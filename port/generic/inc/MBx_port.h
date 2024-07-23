@@ -12,6 +12,10 @@
 
 #ifndef _MBX_PORT_H_
 #define _MBX_PORT_H_
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
@@ -56,4 +60,7 @@ typedef int (*MBX_GTEC_PTR)(uint8_t *data);
 /* Exported variables ---------------------------------------------------------*/
 /* Exported functions ---------------------------------------------------------*/
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* _MBX_PORT_H_ */

@@ -14,7 +14,8 @@
 #ifndef _MBX_API_H_
 #define _MBX_API_H_
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -69,9 +70,18 @@ extern "C" {
 #define MBX_REG_TYPE_U64_1 (7) /*!< 1 0x01类型定义，该地址映射的数据是8位的. */
 #define MBX_REG_TYPE_U64_0 (8) /*!< 1 0x01类型定义，该地址映射的数据是8位的. */
 
+/* modbusx状态机常数 */
+#define MBX_STATE_IDLE  (0) /*!< 0 0x00状态定义，空闲状态. */
+#define MBX_STATE_ERROR (1) /*!< 1 0x01状态定义，错误状态. */
+#define MBX_STATE_WAIT  (2) /*!< 2 0x02状态定义，等待状态. */
+#define MBX_STATE_WRITE (3) /*!< 3 0x03状态定义，发送状态. */
+#define MBX_STATE_READ  (4) /*!< 4 0x04状态定义，接收状态. */
+
+/* 寄存器地址表的结尾 */
+#define MBX_ADDR_LIST_END {NULL, NULL}
 /* Exported types ------------------------------------------------------------*/
 
-/***********主机从机共用的定义***********/
+/***********提供主机从机对象 共用的定义***********/
 /**
  * @brief buffer定义 
  * 线性buffer 采用指针便于动态申请内存
@@ -90,7 +100,7 @@ typedef struct
  */
 typedef struct
 {
-    uint32_t T3_5_Cycs; // 3.5个字符应当间隔的轮询周期 us(由于采用轮询驱动，轮询周期通常至少1ms，此值意义不大，如果一定要保证间隔，应当以微妙级定时器运行驱动轮询)
+    uint32_t T3_5_Cycs; // 3.5个字符应当间隔的轮询周期 us(由于采用轮询驱动，轮询周期通常至少1ms，此值意义不大，如果一定要保证间隔，应当以微秒级定时器运行驱动轮询)
 } _MBX_COMMON_CONFIG;
 
 /**
@@ -108,30 +118,42 @@ typedef struct
  */
 typedef struct
 {
-    uint32_t TimeCnt; // 周期累加，用于驱动modbus协议
-    uint8_t  State;   // 运行时状态机
+    uint32_t TimeCnt;  // 周期累加，用于驱动modbus协议
+    uint16_t NoComNum; // 无通信计数 周期累加，收到有效消息清空
+    uint8_t  State;    // 运行时状态机
 } _MBX_COMMON_RUNTIME;
 
-/***********从机使用的定义***********/
+/***********提供从机对象使用的定义***********/
 typedef struct
 {
-    uint8_t  SlaveID;  //从机号绑定
-    uint16_t NoComNum; //无通信计数 周期累加，收到有效消息清空
+    uint8_t SlaveID; //从机号绑定
 } _MBX_SLAVE_CONFIG;
 
+/***********主从机对象的定义***********/
 /**
  * @brief 定义modbus从机协议对象 
  */
 typedef struct
 {
-    _MBX_EXIST           TxExist;
-    _MBX_EXIST           RxExist;
-    _MBX_COMMON_FUNCTION Func;
-
-    _MBX_SLAVE_CONFIG    Config;
+    /* 配置时完全无需修改的部分 */
+    _MBX_EXIST TxExist; // 供发送的buffer空间
+    _MBX_EXIST RxExist; // 供接收的buffer空间
+    /* 初始化时需赋固定值的部分 */
+    _MBX_COMMON_RUNTIME Runtime; // 运行时变量
+    /* 需传入初始化函数进行配置的部分 */
+    _MBX_COMMON_FUNCTION Func;   // 函数绑定
+    _MBX_SLAVE_CONFIG    Config; // 从机配置
 } _MBX_SLAVE;
 /* Exported variables ---------------------------------------------------------*/
 /* Exported functions ---------------------------------------------------------*/
+
+extern void MBx_Ticks(uint32_t cycle);
+extern void MBx_Slave_Init(_MBX_SLAVE *MBxSlave, uint8_t SlaveID, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc);
+
+extern void MBx_Runtime_Init(_MBX_COMMON_RUNTIME *MBxRuntime);
+
+/* Include MBX utility and system file.  */
+#include "MBx_utility.h"
 
 #ifdef __cplusplus
 }

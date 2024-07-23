@@ -151,7 +151,7 @@ BraceWrapping:
   AfterObjCDeclaration: true
   AfterStruct:     true
   AfterUnion:      true
-  AfterExternBlock: false
+  AfterExternBlock: true
   BeforeCatch:     true
   BeforeElse:      true
   BeforeLambdaBody: true
@@ -308,7 +308,7 @@ IndentGotoLabels: true
 IndentPPDirectives: None
 
 # extern "C"缩进, 建议AfterExternBlock
-IndentExternBlock: AfterExternBlock
+IndentExternBlock: NoIndent
 
 # 模板require是否缩进
 IndentRequiresClause: true

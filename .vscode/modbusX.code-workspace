@@ -4,5 +4,10 @@
 			"path": ".."
 		}
     ],
-    "settings": {}
+    "settings": {
+        "files.associations": {
+            "mbx_api.h": "c",
+            "mbx_utility.h": "c"
+        }
+    }
 }

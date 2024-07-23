@@ -4,14 +4,14 @@
  */
 
 /**
- * @file MBx_utilty.h
+ * @file name.h
  *     MBx Component
- *     Utility
- * 一些代码工具
+ *     type
+ * 此处填写简介
  */
 
-#ifndef _MBX_UTILITY_H_
-#define _MBX_UTILITY_H_
+#ifndef _H_UTILITY_H_
+#define _H_UTILITY_H_
 #ifdef __cplusplus
 extern "C"
 {
@@ -29,4 +29,4 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-#endif /* _MBX_UTILITY_H_ */
+#endif /* _H_UTILITY_H_ */
