@@ -5,36 +5,48 @@
  **** All rights reserved                                       ****
 
  ********************************************************************************
- * File Name     : MBx_Ticks.c
+ * File Name     : MBx_Slave_Engine_IDLE.c
  * Author        : yono
- * Date          : 2024-07-23
+ * Date          : 2024-07-24
  * Version       : 1.0
 ********************************************************************************/
 /**************************************************************************/
 /*
-    暂定为整个modbus驱动的轮询动作，需要周期性调用此函数
+    modbus单从机驱动的运行，空闲态处理分支，内部函数，不应由用户调用
 */
 
 /* Includes ------------------------------------------------------------------*/
 #include <MBx_api.h>
+#if MBX_SLAVE_ENABLE
 /* Private types -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-extern void MBx_Slave_Scan(uint32_t Cycle);
 /* Private functions ---------------------------------------------------------*/
 
 /**
- * @brief 必须周期调用，驱动modbusX系统的关键函数
- * @param Cycle 调用本函数的周期值us
+ * @brief 驱动modbusX从机系统 空闲态处理分支
+ * @param pSlave MBX从机对象指针
  */
-void MBx_Ticks(uint32_t Cycle)
+void MBx_Slave_Engine_IDLE(_MBX_SLAVE *pSlave)
 {
-#if MBX_SLAVE_ENABLE
-    MBx_Slave_Scan(Cycle);
-#endif
-    // #if MBX_MASTER_ENABLE
-    //     MBx_Master_Ticks(Cycle);
-    // #endif
+    uint8_t getc;
+    while(pSlave->Func.Getc(&getc) == MBX_PORT_RETURN_DEFAULT)
+    {
+        MBxSlaveRxBufferPutc(pSlave, getc); // 不判断返回值，若buffer不够大直接丢数据
+    }
+    if(pSlave->Runtime.TimeCnt > pSlave->Attr.T3_5_Cycs) // 达成3.5字符间隔，立即流转
+    {
+        if(pSlave->RxExist.Len > 0)
+        {
+            pSlave->Runtime.State = MBX_STATE_READ; // 流转至接收态
+        }
+        else if(pSlave->TxExist.Len > 0)
+        {
+            pSlave->Runtime.State = MBX_STATE_READ; // 流转至发送态
+        }
+        pSlave->Runtime.StateFlow = 1;
+    }
 }
+#endif /* MBX_SLAVE_ENABLE */

@@ -7,7 +7,10 @@
     "settings": {
         "files.associations": {
             "mbx_api.h": "c",
-            "mbx_utility.h": "c"
+            "mbx_utility.h": "c",
+            "mbx_port.h": "c",
+            "stdint.h": "c",
+            "minwindef.h": "c"
         }
     }
 }

@@ -73,12 +73,26 @@ extern "C"
 /* modbusx状态机常数 */
 #define MBX_STATE_IDLE  (0) /*!< 0 0x00状态定义，空闲状态. */
 #define MBX_STATE_ERROR (1) /*!< 1 0x01状态定义，错误状态. */
-#define MBX_STATE_WAIT  (2) /*!< 2 0x02状态定义，等待状态. */
+// #define MBX_STATE_WAIT  (2) /*!< 2 0x02状态定义，等待状态. */
 #define MBX_STATE_WRITE (3) /*!< 3 0x03状态定义，发送状态. */
 #define MBX_STATE_READ  (4) /*!< 4 0x04状态定义，接收状态. */
 
 /* 寄存器地址表的结尾 */
-#define MBX_ADDR_LIST_END {NULL, NULL}
+#define MBX_MAP_LIST_END {NULL, NULL, NULL, NULL}
+
+/* API返回集 */
+/* 通用返回 */
+#define MBX_API_RETURN_DEFAULT        0x00 //默认的无错误
+#define MBX_API_RETURN_ERR_INDEFINITE 0x01 //默认的未指定错误
+#define MBX_API_RETURN_ERR_PARAM      0x02 //传递参数错误
+/* 数据相关返回 */
+#define MBX_API_RETURN_DATA_ABOVE_LIMIT 0x10 //数据超出上限
+#define MBX_API_RETURN_DATA_BELOW_LIMIT 0x11 //数据超出下限
+#define MBX_API_RETURN_DATA_LOSS        0x12 //数据丢失
+/* BUFFER相关返回 */
+#define MBX_API_RETURN_BUFFER_FULL  0x20 //BUFFER满
+#define MBX_API_RETURN_BUFFER_EMPTY 0x21 //BUFFER空
+
 /* Exported types ------------------------------------------------------------*/
 
 /***********提供主机从机对象 共用的定义***********/
@@ -100,7 +114,10 @@ typedef struct
  */
 typedef struct
 {
-    uint32_t T3_5_Cycs; // 3.5个字符应当间隔的轮询周期 us(由于采用轮询驱动，轮询周期通常至少1ms，此值意义不大，如果一定要保证间隔，应当以微秒级定时器运行驱动轮询)
+    uint8_t  ModbusModel; // modbus协议栈模型 见 /* modbus协议模式定义 */
+    uint32_t T1_5_Cycs;   // 1.5个字符应当间隔的轮询周期 us(由于采用轮询驱动，轮询周期通常至少1ms，此值意义不大，如果一定要保证间隔，应当以微秒级定时器运行驱动轮询)
+    uint32_t T3_5_Cycs;   // 3.5个字符应当间隔的轮询周期 us(由于采用轮询驱动，轮询周期通常至少1ms，此值意义不大，如果一定要保证间隔，应当以微秒级定时器运行驱动轮询)
+
 } _MBX_COMMON_CONFIG;
 
 /**
@@ -118,39 +135,66 @@ typedef struct
  */
 typedef struct
 {
-    uint32_t TimeCnt;  // 周期累加，用于驱动modbus协议
-    uint16_t NoComNum; // 无通信计数 周期累加，收到有效消息清空
-    uint8_t  State;    // 运行时状态机
+    uint32_t TimeCnt;     // 周期累加，用于驱动modbus协议
+    uint32_t NoComNum :4; // 无通信计数 周期累加，收到有效消息清空
+    uint32_t State    :4; // 运行时状态机
+    uint32_t StatePast:4; // 运行时状态机前一态寄存，状态流转时可以处理数据
+    uint32_t StateFlow:1; // 状态机流转动作，主要用于毫秒级轮询时，跳过空闲态
+    // uint32_t TransID  :16; // modbusTCP专用，当前累计的事务号
+    uint32_t reg:19; // 补位
 } _MBX_COMMON_RUNTIME;
 
 /***********提供从机对象使用的定义***********/
+/**
+ * @brief 从机特有的配置结构体
+ */
 typedef struct
 {
     uint8_t SlaveID; //从机号绑定
 } _MBX_SLAVE_CONFIG;
 
+/**
+ * @brief 从机解析栈
+ */
+typedef struct
+{
+    uint8_t  Step;     // 解析进行到的步骤
+    uint16_t AddrStar; // 待处理的寄存器地址起始
+    uint16_t RegNum;   // 待解析的寄存器数量
+} _MBX_SLAVE_PARSE_VALUE;
+
 /***********主从机对象的定义***********/
 /**
  * @brief 定义modbus从机协议对象 
  */
-typedef struct
+typedef struct _MBX_SLAVE
 {
     /* 配置时完全无需修改的部分 */
     _MBX_EXIST TxExist; // 供发送的buffer空间
     _MBX_EXIST RxExist; // 供接收的buffer空间
     /* 初始化时需赋固定值的部分 */
     _MBX_COMMON_RUNTIME Runtime; // 运行时变量
+    _MBX_COMMON_CONFIG  Attr;    // 属性配置
     /* 需传入初始化函数进行配置的部分 */
     _MBX_COMMON_FUNCTION Func;   // 函数绑定
     _MBX_SLAVE_CONFIG    Config; // 从机配置
+    /* 解析过程使用 保持对象独立性 */
+    _MBX_SLAVE_PARSE_VALUE Parse; // 解析栈
+    /* 自动从机驱动，链表支持 */
+    struct _MBX_SLAVE *Next; // 从机链表指针
 } _MBX_SLAVE;
 /* Exported variables ---------------------------------------------------------*/
 /* Exported functions ---------------------------------------------------------*/
 
-extern void MBx_Ticks(uint32_t cycle);
-extern void MBx_Slave_Init(_MBX_SLAVE *MBxSlave, uint8_t SlaveID, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc);
+/* 用户实用API */
 
-extern void MBx_Runtime_Init(_MBX_COMMON_RUNTIME *MBxRuntime);
+extern void     MBx_Ticks(uint32_t Cycle);
+extern uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE *MBxSlave, uint8_t SlaveID, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate);
+
+/* 便于拓展插件的开发，用户不应随意调用 */
+
+extern void MBx_Init_Runtime(_MBX_COMMON_RUNTIME *MBxRuntime);
+extern void MBx_Init_Attr(_MBX_COMMON_CONFIG *MBxAttr, uint8_t Model, uint32_t para1, uint32_t para2);
 
 /* Include MBX utility and system file.  */
 #include "MBx_utility.h"

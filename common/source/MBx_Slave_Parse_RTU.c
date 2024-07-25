@@ -5,36 +5,45 @@
  **** All rights reserved                                       ****
 
  ********************************************************************************
- * File Name     : MBx_Ticks.c
+ * File Name     : MBx_Slave_Parse_RTU.c
  * Author        : yono
- * Date          : 2024-07-23
+ * Date          : 2024-07-25
  * Version       : 1.0
 ********************************************************************************/
 /**************************************************************************/
 /*
-    暂定为整个modbus驱动的轮询动作，需要周期性调用此函数
+    modbus单从机消息解析系统的RTU分支，内部函数，不应由用户调用
 */
 
 /* Includes ------------------------------------------------------------------*/
 #include <MBx_api.h>
+#if MBX_SLAVE_ENABLE
 /* Private types -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
+#define MBX_SLAVE_PARSE_RTU_STEP_FUNC_GET 0
 /* Private function prototypes -----------------------------------------------*/
-extern void MBx_Slave_Scan(uint32_t Cycle);
 /* Private functions ---------------------------------------------------------*/
-
 /**
- * @brief 必须周期调用，驱动modbusX系统的关键函数
- * @param Cycle 调用本函数的周期值us
+ * @brief modbusX从机消息解析系统 RTU分支
+ * @param pSlave MBX从机对象指针
  */
-void MBx_Ticks(uint32_t Cycle)
+void MBx_Slave_Parse_RTU(_MBX_SLAVE *pSlave)
 {
-#if MBX_SLAVE_ENABLE
-    MBx_Slave_Scan(Cycle);
-#endif
-    // #if MBX_MASTER_ENABLE
-    //     MBx_Master_Ticks(Cycle);
-    // #endif
+    switch(pSlave->Parse.Step)
+    {
+    case /* constant-expression */:
+        /* code */
+        break;
+
+    default:
+        break;
+    }
 }
+
+static inline void MBx_Slave_Parse_RTU_(_MBX_SLAVE *pSlave)
+{
+}
+
+#endif /* MBX_SLAVE_ENABLE */

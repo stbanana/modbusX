@@ -8,6 +8,11 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "${file}",
+                "${workspaceFolder}\\common\\source\\*.c",
+                "-I",
+                "${workspaceFolder}\\common\\include",
+                "-I",
+                "${workspaceFolder}\\port\\generic\\inc",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
             ],

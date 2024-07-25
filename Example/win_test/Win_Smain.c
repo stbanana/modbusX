@@ -11,8 +11,11 @@
 #include <windows.h>
 #include <string.h>
 
+#include <MBx_api.h>
+
 /* Private types -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
+_MBX_SLAVE slave;
+
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
 #if 1 //开启DEBUG打印
@@ -27,32 +30,42 @@
 #define LOGE(...)
 #endif
 
-//缓冲区大小
-#define BUF_SIZE  2048
 #define EXIT_STR  "exit"
 #define I_EXIT    "I exit.\r\n"
 #define I_RECEIVE "I receive.\r\n"
 
 /* 测试使用的串口号定义 */
 #define COM_PORT_NAME "COM2"
+/* 测试使用的串口缓冲区大小 */
+#define BUF_SIZE 2048
+
+/* Private variables ---------------------------------------------------------*/
+
+/* 串口句柄 */
+HANDLE comHandle = INVALID_HANDLE_VALUE;
+
+/* modbusx slave对象 */
+_MBX_SLAVE MBxSlave;
 
 /* Private function prototypes -----------------------------------------------*/
 
-static HANDLE OpenSerial(const char *com, int baud, int byteSize, int parity, int stopBits);
+/* 用于绑定的port函数 */
+uint32_t SerialSendPort(const void *Data, size_t Len);
+uint32_t SerialGetcPort(uint8_t *Data);
+
+/* 包装的win32串口驱动 */
+static HANDLE  SerialOpen(const char *com, int baud, int byteSize, int parity, int stopBits);
+static WINBOOL SerialClose(HANDLE hObject);
 
 /* Private functions ---------------------------------------------------------*/
 
 int main(int argc, char *argv[])
 {
-    BOOL   b             = FALSE;
-    DWORD  wRLen         = 0;
-    DWORD  wWLen         = 0;
-    char   buf[BUF_SIZE] = {0};
-    HANDLE comHandle     = INVALID_HANDLE_VALUE; //串口句柄
+    BOOL b = FALSE;
 
-    //打开串口
+    /* 打开串口 */
     const char *com = COM_PORT_NAME;
-    comHandle       = OpenSerial(com, CBR_9600, 8, NOPARITY, ONESTOPBIT);
+    comHandle       = SerialOpen(com, CBR_9600, 8, NOPARITY, ONESTOPBIT);
     if(INVALID_HANDLE_VALUE == comHandle)
     {
         LOGE("OpenSerial COM2 fail!\r\n");
@@ -60,46 +73,54 @@ int main(int argc, char *argv[])
     }
     LOGD("Open COM2 Successfully!\r\n");
 
-    //循环接收消息，收到消息后将消息内容打印并回复I_RECEIVE, 如果收到 EXIT_STR 就回复 EXIT_STR 并退出循环
+    /* 初始化modbus从机 */
+    MBx_Slave_RTU_Init(&MBxSlave, 1, SerialSendPort, SerialGetcPort);
+
     while(1)
     {
-        wRLen = 0;
-        //读串口消息
-        b = ReadFile(comHandle, buf, sizeof(buf) - 1, &wRLen, NULL);
-        if(b && 0 < wRLen)
-        { //读成功并且数据大小大于0
-            buf[wRLen] = '\0';
-            LOGD("[RECV]%s\r\n", buf); //打印收到的数据
-            if(0 == strncmp(buf, EXIT_STR, strlen(EXIT_STR)))
-            {
-                //回复
-                b = WriteFile(comHandle, TEXT(I_EXIT), strlen(I_EXIT), &wWLen, NULL);
-                if(!b)
-                {
-                    LOGE("WriteFile fail\r\n");
-                }
-                break;
-            }
-            //回复
-            b = WriteFile(comHandle, TEXT(I_RECEIVE), strlen(I_RECEIVE), &wWLen, NULL);
-            if(!b)
-            {
-                LOGE("WriteFile fail\r\n");
-            }
-        }
+        MBx_Ticks(1000); // 换算为微妙传入
+        Sleep(1);
     }
 
     //关闭串口
-    b = CloseHandle(comHandle);
-    if(!b)
-    {
-        LOGE("CloseHandle fail\r\n");
-    }
+    SerialClose(comHandle);
 
-    LOGD("Program Exit.\r\n");
     return 0;
 }
 
+/******************利用windows串口驱动编写的mbx port函数******************/
+/**
+ * @brief 将 MBX_SEND_MODE_BYTES 宏置1后，可用多字节发送port
+ * @param Data 发送buffer指针
+ * @param Len 期望发送的长度
+ * @return port标准返回
+ */
+uint32_t SerialSendPort(const void *Data, size_t Len)
+{
+    WINBOOL b     = FALSE; // 发送操作标识
+    DWORD   wWLen = 0;     // 实际发送数据长度
+    /* 尝试发送 */
+    b = WriteFile(comHandle, Data, Len, &wWLen, NULL);
+    if(b)
+        return MBX_PORT_RETURN_DEFAULT;
+    else
+        return MBX_PORT_RETURNT_ERR_INDEFINITE;
+}
+
+/**
+ * @brief 数据接收port，实现功能为取单字节，返回值表示是否取接收成功
+ * @param Data 字节指针，取到的字节
+ * @return port标准返回
+ */
+uint32_t SerialGetcPort(uint8_t *Data)
+{
+    WINBOOL b     = FALSE; // 接收操作标识
+    DWORD   wRLen = 0;     // 实际接收数据长度
+    /* 尝试接收 */
+    b = ReadFile(comHandle, Data, 1, &wRLen, NULL);
+}
+
+/******************以下为串口驱动，应当分离为port文件，示例就算了******************/
 /**
  * @brief 打开串口
  * @param com 串口名称，如COM1，COM2
@@ -107,9 +128,9 @@ int main(int argc, char *argv[])
  * @param byteSize 数位大小：可取值7、8；
  * @param parity 校验方式：可取值NOPARITY、ODDPARITY、EVENPARITY、MARKPARITY、SPACEPARITY
  * @param stopBits 停止位：ONESTOPBIT、ONE5STOPBITS、TWOSTOPBITS；
- * @return 
+ * @return 返回生成的串口对象
  */
-HANDLE OpenSerial(const char *com, int baud, int byteSize, int parity, int stopBits)
+HANDLE SerialOpen(const char *com, int baud, int byteSize, int parity, int stopBits)
 {
     DCB          dcb;
     BOOL         b = FALSE;
@@ -163,4 +184,23 @@ HANDLE OpenSerial(const char *com, int baud, int byteSize, int parity, int stopB
     }
 
     return comHandle;
+}
+
+/**
+ * @brief 关闭串口
+ * @param hObject 
+ * @return 
+ */
+WINBOOL SerialClose(HANDLE hObject)
+{
+    WINBOOL b = FALSE;
+    /* 尝试关闭串口 */
+    b = CloseHandle(hObject);
+    if(!b)
+    {
+        LOGE("CloseHandle fail\r\n");
+    }
+
+    LOGD("Program Exit.\r\n");
+    return b;
 }

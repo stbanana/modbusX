@@ -11,8 +11,11 @@
 #include <windows.h>
 #include <string.h>
 
+#include <MBx_api.h>
+
 /* Private types -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
 #if 1 //开启DEBUG打印
@@ -50,7 +53,7 @@ int main(int argc, char *argv[])
     char   buf[BUF_SIZE] = {0};
     HANDLE comHandle     = INVALID_HANDLE_VALUE; //串口句柄
 
-    //打开串口
+    /* 打开串口 */
     const char *com = COM_PORT_NAME;
     comHandle       = OpenSerial(com, CBR_9600, 8, NOPARITY, ONESTOPBIT);
     if(INVALID_HANDLE_VALUE == comHandle)

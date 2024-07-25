@@ -5,14 +5,15 @@
  **** All rights reserved                                       ****
 
  ********************************************************************************
- * File Name     : MBx_Ticks.c
+ * File Name     : MBx_Init_Runtime.c
  * Author        : yono
  * Date          : 2024-07-23
  * Version       : 1.0
 ********************************************************************************/
 /**************************************************************************/
 /*
-    暂定为整个modbus驱动的轮询动作，需要周期性调用此函数
+    初始化MBX运行时
+    应当是库内调用
 */
 
 /* Includes ------------------------------------------------------------------*/
@@ -22,19 +23,16 @@
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-extern void MBx_Slave_Scan(uint32_t Cycle);
 /* Private functions ---------------------------------------------------------*/
 
 /**
- * @brief 必须周期调用，驱动modbusX系统的关键函数
- * @param Cycle 调用本函数的周期值us
+ * @brief 初始化MBX运行时的各个参数 
+ * @param MBxRuntime 指向MBX运行时结构体的指针
  */
-void MBx_Ticks(uint32_t Cycle)
+void MBx_Init_Runtime(_MBX_COMMON_RUNTIME *MBxRuntime)
 {
-#if MBX_SLAVE_ENABLE
-    MBx_Slave_Scan(Cycle);
-#endif
-    // #if MBX_MASTER_ENABLE
-    //     MBx_Master_Ticks(Cycle);
-    // #endif
+    MBxRuntime->TimeCnt   = 0;
+    MBxRuntime->NoComNum  = 0;
+    MBxRuntime->State     = MBX_STATE_IDLE;
+    MBxRuntime->StatePast = MBX_STATE_IDLE;
 }
