@@ -52,7 +52,9 @@ uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE *MBxSlave, uint8_t SlaveID, MBX_SEND_PTR 
     /* 初始化运行时 */
     MBx_Init_Runtime(&MBxSlave->Runtime);
     /* 初始化属性 */
-    MBx_Init_Attr(&MBxSlave->Attr, MBX_MODEL_RTU, BaudRate, NULL);
+    MBx_Init_Attr(&MBxSlave->Attr, MBX_MODEL_RTU, BaudRate, MBX_PARA_NULL);
+    /* 初始化从机解析栈 */
+    MBx_Init_Slave_Parse(&MBxSlave->Parse);
 
     return MBX_API_RETURN_DEFAULT;
 }

@@ -33,7 +33,7 @@ void MBx_Slave_Parse_RTU(_MBX_SLAVE *pSlave)
 {
     switch(pSlave->Parse.Step)
     {
-    case /* constant-expression */:
+    case 0:
         /* code */
         break;
 

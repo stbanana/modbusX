@@ -19,6 +19,7 @@ extern "C"
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <string.h>
 
 #ifdef MBX_INCLUDE_USER_DEFINE_FILE
 /* Yes, include the user defines in MBx_user.h. The defines in this file may 

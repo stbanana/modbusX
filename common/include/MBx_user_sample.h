@@ -17,7 +17,7 @@
 #define MBX_MASTER_ENABLE 1
 
 /**
- * MBX的错误追踪模组是否启用 0则为裁剪掉错误追钟模组功能 >0则启用
+ * MBX的错误追踪模组是否启用 0则为裁剪掉错误追踪模组功能 >0则启用
  */
 #define MBX_MODULE_ERR_TRACE_ENABLE 1
 

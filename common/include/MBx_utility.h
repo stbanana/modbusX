@@ -53,6 +53,8 @@ extern "C"
         }                                                 \
     }
 
+extern void MBxErrTraceAdd(uint8_t SlaveID, uint8_t mode, uint8_t State, uint32_t ErrCode);
+
 /**
  * @brief 向从机的RXbuffer推入一个字节数据
  * @param pMBX  从机对象指针

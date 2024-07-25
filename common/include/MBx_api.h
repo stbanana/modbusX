@@ -80,6 +80,9 @@ extern "C"
 /* 寄存器地址表的结尾 */
 #define MBX_MAP_LIST_END {NULL, NULL, NULL, NULL}
 
+/* MBX空参数定义 */
+#define MBX_PARA_NULL 0
+
 /* API返回集 */
 /* 通用返回 */
 #define MBX_API_RETURN_DEFAULT        0x00 //默认的无错误
@@ -191,10 +194,11 @@ typedef struct _MBX_SLAVE
 extern void     MBx_Ticks(uint32_t Cycle);
 extern uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE *MBxSlave, uint8_t SlaveID, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate);
 
-/* 便于拓展插件的开发，用户不应随意调用 */
+/* 便于拓展应用的开发，用户无需调用 */
 
 extern void MBx_Init_Runtime(_MBX_COMMON_RUNTIME *MBxRuntime);
 extern void MBx_Init_Attr(_MBX_COMMON_CONFIG *MBxAttr, uint8_t Model, uint32_t para1, uint32_t para2);
+extern void MBx_Init_Slave_Parse(_MBX_SLAVE_PARSE_VALUE *MBxSlaveParse);
 
 /* Include MBX utility and system file.  */
 #include "MBx_utility.h"

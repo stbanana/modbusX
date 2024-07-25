@@ -20,7 +20,7 @@
 #if MBX_SLAVE_ENABLE
 /* Private types -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-extern _MBX_SLAVE *MbxSChainRoot = NULL;
+extern _MBX_SLAVE *MbxSChainRoot;
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/

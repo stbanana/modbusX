@@ -74,11 +74,11 @@ int main(int argc, char *argv[])
     LOGD("Open COM2 Successfully!\r\n");
 
     /* 初始化modbus从机 */
-    MBx_Slave_RTU_Init(&MBxSlave, 1, SerialSendPort, SerialGetcPort);
+    MBx_Slave_RTU_Init(&MBxSlave, 1, SerialSendPort, SerialGetcPort, 9600);
 
     while(1)
     {
-        MBx_Ticks(1000); // 换算为微妙传入
+        MBx_Ticks(1000); // 换算为微秒传入
         Sleep(1);
     }
 
