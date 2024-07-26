@@ -12,7 +12,7 @@
 ********************************************************************************/
 /**************************************************************************/
 /*
-    modbus单从机消息解析系统的运行，内部函数，不应由用户调用
+    modbus单从机消息解析系统的运行, 内部函数, 不应由用户调用
 */
 
 /* Includes ------------------------------------------------------------------*/
@@ -23,7 +23,7 @@
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-extern void MBx_Slave_Parse_RTU(_MBX_SLAVE *pSlave);
+extern void MBx_Slave_RTU_Parse(_MBX_SLAVE *pSlave);
 /* Private functions ---------------------------------------------------------*/
 
 /**
@@ -35,7 +35,7 @@ void MBx_Slave_Parse(_MBX_SLAVE *pSlave)
     switch(pSlave->Attr.ModbusModel)
     {
     case MBX_MODEL_RTU:
-        MBx_Slave_Parse_RTU(pSlave);
+        MBx_Slave_RTU_Parse(pSlave);
         break;
     case MBX_MODEL_TCP:
         // MBx_Slave_Parse_TCP( );

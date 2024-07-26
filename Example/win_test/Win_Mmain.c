@@ -3,7 +3,7 @@
  * @file    Win_Mmain.c
  * windows使用虚拟串口与modbus测试软件进行通信
  * 测试主从机功能
- * 其中大部分代码来自百度，且懒得格式化
+ * 其中大部分代码来自百度, 且懒得格式化
  */
 
 /* Includes ------------------------------------------------------------------*/
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     }
     LOGD("Open COM2 Successfully!\r\n");
 
-    //循环接收消息，收到消息后将消息内容打印并回复I_RECEIVE, 如果收到 EXIT_STR 就回复 EXIT_STR 并退出循环
+    //循环接收消息, 收到消息后将消息内容打印并回复I_RECEIVE, 如果收到 EXIT_STR 就回复 EXIT_STR 并退出循环
     while(1)
     {
         wRLen = 0;
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 
 /**
  * @brief 打开串口
- * @param com 串口名称，如COM1，COM2
+ * @param com 串口名称, 如COM1, COM2
  * @param baud 波特率：常用取值：CBR_9600、CBR_19200、CBR_38400、CBR_115200、CBR_230400、CBR_460800
  * @param byteSize 数位大小：可取值7、8；
  * @param parity 校验方式：可取值NOPARITY、ODDPARITY、EVENPARITY、MARKPARITY、SPACEPARITY

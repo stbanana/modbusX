@@ -12,7 +12,7 @@
 ********************************************************************************/
 /**************************************************************************/
 /*
-    modbus单从机驱动的运行，接收态处理分支，内部函数，不应由用户调用
+    modbus单从机驱动的运行, 接收态处理分支, 内部函数, 不应由用户调用
 */
 
 /* Includes ------------------------------------------------------------------*/
@@ -23,6 +23,7 @@
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
+extern void MBx_Slave_Parse(_MBX_SLAVE *pSlave);
 /* Private functions ---------------------------------------------------------*/
 
 /**
@@ -34,10 +35,12 @@ void MBx_Slave_Engine_READ(_MBX_SLAVE *pSlave)
     uint8_t getc;
     while(pSlave->Func.Getc(&getc) == MBX_PORT_RETURN_DEFAULT)
     {
-        MBxSlaveRxBufferPutc(pSlave, getc); // 不判断返回值，若buffer不够大直接丢数据
+        MBxRxBufferPutc(pSlave, getc); // 若buffer不够大直接丢数据
     }
-    if(pSlave->RxExist.Len > 0)
+    if(pSlave->Runtime.TimeCnt > pSlave->Attr.T1_5_Cycs)
     {
+        MBx_Slave_Parse(pSlave);                // 流转此态条件是收到数据, 无需判接收长度, 解析接收即可
+        pSlave->Runtime.State = MBX_STATE_IDLE; // 流转回等待态
     }
 }
 #endif /* MBX_SLAVE_ENABLE */

@@ -12,7 +12,7 @@
 ********************************************************************************/
 /**************************************************************************/
 /*
-    modbus单从机驱动的运行，空闲态处理分支，内部函数，不应由用户调用
+    modbus单从机驱动的运行, 空闲态处理分支, 内部函数, 不应由用户调用
 */
 
 /* Includes ------------------------------------------------------------------*/
@@ -34,9 +34,9 @@ void MBx_Slave_Engine_IDLE(_MBX_SLAVE *pSlave)
     uint8_t getc;
     while(pSlave->Func.Getc(&getc) == MBX_PORT_RETURN_DEFAULT)
     {
-        MBxSlaveRxBufferPutc(pSlave, getc); // 不判断返回值，若buffer不够大直接丢数据
+        MBxRxBufferPutc(pSlave, getc); // 若buffer不够大直接丢数据
     }
-    if(pSlave->Runtime.TimeCnt > pSlave->Attr.T3_5_Cycs) // 达成3.5字符间隔，立即流转
+    if(pSlave->Runtime.TimeCnt > pSlave->Attr.T3_5_Cycs) // 达成3.5字符间隔, 立即流转
     {
         if(pSlave->RxExist.Len > 0)
         {

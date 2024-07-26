@@ -3,7 +3,7 @@
  * @file    Win_Smain.c
  * windows使用虚拟串口与modbus测试软件进行通信
  * 测试主从机功能
- * 其中大部分代码来自百度，且懒得格式化
+ * 其中大部分代码来自百度, 且懒得格式化
  */
 
 /* Includes ------------------------------------------------------------------*/
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 
 /******************利用windows串口驱动编写的mbx port函数******************/
 /**
- * @brief 将 MBX_SEND_MODE_BYTES 宏置1后，可用多字节发送port
+ * @brief 将 MBX_SEND_MODE_BYTES 宏置1后, 可用多字节发送port
  * @param Data 发送buffer指针
  * @param Len 期望发送的长度
  * @return port标准返回
@@ -108,8 +108,8 @@ uint32_t SerialSendPort(const void *Data, size_t Len)
 }
 
 /**
- * @brief 数据接收port，实现功能为取单字节，返回值表示是否取接收成功
- * @param Data 字节指针，取到的字节
+ * @brief 数据接收port, 实现功能为取单字节, 返回值表示是否取接收成功
+ * @param Data 字节指针, 取到的字节
  * @return port标准返回
  */
 uint32_t SerialGetcPort(uint8_t *Data)
@@ -120,10 +120,10 @@ uint32_t SerialGetcPort(uint8_t *Data)
     b = ReadFile(comHandle, Data, 1, &wRLen, NULL);
 }
 
-/******************以下为串口驱动，应当分离为port文件，示例就算了******************/
+/******************以下为串口驱动, 应当分离为port文件, 示例就算了******************/
 /**
  * @brief 打开串口
- * @param com 串口名称，如COM1，COM2
+ * @param com 串口名称, 如COM1, COM2
  * @param baud 波特率：常用取值：CBR_9600、CBR_19200、CBR_38400、CBR_115200、CBR_230400、CBR_460800
  * @param byteSize 数位大小：可取值7、8；
  * @param parity 校验方式：可取值NOPARITY、ODDPARITY、EVENPARITY、MARKPARITY、SPACEPARITY

@@ -29,13 +29,16 @@
  * @brief 初始化MBX属性的各个参数
  * @param MBxAttr 指向MBX属性结构体的指针
  * @param Model 以何种modbus协议模型进行初始化 见 MBx_api.h modbus协议模式定义 部分 
+ * @param Mode 以主或从机进行初始化 见 MBx_api.h modbus主从模式定义 部分 
  * @param para1 传参1 
  *              MBX_MODEL_RTU: 此传参为波特率
  * @param para2 传参2
  *              冗余设计 暂未使用
  */
-void MBx_Init_Attr(_MBX_COMMON_CONFIG *MBxAttr, uint8_t Model, uint32_t para1, uint32_t para2)
+void MBx_Init_Attr(_MBX_COMMON_CONFIG *MBxAttr, uint8_t Model, uint8_t Mode, uint32_t para1, uint32_t para2)
 {
+    MBxAttr->ModbusMode = Mode;
+
     switch(Model)
     {
     case MBX_MODEL_RTU:
@@ -58,7 +61,7 @@ void MBx_Init_Attr(_MBX_COMMON_CONFIG *MBxAttr, uint8_t Model, uint32_t para1, u
         /* 设置模型 */
         MBxAttr->ModbusModel = MBX_MODEL_TCP;
         MBxAttr->T1_5_Cycs   = 0;
-        MBxAttr->T3_5_Cycs   = 0; // 空闲流转依据，置0
+        MBxAttr->T3_5_Cycs   = 0; // 空闲流转依据, 置0
         break;
 
     default:

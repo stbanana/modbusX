@@ -76,10 +76,10 @@ typedef uint32_t (*MBX_GTEC_PTR)(uint8_t *Data);
  */
 typedef struct
 {
-    uint32_t Addr;                     // 此条寄存器地址
-    void    *Memory;                   // 内存区域头地址
-    uint8_t  Type;                     // 内存区域属性
-    uint32_t (*callback)(void *value); // 回调函数
+    uint32_t Addr;                   // 此条寄存器地址
+    void    *Memory;                 // 内存区域头地址
+    uint8_t  Type;                   // 内存区域映射的数据类型
+    uint32_t (*Handle)(void *value); // 写时处理函数
 } _MBX_MAP_LIST_ENTRY;
 
 /* Exported variables ---------------------------------------------------------*/

@@ -12,7 +12,7 @@
 ********************************************************************************/
 /**************************************************************************/
 /*
-    modbus单从机驱动的运行，发送态处理分支，内部函数，不应由用户调用
+    modbus单从机驱动的运行, 发送态处理分支, 内部函数, 不应由用户调用
 */
 
 /* Includes ------------------------------------------------------------------*/
@@ -35,11 +35,11 @@ void MBx_Slave_Engine_WRITE(_MBX_SLAVE *pSlave)
     if(pSlave->Func.Send(pSlave->TxExist.Buffer, pSlave->TxExist.Len) == MBX_PORT_RETURN_DEFAULT)
     {
         pSlave->TxExist.Len   = 0;
-        pSlave->Runtime.State = MBX_STATE_IDLE; // 成功发送，流转等待态
+        pSlave->Runtime.State = MBX_STATE_IDLE; // 成功发送, 流转等待态
     }
     else
     {
-        // 发送失败，下次轮询继续发送态
+        // 发送失败, 下次轮询继续发送态
     }
 #else
     uint32_t SendState = MBX_PORT_RETURN_DEFAULT;
@@ -50,11 +50,11 @@ void MBx_Slave_Engine_WRITE(_MBX_SLAVE *pSlave)
     if(SendState == MBX_PORT_RETURN_DEFAULT)
     {
         pSlave->TxExist.Len   = 0;
-        pSlave->Runtime.State = MBX_STATE_IDLE; // 成功发送，流转等待态
+        pSlave->Runtime.State = MBX_STATE_IDLE; // 成功发送, 流转等待态
     }
     else
-    { // 发送失败，去除已发送内容，其他内容搬运至buffer前，下次轮询继续发送
-        // 单字节发送更适用环形buffer，或者使用窗口推移机制，目前没有优化计划
+    { // 发送失败, 去除已发送内容, 其他内容搬运至buffer前, 下次轮询继续发送
+        // 单字节发送更适用环形buffer, 或者使用窗口推移机制, 目前没有优化计划
         pSlave->TxExist.Len -= SendNum;
         for(CopyNum = 0; CopyNum < pSlave->TxExist.Len; CopyNum++)
         {

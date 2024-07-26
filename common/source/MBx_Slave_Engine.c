@@ -12,7 +12,7 @@
 ********************************************************************************/
 /**************************************************************************/
 /*
-    modbus单从机驱动的运行，内部函数，不应由用户调用
+    modbus单从机驱动的运行, 内部函数, 不应由用户调用
 */
 
 /* Includes ------------------------------------------------------------------*/
@@ -40,7 +40,13 @@ void MBx_Slave_Engine(_MBX_SLAVE *pSlave, uint32_t Cycle)
 
     while(pSlave->Runtime.StateFlow == 1)
     {
-        pSlave->Runtime.StateFlow = 0;
+        pSlave->Runtime.StateFlow = 0; // 清除流转动作标识
+        if(pSlave->Runtime.StatePast != pSlave->Runtime.State)
+        {
+            pSlave->Runtime.StatePast = pSlave->Runtime.State;
+            pSlave->Runtime.TimeCnt   = 0; // 状态切换时重置时间计数器
+        }
+
         switch(pSlave->Runtime.State)
         {
         case MBX_STATE_IDLE:
@@ -55,7 +61,7 @@ void MBx_Slave_Engine(_MBX_SLAVE *pSlave, uint32_t Cycle)
             MBx_Slave_Engine_READ(pSlave);
             break;
         default:
-            pSlave->Runtime.State = MBX_STATE_IDLE; // 意外状态，自动流转至空闲
+            pSlave->Runtime.State = MBX_STATE_IDLE; // 意外状态, 自动流转至空闲
             break;
         }
     }

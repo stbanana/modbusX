@@ -7,8 +7,8 @@
  * @file MBx_api.h
  *     MBx Component
  *     Application Interface (API)
- * 一个功能并不齐全的modbus主从库，但以如下特性为目标
- * 不阻塞不占线程不占中断、多主多从、寄存器地址表任意映射。是一个纯粹的协议栈，只需要修改数据流入流出即可驱动。
+ * 一个功能并不齐全的modbus主从库, 但以如下特性为目标
+ * 不阻塞不占线程不占中断、多主多从、寄存器地址表任意映射。是一个纯粹的协议栈, 只需要修改数据流入流出即可驱动。
  */
 
 #ifndef _MBX_API_H_
@@ -27,7 +27,11 @@ extern "C"
 /* modbus协议模式定义 */
 #define MBX_MODEL_RTU (1) /*!< 使用modbus RTU协议 */
 #define MBX_MODEL_TCP (2) /*!< 使用modbus TCP协议 */
-// #define MBX_MODEL_ASCII (3) /*!< 使用modbus ASCII协议 愚蠢的协议，或许永远不会添加支持 */
+// #define MBX_MODEL_ASCII (3) /*!< 使用modbus ASCII协议 愚蠢的协议, 或许永远不会添加支持 */
+
+/* modbus主从模式定义 */
+#define MBX_MODE_SLAVE  (0) /*!< 从站模式 */
+#define MBX_MODE_MASTER (1) /*!< 主站模式 */
 
 /* 寄存器类型定义 */
 #define MBX_REG_HOLDING  (1) /*!< 保持寄存器 */
@@ -36,46 +40,50 @@ extern "C"
 #define MBX_REG_DISCRETE (4) /*!< 离散输入寄存器 */
 
 /* 功能码定义 */
-#define MBX_FUNC_READ_COIL        (1)   /*!< 01 0x01功能码，读取一组线圈. */
-#define MBX_FUNC_READ_INPUT       (2)   /*!< 02 0x02功能码，读取一组离散输入. */
-#define MBX_FUNC_READ_REG         (3)   /*!< 03 0x03功能码，读取一个或多个保持寄存器. */
-#define MBX_FUNC_READ_INPUT_REG   (4)   /*!< 04 0x04功能码，读取一个或多个输入寄存器. */
-#define MBX_FUNC_WRITE_COIL       (5)   /*!< 05 0x05功能码，写单个线圈. */
-#define MBX_FUNC_WRITE_REG        (6)   /*!< 06 0x06功能码，写单个保持寄存器. */
-#define MBX_FUNC_WRITE_COIL_MUL   (15)  /*!< 15 0x0F功能码，写多个线圈. */
-#define MBX_FUNC_WRITE_REG_MUL    (16)  /*!< 16 0x10功能码，写入多个保持寄存器. */
-#define MBX_FUNC_EXCEPTION_OFFSET (128) /*!< 128 0x80功能码，是错误帧回复的功能码附加值，需要正常功能码添加上这个附加值表示异常. */
+#define MBX_FUNC_READ_COIL        (1)   /*!< 01 0x01功能码, 读取一组线圈. */
+#define MBX_FUNC_READ_INPUT       (2)   /*!< 02 0x02功能码, 读取一组离散输入. */
+#define MBX_FUNC_READ_REG         (3)   /*!< 03 0x03功能码, 读取一个或多个保持寄存器. */
+#define MBX_FUNC_READ_INPUT_REG   (4)   /*!< 04 0x04功能码, 读取一个或多个输入寄存器. */
+#define MBX_FUNC_WRITE_COIL       (5)   /*!< 05 0x05功能码, 写单个线圈. */
+#define MBX_FUNC_WRITE_REG        (6)   /*!< 06 0x06功能码, 写单个保持寄存器. */
+#define MBX_FUNC_WRITE_COIL_MUL   (15)  /*!< 15 0x0F功能码, 写多个线圈. */
+#define MBX_FUNC_WRITE_REG_MUL    (16)  /*!< 16 0x10功能码, 写入多个保持寄存器. */
+#define MBX_FUNC_EXCEPTION_OFFSET (128) /*!< 128 0x80功能码, 是错误帧回复的功能码附加值, 需要正常功能码添加上这个附加值表示异常. */
 
 /* 错误码定义 */
-#define MBX_EXCEPTION_NONE   (0) /*!< 00 0x00错误码，无错误. */
-#define MBX_EXCEPTION_UNFUNC (1) /*!< 01 0x01错误码，未知指令错误. */
-#define MBX_EXCEPTION_UNADDR (2) /*!< 02 0x02错误码，未知数据地址错误. */
-#define MBX_EXCEPTION_DATA   (3) /*!< 03 0x03错误码，数据不合法错误. */
-#define MBX_EXCEPTION_LEN    (4) /*!< 04 0x04错误码，数据长度不合法错误. */
-// #define MBX_EXCEPTION_ACKTIME         5  /*!< 05 0x05错误码，其实并非错误，而是收到长耗时指令，表明已收到并开始处理.(不常用暂不支持) */
-#define MBX_EXCEPTION_BUSY   (7) /*!< 07 0x07错误码，正在处理耗时命令在忙 */
-#define MBX_EXCEPTION_MASTER (8) /*!< 08 0x08错误码，主控口错误(通常是奇偶校验不通过). */
-// #define MBX_EXCEPTION_UNGATEWAY       (10) /*!< 10 0x0A错误码，网关不可达.(不常用暂不支持) */
-// #define MBX_EXCEPTION_UNTARGETGATEWAY (11) /*!< 11 0x0B错误码，网关目标无响应.(不常用暂不支持) */
-#define MBX_EXCEPTION_SAFE (32) /*!< 32 0x20错误码，保护报警错误，正在报警时对控制类及在线调节命令返回该代码. */
-#define MBX_EXCEPTION_CRC  (64) /*!< 64 0x40错误码，CRC校验错误. */
+#define MBX_EXCEPTION_NONE   (0) /*!< 00 0x00错误码, 无错误. */
+#define MBX_EXCEPTION_UNFUNC (1) /*!< 01 0x01错误码, 未知指令错误. */
+#define MBX_EXCEPTION_UNADDR (2) /*!< 02 0x02错误码, 未知数据地址错误. */
+#define MBX_EXCEPTION_DATA   (3) /*!< 03 0x03错误码, 数据不合法错误. */
+#define MBX_EXCEPTION_LEN    (4) /*!< 04 0x04错误码, 数据长度不合法错误. */
+// #define MBX_EXCEPTION_ACKTIME         5  /*!< 05 0x05错误码, 其实并非错误, 而是收到长耗时指令, 表明已收到并开始处理.(不常用暂不支持) */
+#define MBX_EXCEPTION_BUSY   (7) /*!< 07 0x07错误码, 正在处理耗时命令在忙 */
+#define MBX_EXCEPTION_MASTER (8) /*!< 08 0x08错误码, 主控口错误(通常是奇偶校验不通过). */
+// #define MBX_EXCEPTION_UNGATEWAY       (10) /*!< 10 0x0A错误码, 网关不可达.(不常用暂不支持) */
+// #define MBX_EXCEPTION_UNTARGETGATEWAY (11) /*!< 11 0x0B错误码, 网关目标无响应.(不常用暂不支持) */
+#define MBX_EXCEPTION_SAFE (32) /*!< 32 0x20错误码, 保护报警错误, 正在报警时对控制类及在线调节命令返回该代码. */
+#define MBX_EXCEPTION_CRC  (64) /*!< 64 0x40错误码, CRC校验错误. */
 
-/* 寄存器的类型 */
-#define MBX_REG_TYPE_U8    (1) /*!< 1 0x01类型定义，该地址映射的数据是8位的. */
-#define MBX_REG_TYPE_U16   (2) /*!< 1 0x01类型定义，该地址映射的数据是8位的. */
-#define MBX_REG_TYPE_U32_H (3) /*!< 1 0x01类型定义，该地址映射的数据是8位的. */
-#define MBX_REG_TYPE_U32_L (4) /*!< 1 0x01类型定义，该地址映射的数据是8位的. */
-#define MBX_REG_TYPE_U64_3 (5) /*!< 1 0x01类型定义，该地址映射的数据是8位的. */
-#define MBX_REG_TYPE_U64_2 (6) /*!< 1 0x01类型定义，该地址映射的数据是8位的. */
-#define MBX_REG_TYPE_U64_1 (7) /*!< 1 0x01类型定义，该地址映射的数据是8位的. */
-#define MBX_REG_TYPE_U64_0 (8) /*!< 1 0x01类型定义，该地址映射的数据是8位的. */
+/* 寄存器映射的数据类型 */
+#define MBX_REG_TYPE_U8           (1)   /*!< 类型定义, 该地址映射的数据是8位的. */
+#define MBX_REG_TYPE_U16          (2)   /*!< 类型定义, 该地址映射的数据是16位的. */
+#define MBX_REG_TYPE_U32_L        (3)   /*!< 类型定义, 该地址映射的数据是32位的，映射低16位. */
+#define MBX_REG_TYPE_U32_H        (4)   /*!< 类型定义, 该地址映射的数据是32位的，映射高16位. */
+#define MBX_REG_TYPE_U64_0        (5)   /*!< 类型定义, 该地址映射的数据是64位的，映射最低的16位. */
+#define MBX_REG_TYPE_U64_1        (6)   /*!< 类型定义, 该地址映射的数据是64位的，映射第1个16位. */
+#define MBX_REG_TYPE_U64_2        (7)   /*!< 类型定义, 该地址映射的数据是64位的，映射第2个16位. */
+#define MBX_REG_TYPE_U64_3        (8)   /*!< 类型定义, 该地址映射的数据是64位的，映射第3个16位. */
+#define MBX_REG_TYPE_BIT_U8_BASE  (16)  /*!< 类型定义, 该地址映射的数据是8位的，映射最低第0个bit.若映射第1个bit，则使用类型 MBX_REG_TYPE_BIT_U8_BASE+1 */
+#define MBX_REG_TYPE_BIT_U16_BASE (32)  /*!< 类型定义, 该地址映射的数据是16位的，映射最低第0个bit.若映射第1个bit，则使用类型 MBX_REG_TYPE_BIT_U16_BASE+1 */
+#define MBX_REG_TYPE_BIT_U32_BASE (64)  /*!< 类型定义, 该地址映射的数据是32位的，映射最低第0个bit.若映射第1个bit，则使用类型 MBX_REG_TYPE_BIT_U32_BASE+1 */
+#define MBX_REG_TYPE_BIT_U64_BASE (128) /*!< 类型定义, 该地址映射的数据是64位的，映射最低第0个bit.若映射第1个bit，则使用类型 MBX_REG_TYPE_BIT_U64_BASE+1 */
 
 /* modbusx状态机常数 */
-#define MBX_STATE_IDLE  (0) /*!< 0 0x00状态定义，空闲状态. */
-#define MBX_STATE_ERROR (1) /*!< 1 0x01状态定义，错误状态. */
-// #define MBX_STATE_WAIT  (2) /*!< 2 0x02状态定义，等待状态. */
-#define MBX_STATE_WRITE (3) /*!< 3 0x03状态定义，发送状态. */
-#define MBX_STATE_READ  (4) /*!< 4 0x04状态定义，接收状态. */
+#define MBX_STATE_IDLE  (0) /*!< 0 0x00状态定义, 空闲状态. */
+#define MBX_STATE_ERROR (1) /*!< 1 0x01状态定义, 错误状态. */
+// #define MBX_STATE_WAIT  (2) /*!< 2 0x02状态定义, 等待状态. */
+#define MBX_STATE_WRITE (3) /*!< 3 0x03状态定义, 发送状态. */
+#define MBX_STATE_READ  (4) /*!< 4 0x04状态定义, 接收状态. */
 
 /* 寄存器地址表的结尾 */
 #define MBX_MAP_LIST_END {NULL, NULL, NULL, NULL}
@@ -102,7 +110,7 @@ extern "C"
 /**
  * @brief buffer定义 
  * 线性buffer 采用指针便于动态申请内存
- * 发送、接收buffer的定义共用，主机、从机的定义共用
+ * 发送、接收buffer的定义共用, 主机、从机的定义共用
  */
 typedef struct
 {
@@ -117,9 +125,10 @@ typedef struct
  */
 typedef struct
 {
-    uint8_t  ModbusModel; // modbus协议栈模型 见 /* modbus协议模式定义 */
-    uint32_t T1_5_Cycs;   // 1.5个字符应当间隔的轮询周期 us(由于采用轮询驱动，轮询周期通常至少1ms，此值意义不大，如果一定要保证间隔，应当以微秒级定时器运行驱动轮询)
-    uint32_t T3_5_Cycs;   // 3.5个字符应当间隔的轮询周期 us(由于采用轮询驱动，轮询周期通常至少1ms，此值意义不大，如果一定要保证间隔，应当以微秒级定时器运行驱动轮询)
+    uint8_t  ModbusModel:7; // modbus协议栈模型 见 /* modbus协议模式定义 */
+    uint8_t  ModbusMode :1; // modbus主从模式 见 /* modbus主从模式定义 */
+    uint32_t T1_5_Cycs;     // 1.5个字符应当间隔的轮询周期 us(由于采用轮询驱动, 轮询周期通常至少1ms, 此值意义不大, 如果一定要保证间隔, 应当以微秒级定时器运行驱动轮询)
+    uint32_t T3_5_Cycs;     // 3.5个字符应当间隔的轮询周期 us(由于采用轮询驱动, 轮询周期通常至少1ms, 此值意义不大, 如果一定要保证间隔, 应当以微秒级定时器运行驱动轮询)
 
 } _MBX_COMMON_CONFIG;
 
@@ -138,12 +147,12 @@ typedef struct
  */
 typedef struct
 {
-    uint32_t TimeCnt;     // 周期累加，用于驱动modbus协议
-    uint32_t NoComNum :4; // 无通信计数 周期累加，收到有效消息清空
+    uint32_t TimeCnt;     // 周期累加, 用于驱动modbus协议
+    uint32_t NoComNum :4; // 无通信计数 周期累加, 收到有效消息清空
     uint32_t State    :4; // 运行时状态机
-    uint32_t StatePast:4; // 运行时状态机前一态寄存，状态流转时可以处理数据
-    uint32_t StateFlow:1; // 状态机流转动作，主要用于毫秒级轮询时，跳过空闲态
-    // uint32_t TransID  :16; // modbusTCP专用，当前累计的事务号
+    uint32_t StatePast:4; // 运行时状态机前一态寄存, 状态流转时可以处理数据
+    uint32_t StateFlow:1; // 状态机立即流转动作
+    // uint32_t TransID  :16; // modbusTCP专用, 当前累计的事务号
     uint32_t reg:19; // 补位
 } _MBX_COMMON_RUNTIME;
 
@@ -161,7 +170,7 @@ typedef struct
  */
 typedef struct
 {
-    uint8_t  Step;     // 解析进行到的步骤
+    uint8_t  Func;     // 解析到的功能码
     uint16_t AddrStar; // 待处理的寄存器地址起始
     uint16_t RegNum;   // 待解析的寄存器数量
 } _MBX_SLAVE_PARSE_VALUE;
@@ -183,7 +192,7 @@ typedef struct _MBX_SLAVE
     _MBX_SLAVE_CONFIG    Config; // 从机配置
     /* 解析过程使用 保持对象独立性 */
     _MBX_SLAVE_PARSE_VALUE Parse; // 解析栈
-    /* 自动从机驱动，链表支持 */
+    /* 自动从机驱动, 链表支持 */
     struct _MBX_SLAVE *Next; // 从机链表指针
 } _MBX_SLAVE;
 /* Exported variables ---------------------------------------------------------*/
@@ -194,10 +203,10 @@ typedef struct _MBX_SLAVE
 extern void     MBx_Ticks(uint32_t Cycle);
 extern uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE *MBxSlave, uint8_t SlaveID, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate);
 
-/* 便于拓展应用的开发，用户无需调用 */
+/* 便于拓展应用的开发, 用户无需调用 */
 
 extern void MBx_Init_Runtime(_MBX_COMMON_RUNTIME *MBxRuntime);
-extern void MBx_Init_Attr(_MBX_COMMON_CONFIG *MBxAttr, uint8_t Model, uint32_t para1, uint32_t para2);
+extern void MBx_Init_Attr(_MBX_COMMON_CONFIG *MBxAttr, uint8_t Model, uint8_t mode, uint32_t para1, uint32_t para2);
 extern void MBx_Init_Slave_Parse(_MBX_SLAVE_PARSE_VALUE *MBxSlaveParse);
 
 /* Include MBX utility and system file.  */
