@@ -46,6 +46,10 @@ void MBx_Slave_Engine_IDLE(_MBX_SLAVE *pSlave)
         {
             pSlave->Runtime.State = MBX_STATE_READ; // 流转至发送态
         }
+        else
+        {
+            pSlave->Runtime.TimeCnt = 0; // 无法流转，重置计时器
+        }
         pSlave->Runtime.StateFlow = 1;
     }
 }

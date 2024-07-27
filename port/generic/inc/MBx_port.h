@@ -20,6 +20,7 @@ extern "C"
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
 #include <string.h>
+#include <assert.h>
 
 #ifdef MBX_INCLUDE_USER_DEFINE_FILE
 /* Yes, include the user defines in MBx_user.h. The defines in this file may 
@@ -42,6 +43,10 @@ extern "C"
 
 #ifndef MBX_SEND_MODE_BYTES
 #define MBX_SEND_MODE_BYTES 1
+#endif
+
+#ifndef MBX_BUILT_UTILTY_CRC_ENABLE
+#define MBX_BUILT_UTILTY_CRC_ENABLE 1
 #endif
 
 #ifndef MBX_ENDIAN_MODE_BIG
@@ -70,17 +75,6 @@ typedef uint32_t (*MBX_SEND_PTR)(const uint8_t *Data);
 
 /* 定义接收port函数的类型 */
 typedef uint32_t (*MBX_GTEC_PTR)(uint8_t *Data);
-
-/**
- * 定义MBx寄存器地址查询表的单条结构
- */
-typedef struct
-{
-    uint32_t Addr;                   // 此条寄存器地址
-    void    *Memory;                 // 内存区域头地址
-    uint8_t  Type;                   // 内存区域映射的数据类型
-    uint32_t (*Handle)(void *value); // 写时处理函数
-} _MBX_MAP_LIST_ENTRY;
 
 /* Exported variables ---------------------------------------------------------*/
 /* Exported functions ---------------------------------------------------------*/

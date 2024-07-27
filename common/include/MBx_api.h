@@ -86,7 +86,7 @@ extern "C"
 #define MBX_STATE_READ  (4) /*!< 4 0x04状态定义, 接收状态. */
 
 /* 寄存器地址表的结尾 */
-#define MBX_MAP_LIST_END {NULL, NULL, NULL, NULL}
+#define MBX_MAP_LIST_END {.Addr = 0, .Memory = NULL, .Type = 0, .Handle = NULL}
 
 /* MBX空参数定义 */
 #define MBX_PARA_NULL 0
@@ -103,8 +103,26 @@ extern "C"
 /* BUFFER相关返回 */
 #define MBX_API_RETURN_BUFFER_FULL  0x20 //BUFFER满
 #define MBX_API_RETURN_BUFFER_EMPTY 0x21 //BUFFER空
+/* BUFFER相关返回 */
+#define MBX_API_RETURN_BUFFER_FULL  0x20 //BUFFER满
+#define MBX_API_RETURN_BUFFER_EMPTY 0x21 //BUFFER空
+/* BUFFER相关返回 */
+#define MBX_API_RETURN_MAP_UNFORMAT 0x101 // MAP格式错误
+#define MBX_API_RETURN_MAP_UNFIND   0x101 // MAP未查找到错误
 
 /* Exported types ------------------------------------------------------------*/
+
+/***********地址映射表的定义***********/
+/**
+ * 定义MBx寄存器地址查询表的单条结构
+ */
+typedef struct
+{
+    const uint32_t Addr;                   // 此条寄存器地址
+    const void    *Memory;                 // 内存区域头地址
+    const uint8_t  Type;                   // 内存区域映射的数据类型
+    const uint32_t (*Handle)(void *value); // 写时处理函数
+} _MBX_MAP_LIST_ENTRY;
 
 /***********提供主机从机对象 共用的定义***********/
 /**
@@ -162,7 +180,9 @@ typedef struct
  */
 typedef struct
 {
-    uint8_t SlaveID; //从机号绑定
+    uint8_t                    SlaveID; //从机号绑定
+    const _MBX_MAP_LIST_ENTRY *Map;     // 地址映射
+    uint16_t                   MapNum;  // 地址映射数量，自动遍历map产生
 } _MBX_SLAVE_CONFIG;
 
 /**
@@ -195,19 +215,21 @@ typedef struct _MBX_SLAVE
     /* 自动从机驱动, 链表支持 */
     struct _MBX_SLAVE *Next; // 从机链表指针
 } _MBX_SLAVE;
+
 /* Exported variables ---------------------------------------------------------*/
 /* Exported functions ---------------------------------------------------------*/
 
 /* 用户实用API */
 
 extern void     MBx_Ticks(uint32_t Cycle);
-extern uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE *MBxSlave, uint8_t SlaveID, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate);
+extern uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE *MBxSlave, uint8_t SlaveID, const _MBX_MAP_LIST_ENTRY *MAP, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate, uint8_t *RxBuffer, uint32_t RxBufferSize, uint8_t *TxBuffer, uint32_t TxBufferSize);
 
 /* 便于拓展应用的开发, 用户无需调用 */
 
-extern void MBx_Init_Runtime(_MBX_COMMON_RUNTIME *MBxRuntime);
-extern void MBx_Init_Attr(_MBX_COMMON_CONFIG *MBxAttr, uint8_t Model, uint8_t mode, uint32_t para1, uint32_t para2);
-extern void MBx_Init_Slave_Parse(_MBX_SLAVE_PARSE_VALUE *MBxSlaveParse);
+extern void     MBx_Init_Runtime(_MBX_COMMON_RUNTIME *MBxRuntime);
+extern void     MBx_Init_Attr(_MBX_COMMON_CONFIG *MBxAttr, uint8_t Model, uint8_t mode, uint32_t para1, uint32_t para2);
+extern void     MBx_Init_Slave_Parse(_MBX_SLAVE_PARSE_VALUE *MBxSlaveParse);
+extern uint32_t MBx_Init_Slave_Config(_MBX_SLAVE_CONFIG *MBxSlaveConfig, uint8_t ID, const _MBX_MAP_LIST_ENTRY *MAP);
 
 /* Include MBX utility and system file.  */
 #include "MBx_utility.h"

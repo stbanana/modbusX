@@ -35,7 +35,7 @@ extern "C"
         uint8_t     isFound  = 0;                             \
         if(ChainNow == NULL)                                  \
         {                                                     \
-            ChainNow = newNode;                               \
+            rootNode = newNode;                               \
         }                                                     \
         else                                                  \
         {                                                     \
@@ -119,6 +119,10 @@ extern "C"
 #define MBx_MODULE_TRACE_ADD_ERR(pMB, err)
 #endif
 
+/* 定义map映射查找模式 */
+#define MBX_MAP_FIND_MODE_FIRST      0 /* 定义首次查找 */
+#define MBX_MAP_FIND_MODE_CONTINUOUS 1 /* 定义继续查找 */
+
 /* Exported types ------------------------------------------------------------*/
 
 /**
@@ -136,7 +140,11 @@ typedef struct
 /* Exported variables ---------------------------------------------------------*/
 /* Exported functions ---------------------------------------------------------*/
 
-extern void MBxErrTraceAdd(uint8_t SlaveID, uint8_t mode, uint8_t State, uint32_t ErrCode);
+extern uint16_t MBx_utility_crc16(uint8_t *data, uint16_t len);
+
+extern void     MBxErrTraceAdd(uint8_t SlaveID, uint8_t mode, uint8_t State, uint32_t ErrCode);
+
+extern uint32_t MBx_utility_map_addr_data_get(_MBX_MAP_LIST_ENTRY *Map, uint16_t MapNum, uint16_t Addr, uint16_t *Data, uint8_t mode);
 
 #ifdef __cplusplus
 }
