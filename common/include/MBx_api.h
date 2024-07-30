@@ -41,7 +41,7 @@ extern "C"
 
 /* 功能码定义 */
 #define MBX_FUNC_READ_COIL        (1)   /*!< 01 0x01功能码, 读取一组线圈. */
-#define MBX_FUNC_READ_INPUT       (2)   /*!< 02 0x02功能码, 读取一组离散输入. */
+#define MBX_FUNC_READ_DISC_INPUT  (2)   /*!< 02 0x02功能码, 读取一组离散输入. */
 #define MBX_FUNC_READ_REG         (3)   /*!< 03 0x03功能码, 读取一个或多个保持寄存器. */
 #define MBX_FUNC_READ_INPUT_REG   (4)   /*!< 04 0x04功能码, 读取一个或多个输入寄存器. */
 #define MBX_FUNC_WRITE_COIL       (5)   /*!< 05 0x05功能码, 写单个线圈. */
@@ -73,6 +73,7 @@ extern "C"
 #define MBX_REG_TYPE_U64_1        (6)   /*!< 类型定义, 该地址映射的数据是64位的，映射第1个16位. */
 #define MBX_REG_TYPE_U64_2        (7)   /*!< 类型定义, 该地址映射的数据是64位的，映射第2个16位. */
 #define MBX_REG_TYPE_U64_3        (8)   /*!< 类型定义, 该地址映射的数据是64位的，映射第3个16位. */
+#define MBX_REG_TYPE_BIT_ONLY     (15)  /*!< 类型定义, 该地址映射的数据是独立的bit位 */
 #define MBX_REG_TYPE_BIT_U8_BASE  (16)  /*!< 类型定义, 该地址映射的数据是8位的，映射最低第0个bit.若映射第1个bit，则使用类型 MBX_REG_TYPE_BIT_U8_BASE+1 */
 #define MBX_REG_TYPE_BIT_U16_BASE (32)  /*!< 类型定义, 该地址映射的数据是16位的，映射最低第0个bit.若映射第1个bit，则使用类型 MBX_REG_TYPE_BIT_U16_BASE+1 */
 #define MBX_REG_TYPE_BIT_U32_BASE (64)  /*!< 类型定义, 该地址映射的数据是32位的，映射最低第0个bit.若映射第1个bit，则使用类型 MBX_REG_TYPE_BIT_U32_BASE+1 */
@@ -113,15 +114,16 @@ extern "C"
 /* Exported types ------------------------------------------------------------*/
 
 /***********地址映射表的定义***********/
+typedef uint32_t (*MBX_MAP_REG_HANDLE)(void *value); //地址映射表中的写时处理函数 类型定义
 /**
  * 定义MBx寄存器地址查询表的单条结构
  */
 typedef struct
 {
-    const uint32_t Addr;                   // 此条寄存器地址
-    const void    *Memory;                 // 内存区域头地址
-    const uint8_t  Type;                   // 内存区域映射的数据类型
-    const uint32_t (*Handle)(void *value); // 写时处理函数
+    uint32_t           Addr;   // 此条寄存器地址
+    void              *Memory; // 内存区域头地址
+    uint8_t            Type;   // 内存区域映射的数据类型
+    MBX_MAP_REG_HANDLE Handle; // 写时处理函数
 } _MBX_MAP_LIST_ENTRY;
 
 /***********提供主机从机对象 共用的定义***********/
@@ -181,7 +183,7 @@ typedef struct
 typedef struct
 {
     uint8_t                    SlaveID; //从机号绑定
-    const _MBX_MAP_LIST_ENTRY *Map;     // 地址映射
+    const _MBX_MAP_LIST_ENTRY *Map;     // 地址映射表头
     uint16_t                   MapNum;  // 地址映射数量，自动遍历map产生
 } _MBX_SLAVE_CONFIG;
 
@@ -190,9 +192,10 @@ typedef struct
  */
 typedef struct
 {
-    uint8_t  Func;     // 解析到的功能码
-    uint16_t AddrStar; // 待处理的寄存器地址起始
-    uint16_t RegNum;   // 待解析的寄存器数量
+    uint8_t  Func;      // 解析到的功能码
+    uint16_t RegData;   // 待处理的寄存器值
+    uint16_t AddrStart; // 待处理的寄存器地址起始
+    uint16_t RegNum;    // 待解析的寄存器数量
 } _MBX_SLAVE_PARSE_VALUE;
 
 /***********主从机对象的定义***********/

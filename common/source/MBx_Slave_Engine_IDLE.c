@@ -38,13 +38,13 @@ void MBx_Slave_Engine_IDLE(_MBX_SLAVE *pSlave)
     }
     if(pSlave->Runtime.TimeCnt > pSlave->Attr.T3_5_Cycs) // 达成3.5字符间隔, 立即流转
     {
-        if(pSlave->RxExist.Len > 0)
+        if(pSlave->TxExist.Len > 0)
+        {
+            pSlave->Runtime.State = MBX_STATE_WRITE; // 流转至发送态
+        }
+        else if(pSlave->RxExist.Len > 0)
         {
             pSlave->Runtime.State = MBX_STATE_READ; // 流转至接收态
-        }
-        else if(pSlave->TxExist.Len > 0)
-        {
-            pSlave->Runtime.State = MBX_STATE_READ; // 流转至发送态
         }
         else
         {

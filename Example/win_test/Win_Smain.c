@@ -15,8 +15,6 @@
 #include <MBx_api.h>
 
 /* Private types -------------------------------------------------------------*/
-_MBX_SLAVE slave;
-
 /* Private macros ------------------------------------------------------------*/
 #if 1 //开启DEBUG打印
 #define LOGD(...) printf(__VA_ARGS__)
@@ -52,8 +50,9 @@ _MBX_SLAVE MBxSlave2;
 uint8_t  u8MapMem[64];
 uint16_t u16MapMem[64];
 uint32_t u36MapMem[64];
-float    fMapMem[64];
 uint64_t u64MapMem[64];
+float    fMapMem[64]; // 32位数据模型
+double   dMapMem[64]; // 64位数据模型
 
 /* Private Constants ---------------------------------------------------------*/
 static const _MBX_MAP_LIST_ENTRY MapList[];
@@ -65,6 +64,13 @@ static uint32_t u8WriteTest2(void *value);
 static uint32_t u16WriteTest1(void *value);
 static uint32_t u16WriteTest2(void *value);
 static uint32_t u36WriteTest1(void *value);
+static uint32_t u36WriteTest2(void *value);
+static uint32_t u36WriteTest3(void *value);
+static uint32_t fWriteTest1(void *value);
+
+/* 测试数据弄一些值的操作 */
+static void TestMemInit(void);
+static void TestMemUpdate(uint32_t Cycle);
 
 /* 用于绑定的port函数 */
 uint32_t SerialSendPort(const void *Data, size_t Len);
@@ -73,6 +79,9 @@ uint32_t SerialGetcPort(uint8_t *Data);
 /* 包装的win32串口驱动 */
 static HANDLE  SerialOpen(const char *com, int baud, int byteSize, int parity, int stopBits);
 static WINBOOL SerialClose(HANDLE hObject);
+
+/* 分立测试系列 */
+void MyRTUSlaveTest(void);
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -83,12 +92,27 @@ int main(int argc, char *argv[])
     comHandle       = SerialOpen(com, CBR_9600, 8, NOPARITY, ONESTOPBIT);
     if(INVALID_HANDLE_VALUE == comHandle)
     {
-        LOGE("OpenSerial COM2 fail!\r\n");
+        LOGE("OpenSerial %s fail!\r\n", COM_PORT_NAME);
         return -1;
     }
-    LOGD("Open COM2 Successfully!\r\n");
+    LOGD("Open %s Successfully!\r\n", COM_PORT_NAME);
 
-    /* 申请从机发送及接收buffer */
+    /* RTU从机测试 */
+    MyRTUSlaveTest( );
+
+    //关闭串口
+    SerialClose(comHandle);
+
+    return 0;
+}
+
+/**
+ * @brief RTU从机测试
+ * @param  无
+ */
+void MyRTUSlaveTest(void)
+{
+    /* 申请从机对象发送及接收buffer */
     uint8_t *SRxBuffer = (uint8_t *)malloc(84 * sizeof(uint8_t));
     uint8_t *STxBuffer = (uint8_t *)malloc(84 * sizeof(uint8_t));
     /* 初始化modbus从机 */
@@ -102,40 +126,38 @@ int main(int argc, char *argv[])
                        84,             // 接收buffer最大长度
                        STxBuffer,      // 库内发送buffer分配
                        84);            // 发送buffer最大长度
-    /* 初始化modbus从机 */
-    MBx_Slave_RTU_Init(&MBxSlave2,     // 从机对象
-                       2,              // 从机ID
-                       MapList,        // 地址映射表
-                       SerialSendPort, // 发送函数
-                       SerialGetcPort, // 接收函数
-                       9600,           // 波特率
-                       SRxBuffer,      // 库内接收buffer分配
-                       84,             // 接收buffer最大长度
-                       STxBuffer,      // 库内发送buffer分配
-                       84);            // 发送buffer最大长度
 
+    /* 初始化测试数据 */
+    TestMemInit( );
     while(1)
     {
-        MBx_Ticks(1000); // 换算为微秒传入
-        Sleep(1);
+        MBx_Ticks(1000);   // 换算为微秒传入MBx驱动
+        TestMemUpdate(15); // 毫秒传入测试函数
+        Sleep(1);          // 实际延迟大约是15ms
     }
-
-    //关闭串口
-    SerialClose(comHandle);
-
-    return 0;
 }
 /******************寄存器地址映射表示例******************/
 
 /* 为了实现更快速的查找，库内采用二分法查询地址表
     地址表必须手动以升序排列，由于C标准不支持动态宏，暂时无法在编译阶段自动检查 */
 static const _MBX_MAP_LIST_ENTRY MapList[] = {
-    {.Addr = 0x0000, .Memory = &u8MapMem[10],  .Type = MBX_REG_TYPE_U8,    .Handle = u8WriteTest1 },
-    {.Addr = 0x0001, .Memory = &u8MapMem[16],  .Type = MBX_REG_TYPE_U8,    .Handle = u8WriteTest2 },
-    {.Addr = 0x0100, .Memory = &u16MapMem[10], .Type = MBX_REG_TYPE_U16,   .Handle = u16WriteTest1},
-    {.Addr = 0x0101, .Memory = &u16MapMem[16], .Type = MBX_REG_TYPE_U16,   .Handle = u16WriteTest2},
-    {.Addr = 0x0200, .Memory = &u36MapMem[7],  .Type = MBX_REG_TYPE_U32_H, .Handle = u36WriteTest1}, /* 多寄存器组合映射同一个内存变量，写入处理函数应该是同一个*/
-    {.Addr = 0x0201, .Memory = &u36MapMem[7],  .Type = MBX_REG_TYPE_U32_L, .Handle = u36WriteTest1},
+    {.Addr = 0x0000, .Memory = &u8MapMem[0],  .Type = MBX_REG_TYPE_U8,    .Handle = u8WriteTest1 },
+    {.Addr = 0x0001, .Memory = &u8MapMem[1],  .Type = MBX_REG_TYPE_U8,    .Handle = u8WriteTest2 },
+    {.Addr = 0x0002, .Memory = &u8MapMem[2],  .Type = MBX_REG_TYPE_U8,    .Handle = NULL         },
+    {.Addr = 0x0003, .Memory = &u8MapMem[3],  .Type = MBX_REG_TYPE_U8,    .Handle = NULL         },
+    {.Addr = 0x0100, .Memory = &u16MapMem[0], .Type = MBX_REG_TYPE_U16,   .Handle = u16WriteTest1},
+    {.Addr = 0x0101, .Memory = &u16MapMem[1], .Type = MBX_REG_TYPE_U16,   .Handle = u16WriteTest2},
+    {.Addr = 0x0200, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_H, .Handle = u36WriteTest1}, /* 多寄存器组合映射同一个内存变量，写入处理函数应该是同一个(硬性要求) 模拟大端内存(ABCD排列 基于传输协议，这是最合适的) */
+    {.Addr = 0x0201, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_L, .Handle = u36WriteTest1},
+    {.Addr = 0x0202, .Memory = &u36MapMem[1], .Type = MBX_REG_TYPE_U32_L, .Handle = u36WriteTest2}, /* 多寄存器拼接模仿小端16位字节交换映射 CDAB排列 因为传输协议要求每个寄存器高8位在前，不允许完全模拟小端(完全模拟将导致单寄存器操作混乱)*/
+    {.Addr = 0x0203, .Memory = &u36MapMem[1], .Type = MBX_REG_TYPE_U32_H, .Handle = u36WriteTest2},
+    {.Addr = 0x0204, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_H, .Handle = u36WriteTest1}, /* 多寄存器乱序插叙 瞎几把自由映射*/
+    {.Addr = 0x0205, .Memory = &u36MapMem[2], .Type = MBX_REG_TYPE_U32_L, .Handle = u36WriteTest3},
+    {.Addr = 0x0206, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_L, .Handle = u36WriteTest1},
+    {.Addr = 0x0207, .Memory = &u36MapMem[2], .Type = MBX_REG_TYPE_U32_H, .Handle = u36WriteTest3},
+    {.Addr = 0x0300, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U32_H, .Handle = fWriteTest1  }, /* 浮点映射测试 (大端)*/
+    {.Addr = 0x0301, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U32_L, .Handle = fWriteTest1  },
+
     MBX_MAP_LIST_END
 };
 
@@ -157,7 +179,7 @@ static uint32_t u8WriteTest1(void *value)
         return MBX_API_RETURN_DATA_ABOVE_LIMIT;
     }
 
-    u8MapMem[10] = ValueGet;
+    u8MapMem[0] = ValueGet;
     return MBX_API_RETURN_DEFAULT;
 }
 
@@ -168,28 +190,18 @@ static uint32_t u8WriteTest1(void *value)
 */
 static uint32_t u8WriteTest2(void *value)
 {
-    u8MapMem[16] = (*(uint8_t *)value);
+    u8MapMem[1] = (*(uint8_t *)value);
     return MBX_API_RETURN_DEFAULT;
 }
 
 /**
- * @brief uint16_t 映射的写时处理，展示了如何检查数据上下限
+ * @brief uint16_t 映射的写时处理
  * @param value 库内传参，对于uint16_t的映射将传入(uint16_t *)类型
  * @return 标准返回，请依照 MBx_api.h 的 “API返回集” 部分编写
 */
 static uint32_t u16WriteTest1(void *value)
 {
-    uint8_t ValueGet = (*(uint8_t *)value);
-    if(ValueGet < 10) // 假设下限是 10
-    {
-        return MBX_API_RETURN_DATA_BELOW_LIMIT;
-    }
-    if(ValueGet > 50) // 假设上限是 50
-    {
-        return MBX_API_RETURN_DATA_ABOVE_LIMIT;
-    }
-
-    u8MapMem[11] = ValueGet;
+    u16MapMem[0] = (*(uint16_t *)value);
     return MBX_API_RETURN_DEFAULT;
 }
 
@@ -200,7 +212,7 @@ static uint32_t u16WriteTest1(void *value)
 */
 static uint32_t u16WriteTest2(void *value)
 {
-    u8MapMem[8] = (*(uint16_t *)value);
+    u16MapMem[1] = (*(uint16_t *)value);
     return MBX_API_RETURN_DEFAULT;
 }
 
@@ -212,8 +224,87 @@ static uint32_t u16WriteTest2(void *value)
 static uint32_t u36WriteTest1(void *value)
 {
     /* 可添加上下限检查及其他处理 */
-    u36MapMem[7] = (*(uint32_t *)value);
+    u36MapMem[0] = (*(uint32_t *)value);
     return MBX_API_RETURN_DEFAULT;
+}
+
+/**
+ * @brief uint32_t 映射的写时处理，展示了如何无条件写值
+ * @param value 库内传参，对于 uint32_t 的映射将传入(uint32_t *)类型
+ * @return 标准返回，请依照 MBx_api.h 的 “API返回集” 部分编写
+*/
+static uint32_t u36WriteTest2(void *value)
+{
+    /* 可添加上下限检查及其他处理 */
+    u36MapMem[1] = (*(uint32_t *)value);
+    return MBX_API_RETURN_DEFAULT;
+}
+
+/**
+ * @brief uint32_t 映射的写时处理，展示了如何无条件写值
+ * @param value 库内传参，对于 uint32_t 的映射将传入(uint32_t *)类型
+ * @return 标准返回，请依照 MBx_api.h 的 “API返回集” 部分编写
+*/
+static uint32_t u36WriteTest3(void *value)
+{
+    /* 可添加上下限检查及其他处理 */
+    u36MapMem[2] = (*(uint32_t *)value);
+    return MBX_API_RETURN_DEFAULT;
+}
+
+/**
+ * @brief float 映射的写时处理，展示了如何无条件写值
+ * @param value 库内传参，对于 uint32_t 的映射将传入(uint32_t *)类型
+ * @return 标准返回，请依照 MBx_api.h 的 “API返回集” 部分编写
+*/
+static uint32_t fWriteTest1(void *value)
+{
+    /* 可添加上下限检查及其他处理 */
+    fMapMem[0] = (*(float *)value);
+    return MBX_API_RETURN_DEFAULT;
+}
+
+/******************测试数据弄一些值的操作******************/
+
+/**
+ * @brief 初始化测试bufferr为一些值
+ * @param  
+ */
+static void TestMemInit(void)
+{
+    uint64_t i;
+    for(i = 0; i < sizeof(u8MapMem); i++)
+    {
+        u8MapMem[i]  = i;
+        u16MapMem[i] = i << 8 | i;
+        u36MapMem[i] = (i + 0x10) << 24 | (i + 0x10) << 16 | i << 8 | i;
+        u64MapMem[i] = (i + 0x30) << 56 | (i + 0x30) << 48 | (i + 0x20) << 40 | (i + 0x20) << 32 | (i + 0x10) << 24 | (i + 0x10) << 16 | i << 8 | i;
+        fMapMem[i]   = i * 10.0 + (float)i / 10.0;
+        dMapMem[i]   = i * 10.0 + (float)i / 100.0;
+    }
+}
+
+/**
+ * @brief 测试值周期变化
+ * @param  Cycle 周期 ms
+ */
+static void TestMemUpdate(uint32_t Cycle)
+{
+    static uint32_t i;
+    i += Cycle;
+    if(i >= 2000) // 分频到两秒
+    {
+        for(i = 0; i < sizeof(u8MapMem); i++)
+        {
+            u8MapMem[i]  = u8MapMem[i] + 1ULL;
+            u16MapMem[i] = u16MapMem[i] + (1ULL << 8 | 1ULL);
+            u36MapMem[i] = u36MapMem[i] + (1ULL << 24 | 1ULL << 16 | 1ULL << 8 | 1ULL);
+            u64MapMem[i] = u36MapMem[i] + ((1ULL << 56) | 1ULL << 48 | 1ULL << 40 | 1ULL << 32 | 1ULL << 24 | 1ULL << 16 | 1ULL << 8 | 1ULL);
+            fMapMem[i]   = fMapMem[i] + ((float)1ULL * 10.0 + (float)1ULL / 10.0);
+            dMapMem[i]   = dMapMem[i] + ((float)1ULL * 10.0 + (float)1ULL / 100.0);
+        }
+        i = 0;
+    }
 }
 
 /******************利用windows串口驱动编写的mbx port函数******************/
@@ -229,7 +320,7 @@ uint32_t SerialSendPort(const void *Data, size_t Len)
     DWORD   wWLen = 0;     // 实际发送数据长度
     /* 尝试发送 */
     b = WriteFile(comHandle, Data, Len, &wWLen, NULL);
-    if(b)
+    if(b && wWLen == Len)
         return MBX_PORT_RETURN_DEFAULT;
     else
         return MBX_PORT_RETURNT_ERR_INDEFINITE;
@@ -246,6 +337,14 @@ uint32_t SerialGetcPort(uint8_t *Data)
     DWORD   wRLen = 0;     // 实际接收数据长度
     /* 尝试接收 */
     b = ReadFile(comHandle, Data, 1, &wRLen, NULL);
+    if(b == TRUE && wRLen == 1)
+    {
+        return MBX_PORT_RETURN_DEFAULT;
+    }
+    else
+    {
+        return MBX_PORT_RETURNT_ERR_INDEFINITE;
+    }
 }
 
 /******************以下为串口驱动, 应当分离为port文件, 示例就算了******************/

@@ -14,7 +14,8 @@
             "compare": "c",
             "assert.h": "c",
             "limits": "c",
-            "string.h": "c"
+            "string.h": "c",
+            "type_traits": "c"
         }
     },
     "launch": {

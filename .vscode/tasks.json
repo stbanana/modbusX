@@ -13,6 +13,10 @@
                 "${workspaceFolder}\\common\\include",
                 "-I",
                 "${workspaceFolder}\\port\\generic\\inc",
+                "-I",
+                "${fileDirname}",
+                "-D",
+                "MBX_INCLUDE_USER_DEFINE_FILE",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
             ],

@@ -82,13 +82,32 @@ extern "C"
     {                                                                   \
         if((pMBX->TxExist.Len + 1) < pMBX->TxExist.LenMAX)              \
         {                                                               \
-            pMBX->TxExist.Buffer[pMBX->RxExist.Len] = c;                \
+            pMBX->TxExist.Buffer[pMBX->TxExist.Len] = c;                \
             pMBX->TxExist.Len++;                                        \
         }                                                               \
         else                                                            \
         {                                                               \
             MBx_MODULE_TRACE_ADD_ERR(pMBX, MBX_API_RETURN_BUFFER_FULL); \
         }                                                               \
+    }
+
+/**
+ * @brief 向MBX对象的TXbuffer推入一个寄存器的数据(16位)
+ * @param pMBX  MBX对象指针
+ * @param reg 期望推入的 寄存器的数据(16位)
+ */
+#define MBxTxBufferPutReg(pMBX, reg)                                                      \
+    {                                                                                     \
+        if((pMBX->TxExist.Len + 2) < pMBX->TxExist.LenMAX)                                \
+        {                                                                                 \
+            pMBX->TxExist.Buffer[pMBX->TxExist.Len]     = (uint8_t)((reg >> 8) & 0x00FF); \
+            pMBX->TxExist.Buffer[pMBX->TxExist.Len + 1] = (uint8_t)(reg & 0x00FF);        \
+            pMBX->TxExist.Len += 2;                                                       \
+        }                                                                                 \
+        else                                                                              \
+        {                                                                                 \
+            MBx_MODULE_TRACE_ADD_ERR(pMBX, MBX_API_RETURN_BUFFER_FULL);                   \
+        }                                                                                 \
     }
 
 /**
@@ -125,6 +144,22 @@ extern "C"
 
 /* Exported types ------------------------------------------------------------*/
 
+//用于CRC校验的数据结构
+
+/**
+ * @brief 一个方便的CRC16结构
+ */
+typedef struct
+{
+    uint8_t L8; // 低8位
+    uint8_t H8; // 高8位
+} _MBX_CRC16_H_L;
+typedef union _MBX_CRC16_R_
+{
+    uint16_t       Val;
+    _MBX_CRC16_H_L H_L;
+} _MBX_CRC16;
+
 /**
  * @brief MBx的错误追踪单条目设定, 于模块源码MBx_utility_err_trace.c中声明错误追踪队列
  */
@@ -138,13 +173,20 @@ typedef struct
 } _MBX_ERR_TRACE;
 
 /* Exported variables ---------------------------------------------------------*/
+#if MBX_MODULE_ERR_TRACE_ENABLE
+extern _MBX_ERR_TRACE MBxErrTraceList[];
+#endif
 /* Exported functions ---------------------------------------------------------*/
 
 extern uint16_t MBx_utility_crc16(uint8_t *data, uint16_t len);
 
 extern void     MBxErrTraceAdd(uint8_t SlaveID, uint8_t mode, uint8_t State, uint32_t ErrCode);
 
-extern uint32_t MBx_utility_map_addr_data_get(_MBX_MAP_LIST_ENTRY *Map, uint16_t MapNum, uint16_t Addr, uint16_t *Data, uint8_t mode);
+extern uint32_t MBx_utility_map_addr_data_read(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapNum, uint16_t Addr, uint16_t *Data, uint8_t mode);
+extern uint32_t MBx_utility_map_r_continuity_review(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapMax, uint16_t AddrStart, uint16_t RegNum);
+extern uint32_t MBx_utility_map_addr_data_write(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapMax, uint16_t Addr, uint16_t Data, uint8_t mode);
+extern uint32_t MBx_utility_map_w_continuity_review(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapMax, uint16_t AddrStart, uint16_t RegNum);
+extern uint32_t MBx_utility_map_w_cooperate_review(void);
 
 #ifdef __cplusplus
 }

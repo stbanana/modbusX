@@ -76,8 +76,8 @@ uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE                *MBxSlave, //
     /* 绑定buffer内存部分 */
     MBxSlave->RxExist.Buffer = RxBuffer;
     MBxSlave->RxExist.LenMAX = RxBufferSize;
-    MBxSlave->TxExist.Buffer = RxBuffer;
-    MBxSlave->TxExist.LenMAX = RxBufferSize;
+    MBxSlave->TxExist.Buffer = TxBuffer;
+    MBxSlave->TxExist.LenMAX = TxBufferSize;
     /* 初始化属性 */
     MBx_Init_Attr(&MBxSlave->Attr, MBX_MODEL_RTU, MBX_MODE_SLAVE, BaudRate, MBX_PARA_NULL);
     /* 初始化从机配置 */

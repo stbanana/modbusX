@@ -36,6 +36,7 @@ void MBx_Slave_Engine_READ(_MBX_SLAVE *pSlave)
     while(pSlave->Func.Getc(&getc) == MBX_PORT_RETURN_DEFAULT)
     {
         MBxRxBufferPutc(pSlave, getc); // 若buffer不够大直接丢数据
+        pSlave->Runtime.TimeCnt = 0;   // 接收到数据, 计时清零
     }
     if(pSlave->Runtime.TimeCnt > pSlave->Attr.T1_5_Cycs)
     {
