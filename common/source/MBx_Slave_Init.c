@@ -59,6 +59,10 @@ uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE                *MBxSlave, //
         return MBX_API_RETURN_ERR_PARAM;
     if(MBxSend == NULL || MBxGetc == NULL)
         return MBX_API_RETURN_ERR_PARAM;
+    if(RxBuffer == NULL || RxBuffer == NULL)
+        return MBX_API_RETURN_ERR_PARAM;
+    if(RxBufferSize < 30 || TxBufferSize < 30) // buffer收发空间至少为30字节(随便写的值)
+        return MBX_API_RETURN_ERR_PARAM;
 
     /* 加入从机链表 */
     NewSlaveChainNode(MbxSChainRoot, MBxSlave);

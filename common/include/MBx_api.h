@@ -223,12 +223,10 @@ typedef struct _MBX_SLAVE
 /* Exported functions ---------------------------------------------------------*/
 
 /* 用户实用API */
-
 extern void     MBx_Ticks(uint32_t Cycle);
 extern uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE *MBxSlave, uint8_t SlaveID, const _MBX_MAP_LIST_ENTRY *MAP, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate, uint8_t *RxBuffer, uint32_t RxBufferSize, uint8_t *TxBuffer, uint32_t TxBufferSize);
 
 /* 便于拓展应用的开发, 用户无需调用 */
-
 extern void     MBx_Init_Runtime(_MBX_COMMON_RUNTIME *MBxRuntime);
 extern void     MBx_Init_Attr(_MBX_COMMON_CONFIG *MBxAttr, uint8_t Model, uint8_t mode, uint32_t para1, uint32_t para2);
 extern void     MBx_Init_Slave_Parse(_MBX_SLAVE_PARSE_VALUE *MBxSlaveParse);

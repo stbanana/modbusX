@@ -28,10 +28,6 @@
 #define LOGE(...)
 #endif
 
-#define EXIT_STR  "exit"
-#define I_EXIT    "I exit.\r\n"
-#define I_RECEIVE "I receive.\r\n"
-
 /* 测试使用的串口号定义 */
 #define COM_PORT_NAME "COM2"
 /* 测试使用的串口缓冲区大小 */
@@ -63,9 +59,9 @@ static uint32_t u8WriteTest1(void *value);
 static uint32_t u8WriteTest2(void *value);
 static uint32_t u16WriteTest1(void *value);
 static uint32_t u16WriteTest2(void *value);
-static uint32_t u36WriteTest1(void *value);
-static uint32_t u36WriteTest2(void *value);
-static uint32_t u36WriteTest3(void *value);
+static uint32_t u32WriteTest1(void *value);
+static uint32_t u32WriteTest2(void *value);
+static uint32_t u32WriteTest3(void *value);
 static uint32_t fWriteTest1(void *value);
 
 /* 测试数据弄一些值的操作 */
@@ -115,7 +111,8 @@ void MyRTUSlaveTest(void)
     /* 申请从机对象发送及接收buffer */
     uint8_t *SRxBuffer = (uint8_t *)malloc(84 * sizeof(uint8_t));
     uint8_t *STxBuffer = (uint8_t *)malloc(84 * sizeof(uint8_t));
-    /* 初始化modbus从机 */
+
+    /* 初始化modbus从机1 */
     MBx_Slave_RTU_Init(&MBxSlave,      // 从机对象
                        1,              // 从机ID
                        MapList,        // 地址映射表
@@ -127,11 +124,23 @@ void MyRTUSlaveTest(void)
                        STxBuffer,      // 库内发送buffer分配
                        84);            // 发送buffer最大长度
 
+    /* 假装初始化从机2(如果真的有，把传参填写正常) */
+    MBx_Slave_RTU_Init(&MBxSlave2, // 从机对象
+                       2,          // 从机ID
+                       MapList,    // 地址映射表
+                       NULL,       // 发送函数
+                       NULL,       // 接收函数
+                       NULL,       // 波特率
+                       NULL,       // 库内接收buffer分配
+                       NULL,       // 接收buffer最大长度
+                       NULL,       // 库内发送buffer分配
+                       NULL);      // 发送buffer最大长度
+
     /* 初始化测试数据 */
     TestMemInit( );
     while(1)
     {
-        MBx_Ticks(1000);   // 换算为微秒传入MBx驱动
+        MBx_Ticks(15000);  // 换算为微秒传入MBx驱动 链表自动驱动
         TestMemUpdate(15); // 毫秒传入测试函数
         Sleep(1);          // 实际延迟大约是15ms
     }
@@ -141,20 +150,21 @@ void MyRTUSlaveTest(void)
 /* 为了实现更快速的查找，库内采用二分法查询地址表
     地址表必须手动以升序排列，由于C标准不支持动态宏，暂时无法在编译阶段自动检查 */
 static const _MBX_MAP_LIST_ENTRY MapList[] = {
+    /*  寄存器地址        映射到的内部内存              内部内存数据属性            写时回调(NULL为只读寄存器)  */
     {.Addr = 0x0000, .Memory = &u8MapMem[0],  .Type = MBX_REG_TYPE_U8,    .Handle = u8WriteTest1 },
     {.Addr = 0x0001, .Memory = &u8MapMem[1],  .Type = MBX_REG_TYPE_U8,    .Handle = u8WriteTest2 },
     {.Addr = 0x0002, .Memory = &u8MapMem[2],  .Type = MBX_REG_TYPE_U8,    .Handle = NULL         },
     {.Addr = 0x0003, .Memory = &u8MapMem[3],  .Type = MBX_REG_TYPE_U8,    .Handle = NULL         },
     {.Addr = 0x0100, .Memory = &u16MapMem[0], .Type = MBX_REG_TYPE_U16,   .Handle = u16WriteTest1},
     {.Addr = 0x0101, .Memory = &u16MapMem[1], .Type = MBX_REG_TYPE_U16,   .Handle = u16WriteTest2},
-    {.Addr = 0x0200, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_H, .Handle = u36WriteTest1}, /* 多寄存器组合映射同一个内存变量，写入处理函数应该是同一个(硬性要求) 模拟大端内存(ABCD排列 基于传输协议，这是最合适的) */
-    {.Addr = 0x0201, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_L, .Handle = u36WriteTest1},
-    {.Addr = 0x0202, .Memory = &u36MapMem[1], .Type = MBX_REG_TYPE_U32_L, .Handle = u36WriteTest2}, /* 多寄存器拼接模仿小端16位字节交换映射 CDAB排列 因为传输协议要求每个寄存器高8位在前，不允许完全模拟小端(完全模拟将导致单寄存器操作混乱)*/
-    {.Addr = 0x0203, .Memory = &u36MapMem[1], .Type = MBX_REG_TYPE_U32_H, .Handle = u36WriteTest2},
-    {.Addr = 0x0204, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_H, .Handle = u36WriteTest1}, /* 多寄存器乱序插叙 瞎几把自由映射*/
-    {.Addr = 0x0205, .Memory = &u36MapMem[2], .Type = MBX_REG_TYPE_U32_L, .Handle = u36WriteTest3},
-    {.Addr = 0x0206, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_L, .Handle = u36WriteTest1},
-    {.Addr = 0x0207, .Memory = &u36MapMem[2], .Type = MBX_REG_TYPE_U32_H, .Handle = u36WriteTest3},
+    {.Addr = 0x0200, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_H, .Handle = u32WriteTest1}, /* 多寄存器组合映射同一个内存变量，写入处理函数应该是同一个(硬性要求) 模拟大端内存(ABCD排列 基于传输协议，这是最合适的) */
+    {.Addr = 0x0201, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_L, .Handle = u32WriteTest1},
+    {.Addr = 0x0202, .Memory = &u36MapMem[1], .Type = MBX_REG_TYPE_U32_L, .Handle = u32WriteTest2}, /* 多寄存器拼接模仿小端16位字节交换映射 CDAB排列 因为传输协议要求每个寄存器高8位在前，不允许完全模拟小端(完全模拟将导致单寄存器操作混乱)*/
+    {.Addr = 0x0203, .Memory = &u36MapMem[1], .Type = MBX_REG_TYPE_U32_H, .Handle = u32WriteTest2},
+    {.Addr = 0x0204, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_H, .Handle = u32WriteTest1}, /* 多寄存器乱序插叙 瞎几把自由映射*/
+    {.Addr = 0x0205, .Memory = &u36MapMem[2], .Type = MBX_REG_TYPE_U32_L, .Handle = u32WriteTest3},
+    {.Addr = 0x0206, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_L, .Handle = u32WriteTest1},
+    {.Addr = 0x0207, .Memory = &u36MapMem[2], .Type = MBX_REG_TYPE_U32_H, .Handle = u32WriteTest3},
     {.Addr = 0x0300, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U32_H, .Handle = fWriteTest1  }, /* 浮点映射测试 (大端)*/
     {.Addr = 0x0301, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U32_L, .Handle = fWriteTest1  },
 
@@ -170,14 +180,14 @@ static const _MBX_MAP_LIST_ENTRY MapList[] = {
 static uint32_t u8WriteTest1(void *value)
 {
     uint8_t ValueGet = (*(uint8_t *)value);
-    if(ValueGet < 10) // 假设下限是 10
-    {
-        return MBX_API_RETURN_DATA_BELOW_LIMIT;
-    }
-    if(ValueGet > 50) // 假设上限是 50
-    {
-        return MBX_API_RETURN_DATA_ABOVE_LIMIT;
-    }
+    // if(ValueGet < 10) // 假设下限是 10
+    // {
+    //     return MBX_API_RETURN_DATA_BELOW_LIMIT;
+    // }
+    // if(ValueGet > 50) // 假设上限是 50
+    // {
+    //     return MBX_API_RETURN_DATA_ABOVE_LIMIT;
+    // }
 
     u8MapMem[0] = ValueGet;
     return MBX_API_RETURN_DEFAULT;
@@ -221,7 +231,7 @@ static uint32_t u16WriteTest2(void *value)
  * @param value 库内传参，对于 uint32_t 的映射将传入(uint32_t *)类型
  * @return 标准返回，请依照 MBx_api.h 的 “API返回集” 部分编写
 */
-static uint32_t u36WriteTest1(void *value)
+static uint32_t u32WriteTest1(void *value)
 {
     /* 可添加上下限检查及其他处理 */
     u36MapMem[0] = (*(uint32_t *)value);
@@ -233,7 +243,7 @@ static uint32_t u36WriteTest1(void *value)
  * @param value 库内传参，对于 uint32_t 的映射将传入(uint32_t *)类型
  * @return 标准返回，请依照 MBx_api.h 的 “API返回集” 部分编写
 */
-static uint32_t u36WriteTest2(void *value)
+static uint32_t u32WriteTest2(void *value)
 {
     /* 可添加上下限检查及其他处理 */
     u36MapMem[1] = (*(uint32_t *)value);
@@ -245,7 +255,7 @@ static uint32_t u36WriteTest2(void *value)
  * @param value 库内传参，对于 uint32_t 的映射将传入(uint32_t *)类型
  * @return 标准返回，请依照 MBx_api.h 的 “API返回集” 部分编写
 */
-static uint32_t u36WriteTest3(void *value)
+static uint32_t u32WriteTest3(void *value)
 {
     /* 可添加上下限检查及其他处理 */
     u36MapMem[2] = (*(uint32_t *)value);
