@@ -182,7 +182,7 @@ typedef struct
  */
 typedef struct
 {
-    uint8_t                    SlaveID; //从机号绑定
+    uint8_t                    SlaveID; // 从机号绑定
     const _MBX_MAP_LIST_ENTRY *Map;     // 地址映射表头
     uint16_t                   MapNum;  // 地址映射数量，自动遍历map产生
 } _MBX_SLAVE_CONFIG;
@@ -218,6 +218,26 @@ typedef struct _MBX_SLAVE
     /* 自动从机驱动, 链表支持 */
     struct _MBX_SLAVE *Next; // 从机链表指针
 } _MBX_SLAVE;
+
+/**
+ * @brief 定义modbus从机协议对象 
+ */
+typedef struct _MBX_MASTER
+{
+    /* 配置时完全无需修改的部分 */
+    _MBX_EXIST TxExist; // 供发送的buffer空间
+    _MBX_EXIST RxExist; // 供接收的buffer空间
+    /* 初始化时需赋固定值的部分 */
+    _MBX_COMMON_RUNTIME Runtime; // 运行时变量
+    _MBX_COMMON_CONFIG  Attr;    // 属性配置
+    /* 需传入初始化函数进行配置的部分 */
+    _MBX_COMMON_FUNCTION Func;   // 函数绑定
+    _MBX_SLAVE_CONFIG    Config; // 从机配置
+    /* 解析过程使用 保持对象独立性 */
+    _MBX_SLAVE_PARSE_VALUE Parse; // 解析栈
+    /* 自动从机驱动, 链表支持 */
+    struct _MBX_SLAVE *Next; // 从机链表指针
+} _MBX_MASTER;
 
 /* Exported variables ---------------------------------------------------------*/
 /* Exported functions ---------------------------------------------------------*/
