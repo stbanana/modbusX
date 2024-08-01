@@ -5,19 +5,19 @@
  **** All rights reserved                                       ****
 
  ********************************************************************************
- * File Name     : MBx_Slave_Engine_IDLE.c
+ * File Name     : MBx_Master_Engine_IDLE.c
  * Author        : yono
  * Date          : 2024-07-24
  * Version       : 1.0
 ********************************************************************************/
 /**************************************************************************/
 /*
-    modbus单从机驱动的运行, 空闲态处理分支, 内部函数, 不应由用户调用
+    modbus单机驱动的运行, 空闲态处理分支, 内部函数, 不应由用户调用
 */
 
 /* Includes ------------------------------------------------------------------*/
 #include <MBx_api.h>
-#if MBX_SLAVE_ENABLE
+#if MBX_MASTER_ENABLE
 /* Private types -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private Constants ---------------------------------------------------------*/
@@ -26,31 +26,32 @@
 /* Private functions ---------------------------------------------------------*/
 
 /**
- * @brief 驱动modbusX从机系统 空闲态处理分支
- * @param pSlave MBX从机对象指针
+ * @brief 驱动modbusX主机系统 空闲态处理分支
+ * @param pMaster MBX主机对象指针
  */
-void MBx_Slave_Engine_IDLE(_MBX_SLAVE *pSlave)
+void MBx_Master_Engine_IDLE(_MBX_MASTER *pMaster)
 {
     uint8_t getc;
-    while(pSlave->Func.Getc(&getc) == MBX_PORT_RETURN_DEFAULT)
+    while(pMaster->Func.Getc(&getc) == MBX_PORT_RETURN_DEFAULT)
     {
-        MBxRxBufferPutc(pSlave, getc); // 若buffer不够大直接丢数据
+        MBxRxBufferPutc(pMaster, getc); // 若buffer不够大直接丢数据
     }
-    if(pSlave->Runtime.TimeCnt >= pSlave->Attr.T3_5_Cycs) // 达成3.5字符间隔, 立即流转
+    if(pMaster->Runtime.TimeCnt >= pMaster->Attr.T3_5_Cycs) // 达成3.5字符间隔, 立即流转
     {
-        if(pSlave->TxExist.Len > 0)
+        if(!MBxMasterRequestEmptyQ(pMaster))
         {
-            pSlave->Runtime.State = MBX_STATE_WRITE; // 流转至发送态
+            MBxMasterRequestToTx(pMaster);            // 填充一条请求给发送buffer
+            pMaster->Runtime.State = MBX_STATE_WRITE; // 流转至发送态
         }
-        else if(pSlave->RxExist.Len > 0)
+        else if(pMaster->RxExist.Len > 0)
         {
-            pSlave->Runtime.State = MBX_STATE_READ; // 流转至接收态
+            MBxRxBufferEmpty(pMaster); // 空闲态接收数据非法，清空接收buffer
         }
         else
         {
-            pSlave->Runtime.TimeCnt = pSlave->Attr.T3_5_Cycs; // 无法流转，静止计时器
+            pMaster->Runtime.TimeCnt = pMaster->Attr.T3_5_Cycs; // 无法流转，静止计时器
         }
-        pSlave->Runtime.StateFlow = 1;
+        pMaster->Runtime.StateFlow = 1;
     }
 }
-#endif /* MBX_SLAVE_ENABLE */
+#endif /* MBX_MASTER_ENABLE */

@@ -58,7 +58,7 @@ extern "C"
 #define MBX_EXCEPTION_LEN    (4) /*!< 04 0x04错误码, 数据长度不合法错误. */
 // #define MBX_EXCEPTION_ACKTIME         5  /*!< 05 0x05错误码, 其实并非错误, 而是收到长耗时指令, 表明已收到并开始处理.(不常用暂不支持) */
 #define MBX_EXCEPTION_BUSY   (7) /*!< 07 0x07错误码, 正在处理耗时命令在忙 */
-#define MBX_EXCEPTION_MASTER (8) /*!< 08 0x08错误码, 主控口错误(通常是奇偶校验不通过). */
+#define MBX_EXCEPTION_MASTER (8) /*!< 08 0x08错误码, 主控口错误(通常是硬件流校验例如奇偶校验不通过). */
 // #define MBX_EXCEPTION_UNGATEWAY       (10) /*!< 10 0x0A错误码, 网关不可达.(不常用暂不支持) */
 // #define MBX_EXCEPTION_UNTARGETGATEWAY (11) /*!< 11 0x0B错误码, 网关目标无响应.(不常用暂不支持) */
 #define MBX_EXCEPTION_SAFE (32) /*!< 32 0x20错误码, 保护报警错误, 正在报警时对控制类及在线调节命令返回该代码. */
@@ -82,7 +82,7 @@ extern "C"
 /* modbusx状态机常数 */
 #define MBX_STATE_IDLE  (0) /*!< 0 0x00状态定义, 空闲状态. */
 #define MBX_STATE_ERROR (1) /*!< 1 0x01状态定义, 错误状态. */
-// #define MBX_STATE_WAIT  (2) /*!< 2 0x02状态定义, 等待状态. */
+#define MBX_STATE_WAIT  (2) /*!< 2 0x02状态定义, 等待状态. */
 #define MBX_STATE_WRITE (3) /*!< 3 0x03状态定义, 发送状态. */
 #define MBX_STATE_READ  (4) /*!< 4 0x04状态定义, 接收状态. */
 
@@ -101,9 +101,6 @@ extern "C"
 #define MBX_API_RETURN_DATA_ABOVE_LIMIT 0x10 //数据超出上限
 #define MBX_API_RETURN_DATA_BELOW_LIMIT 0x11 //数据超出下限
 #define MBX_API_RETURN_DATA_LOSS        0x12 //数据丢失
-/* BUFFER相关返回 */
-#define MBX_API_RETURN_BUFFER_FULL  0x20 //BUFFER满
-#define MBX_API_RETURN_BUFFER_EMPTY 0x21 //BUFFER空
 /* BUFFER相关返回 */
 #define MBX_API_RETURN_BUFFER_FULL  0x20 //BUFFER满
 #define MBX_API_RETURN_BUFFER_EMPTY 0x21 //BUFFER空
@@ -171,7 +168,8 @@ typedef struct
     uint32_t NoComNum :4; // 无通信计数 周期累加, 收到有效消息清空
     uint32_t State    :4; // 运行时状态机
     uint32_t StatePast:4; // 运行时状态机前一态寄存, 状态流转时可以处理数据
-    uint32_t StateFlow:1; // 状态机立即流转动作
+    uint32_t StateFlow:1; // 状态机立即流转动作 1立即流转 0按流程流转
+    // uint32_t StateWait:1; // 状态机保持等待标识 1保持等待 0流转出去
     // uint32_t TransID  :16; // modbusTCP专用, 当前累计的事务号
     uint32_t reg:19; // 补位
 } _MBX_COMMON_RUNTIME;
@@ -198,21 +196,82 @@ typedef struct
     uint16_t RegNum;    // 待解析的寄存器数量
 } _MBX_SLAVE_PARSE_VALUE;
 
+/***********提供主机对象使用的定义***********/
+/**
+ * @brief 主机特有的配置结构体
+ */
+typedef struct
+{
+    uint8_t                    SlaveID; // 从机号绑定
+    const _MBX_MAP_LIST_ENTRY *Map;     // 地址映射表头
+    uint16_t                   MapNum;  // 地址映射数量，自动遍历map产生
+} _MBX_MASTER_CONFIG;
+
+/**
+ * @brief 主机解析栈
+ */
+typedef struct
+{
+    uint8_t  Func;      // 解析到的功能码
+    uint16_t RegData;   // 待处理的寄存器值
+    uint16_t AddrStart; // 待处理的寄存器地址起始
+    uint16_t RegNum;    // 待解析的寄存器数量
+
+    uint8_t  SendFunc;                                // 发送时的功能码
+    uint16_t SendAddrStart;                           // 发送时的地址起始
+    uint16_t SendRegNum;                              // 发送时的寄存器数量
+    uint8_t  SendValue[MBX_MASTER_MULTI_REG_MAX * 2]; // 发送时的设置值域
+} _MBX_MASTER_PARSE_VALUE;
+
+/**
+ * @brief 主机对从指令失败的环形栈
+ */
+typedef struct
+{
+    uint8_t  SendFunc;      // 产生错误的帧 发送时的功能码
+    uint16_t SendAddrStart; // 产生错误的帧 发送时的地址起始
+    uint16_t SendRegNum;    // 产生错误的帧 发送时的操作的寄存器数量
+} _MBX_MASTER_ERROR_RING_NODE;
+
+typedef struct
+{
+    _MBX_MASTER_ERROR_RING_NODE Queue[MBX_MASTER_ERROR_QUEUE_MAX]; // 错误环形队列
+    uint8_t                     Head;                              // 环形队列的头指针(入)
+    uint8_t                     Tail;                              // 环形队列的尾指针(出)
+} _MBX_MASTER_ERROR_RING;
+
+/**
+ * @brief 主机对从指令待发送请求的环形栈
+ */
+typedef struct
+{
+    uint8_t  Func;                                // 待发送的功能码
+    uint16_t AddrStart;                           // 待发送的地址起始
+    uint16_t RegNum;                              // 待发送的寄存器数量
+    uint8_t  Value[MBX_MASTER_MULTI_REG_MAX * 2]; // 待发送的设置值域
+} _MBX_MASTER_REQUEST_RING_NODE;
+
+typedef struct
+{
+    _MBX_MASTER_REQUEST_RING_NODE Queue[MBX_MASTER_REQUEST_QUEUE_MAX]; // 待发送请求队列
+    uint8_t                       Head;                                // 环形队列的头指针(入)
+    uint8_t                       Tail;                                // 环形队列的尾指针(出)
+} _MBX_MASTER_REQUEST_RING;
+
 /***********主从机对象的定义***********/
 /**
  * @brief 定义modbus从机协议对象 
  */
 typedef struct _MBX_SLAVE
 {
-    /* 配置时完全无需修改的部分 */
-    _MBX_EXIST TxExist; // 供发送的buffer空间
-    _MBX_EXIST RxExist; // 供接收的buffer空间
     /* 初始化时需赋固定值的部分 */
     _MBX_COMMON_RUNTIME Runtime; // 运行时变量
     _MBX_COMMON_CONFIG  Attr;    // 属性配置
     /* 需传入初始化函数进行配置的部分 */
-    _MBX_COMMON_FUNCTION Func;   // 函数绑定
-    _MBX_SLAVE_CONFIG    Config; // 从机配置
+    _MBX_EXIST           TxExist; // 供发送的buffer空间
+    _MBX_EXIST           RxExist; // 供接收的buffer空间
+    _MBX_COMMON_FUNCTION Func;    // 函数绑定
+    _MBX_SLAVE_CONFIG    Config;  // 从机配置
     /* 解析过程使用 保持对象独立性 */
     _MBX_SLAVE_PARSE_VALUE Parse; // 解析栈
     /* 自动从机驱动, 链表支持 */
@@ -220,23 +279,24 @@ typedef struct _MBX_SLAVE
 } _MBX_SLAVE;
 
 /**
- * @brief 定义modbus从机协议对象 
+ * @brief 定义modbus主机协议对象 
  */
 typedef struct _MBX_MASTER
 {
-    /* 配置时完全无需修改的部分 */
-    _MBX_EXIST TxExist; // 供发送的buffer空间
-    _MBX_EXIST RxExist; // 供接收的buffer空间
     /* 初始化时需赋固定值的部分 */
     _MBX_COMMON_RUNTIME Runtime; // 运行时变量
     _MBX_COMMON_CONFIG  Attr;    // 属性配置
     /* 需传入初始化函数进行配置的部分 */
-    _MBX_COMMON_FUNCTION Func;   // 函数绑定
-    _MBX_SLAVE_CONFIG    Config; // 从机配置
+    _MBX_EXIST           TxExist; // 供发送的buffer空间
+    _MBX_EXIST           RxExist; // 供接收的buffer空间
+    _MBX_COMMON_FUNCTION Func;    // 函数绑定
+    _MBX_MASTER_CONFIG   Config;  // 主机配置
     /* 解析过程使用 保持对象独立性 */
-    _MBX_SLAVE_PARSE_VALUE Parse; // 解析栈
-    /* 自动从机驱动, 链表支持 */
-    struct _MBX_SLAVE *Next; // 从机链表指针
+    _MBX_MASTER_PARSE_VALUE  Parse;   // 解析栈
+    _MBX_MASTER_ERROR_RING   Error;   // 错误栈
+    _MBX_MASTER_REQUEST_RING Request; // 请求栈
+    /* 自动主机驱动, 链表支持 */
+    struct _MBX_MASTER *Next; // 主机链表指针
 } _MBX_MASTER;
 
 /* Exported variables ---------------------------------------------------------*/
@@ -245,12 +305,17 @@ typedef struct _MBX_MASTER
 /* 用户实用API */
 extern void     MBx_Ticks(uint32_t Cycle);
 extern uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE *MBxSlave, uint8_t SlaveID, const _MBX_MAP_LIST_ENTRY *MAP, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate, uint8_t *RxBuffer, uint32_t RxBufferSize, uint8_t *TxBuffer, uint32_t TxBufferSize);
+extern uint32_t MBx_Master_RTU_Init(_MBX_MASTER *MBxMaster, uint8_t SlaveID, const _MBX_MAP_LIST_ENTRY *MAP, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate, uint8_t *RxBuffer, uint32_t RxBufferSize, uint8_t *TxBuffer, uint32_t TxBufferSize);
 
 /* 便于拓展应用的开发, 用户无需调用 */
 extern void     MBx_Init_Runtime(_MBX_COMMON_RUNTIME *MBxRuntime);
 extern void     MBx_Init_Attr(_MBX_COMMON_CONFIG *MBxAttr, uint8_t Model, uint8_t mode, uint32_t para1, uint32_t para2);
 extern void     MBx_Init_Slave_Parse(_MBX_SLAVE_PARSE_VALUE *MBxSlaveParse);
 extern uint32_t MBx_Init_Slave_Config(_MBX_SLAVE_CONFIG *MBxSlaveConfig, uint8_t ID, const _MBX_MAP_LIST_ENTRY *MAP);
+extern void     MBx_Init_Master_Parse(_MBX_MASTER_PARSE_VALUE *MBxMasterParse);
+extern void     MBx_Init_Master_Error(_MBX_MASTER_ERROR_RING *MBxMasterError);
+extern void     MBx_Init_Master_Request(_MBX_MASTER_REQUEST_RING *MBxMasterRequest);
+extern uint32_t MBx_Init_Master_Config(_MBX_MASTER_CONFIG *MBxMasterConfig, uint8_t ID, const _MBX_MAP_LIST_ENTRY *MAP);
 
 /* Include MBX utility and system file.  */
 #include "MBx_utility.h"

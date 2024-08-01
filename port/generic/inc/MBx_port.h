@@ -53,6 +53,31 @@ extern "C"
 #define MBX_ENDIAN_MODE_BIG 0
 #endif
 
+#ifndef MBX_MASTER_REQUEST_QUEUE_MAX
+#define MBX_MASTER_REQUEST_QUEUE_MAX 20
+#endif
+#if MBX_MASTER_REQUEST_QUEUE_MAX > 0xFF
+#error "MBX_MASTER_REQUEST_QUEUE_MAX must be not greater than 0xFF"
+#endif
+
+#ifndef MBX_MASTER_ERROR_QUEUE_MAX
+#define MBX_MASTER_ERROR_QUEUE_MAX 10
+#endif
+#if MBX_MASTER_ERROR_QUEUE_MAX > 0xFF
+#error "MBX_MASTER_ERROR_QUEUE_MAX must be not greater than 0xFF"
+#endif
+
+#ifndef MBX_MASTER_MULTI_REG_MAX
+#define MBX_MASTER_MULTI_REG_MAX 0x7F
+#endif
+#if MBX_MASTER_MULTI_REG_MAX > 0x7F
+#error "MBX_MASTER_MULTI_REG_MAX must be not greater than 0x7F"
+#endif
+
+#ifndef MBX_MASTER_RESPONSE_TIMEOUT_US
+#define MBX_MASTER_RESPONSE_TIMEOUT_US 100000
+#endif
+
 /* Exported constants --------------------------------------------------------*/
 /* Exported macros -----------------------------------------------------------*/
 

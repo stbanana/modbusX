@@ -5,14 +5,14 @@
  **** All rights reserved                                       ****
 
  ********************************************************************************
- * File Name     : MBx_Init_Slave_Config.c
+ * File Name     : MBx_Init_Master_Config.c
  * Author        : yono
- * Date          : 2024-07-27
+ * Date          : 2024-07-30
  * Version       : 1.0
 ********************************************************************************/
 /**************************************************************************/
 /*
-    初始化MBX从机配置
+    初始化MBX主机配置
     应当是库内调用
 */
 
@@ -27,12 +27,12 @@
 
 /**
  * @brief 初始化MBX从机配置的各个参数
- * @param MBxSlaveConfig 指向MBX从机解析栈的指针
+ * @param MBxMasterConfig 指向MBX从机解析栈的指针
  * @param ID 期望配置成的从机ID
  * @param MAP 指向地址映射表头的指针
  * @return 标准返回
  */
-uint32_t MBx_Init_Slave_Config(_MBX_SLAVE_CONFIG *MBxSlaveConfig, uint8_t ID, const _MBX_MAP_LIST_ENTRY *MAP)
+uint32_t MBx_Init_Master_Config(_MBX_MASTER_CONFIG *MBxMasterConfig, uint8_t ID, const _MBX_MAP_LIST_ENTRY *MAP)
 {
     uint32_t state = MBX_API_RETURN_DEFAULT;
     uint16_t i; // 遍历map并审查
@@ -42,8 +42,8 @@ uint32_t MBx_Init_Slave_Config(_MBX_SLAVE_CONFIG *MBxSlaveConfig, uint8_t ID, co
 #endif
 
     /* 基础配置 */
-    MBxSlaveConfig->SlaveID = ID;
-    MBxSlaveConfig->Map     = MAP;
+    MBxMasterConfig->SlaveID = ID;
+    MBxMasterConfig->Map     = MAP;
 
     /* 审查定义的映射表*/
     for(i = 0;                   // 从0开始遍历
@@ -59,7 +59,7 @@ uint32_t MBx_Init_Slave_Config(_MBX_SLAVE_CONFIG *MBxSlaveConfig, uint8_t ID, co
         AddrNow = MAP[i].Addr;
 #endif
     }
-    MBxSlaveConfig->MapNum = i; // 记录条目总数量
+    MBxMasterConfig->MapNum = i; // 记录条目总数量
 
     return state;
 }

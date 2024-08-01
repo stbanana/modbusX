@@ -23,6 +23,7 @@
 /* Private macros ------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 extern void MBx_Slave_Scan(uint32_t Cycle);
+extern void MBx_Master_Scan(uint32_t Cycle);
 /* Private functions ---------------------------------------------------------*/
 
 /**
@@ -34,7 +35,7 @@ void MBx_Ticks(uint32_t Cycle)
 #if MBX_SLAVE_ENABLE
     MBx_Slave_Scan(Cycle);
 #endif
-    // #if MBX_MASTER_ENABLE
-    //     MBx_Master_Ticks(Cycle);
-    // #endif
+#if MBX_MASTER_ENABLE
+    MBx_Master_Scan(Cycle);
+#endif
 }

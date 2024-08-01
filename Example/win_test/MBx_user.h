@@ -40,4 +40,27 @@
  */
 #define MBX_ENDIAN_MODE_BIG 0
 
+/***********主机特有属性定义***********/
+/**
+ * MBX主机请求队列的最大深度，用于连续读写请求，寄存并自动发送处理
+ */
+#define MBX_MASTER_REQUEST_QUEUE_MAX 20
+
+/**
+ * MBX主机错误响应队列的最大深度，用于寄存从机的错误响应，并在主应用中取出处理
+ */
+#define MBX_MASTER_ERROR_QUEUE_MAX 10
+
+/**
+ * MBX主机读写多个寄存器的最大个数，由于回复"字节数"段是一个字节，所以配置最大值为0x7F
+ */
+#define MBX_MASTER_MULTI_REG_MAX 0x7F
+
+/**
+ * MBX主机响应超时的判定阈值，以us为单位。
+ *      若主机在设定时间内未收到从机响应，则判定为超时
+ *      NOTE:未来可做到对象结构体中进行配置
+ */
+#define MBX_MASTER_RESPONSE_TIMEOUT_US 100000
+
 #endif /* _MBX_USER_H_ */

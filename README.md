@@ -74,7 +74,7 @@ uint32_t SerialGetcPort(uint8_t *Data)
 然后制作一张类似如下的地址映射表，注意以下两点，
 
 > 1. 数据模型的**寄存器地址必须递增**，库内使用二分法查找以提高查找效率
-> 2. **如果映射到的内部内存变量相同，那么回调处理也应该相同**，因为库会最终将整个变量期望修改的值以void*形式传入写时回调，写时回调应当再翻译为对应的数据，详见例程
+> 2. **如果映射到的内部内存变量相同，那么回调处理也应该相同**，因为库会最终将整个变量期望修改的值以void*形式传入写时回调，写时回调应当再翻译为对应的数据，详见例程 [在windows平台的从机例子](Example/win_twst/Win_Smain.c)
 
 ```c
 /* 供映射的内存区域 */
@@ -139,16 +139,16 @@ MBx_Slave_RTU_Init(&MBxSlave,      // 从机对象
                    84);            // 发送buffer最大长度
 
 /* 假装初始化从机2(如果真的有，把传参填写正常) */
-MBx_Slave_RTU_Init(&MBxSlave2, // 从机对象
-                   2,          // 从机ID
-                   MapList,    // 地址映射表
-                   NULL,       // 发送函数
-                   NULL,       // 接收函数
-                   NULL,       // 波特率
-                   NULL,       // 库内接收buffer分配
-                   NULL,       // 接收buffer最大长度
-                   NULL,       // 库内发送buffer分配
-                   NULL);      // 发送buffer最大长度
+MBx_Slave_RTU_Init(&MBxSlave2,     // 从机对象
+                    2,              // 从机ID
+                    MapList,        // 地址映射表
+                    MBX_PARA_NULL,  // 发送函数
+                    MBX_PARA_NULL,  // 接收函数
+                    MBX_PARA_NULL,  // 波特率
+                    MBX_PARA_NULL,  // 库内接收buffer分配
+                    MBX_PARA_NULL,  // 接收buffer最大长度
+                    MBX_PARA_NULL,  // 库内发送buffer分配
+                    MBX_PARA_NULL); // 发送buffer最大长度
 ```
 
 
@@ -163,3 +163,6 @@ MBx_Slave_RTU_Init(&MBxSlave2, // 从机对象
     }
 ```
 
+# 程序状态机
+
+![主从状态机流转](Example/README.DATA/MBX状态机.png)

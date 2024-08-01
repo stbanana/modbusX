@@ -5,63 +5,67 @@
  **** All rights reserved                                       ****
 
  ********************************************************************************
- * File Name     : MBx_Slave_Engine.c
+ * File Name     : MBx_Master_Engine.c
  * Author        : yono
  * Date          : 2024-07-24
  * Version       : 1.0
 ********************************************************************************/
 /**************************************************************************/
 /*
-    modbus单从机驱动的运行, 内部函数, 不应由用户调用
+    modbus单主机驱动的运行, 内部函数, 不应由用户调用
 */
 
 /* Includes ------------------------------------------------------------------*/
 #include <MBx_api.h>
-#if MBX_SLAVE_ENABLE
+#if MBX_MASTER_ENABLE
 /* Private types -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-extern void MBx_Slave_Engine_IDLE(_MBX_SLAVE *pSlave);
-extern void MBx_Slave_Engine_WRITE(_MBX_SLAVE *pSlave);
-extern void MBx_Slave_Engine_READ(_MBX_SLAVE *pSlave);
+extern void MBx_Master_Engine_IDLE(_MBX_MASTER *pMaster);
+extern void MBx_Master_Engine_WAIT(_MBX_MASTER *pMaster);
+extern void MBx_Master_Engine_WRITE(_MBX_MASTER *pMaster);
+extern void MBx_Master_Engine_READ(_MBX_MASTER *pMaster);
 /* Private functions ---------------------------------------------------------*/
 
 /**
- * @brief 驱动modbusX从机系统
- * @param pSlave MBX从机对象指针
+ * @brief 驱动modbusX主机系统
+ * @param pMaster MBX主机对象指针
  * @param Cycle 调用本函数的周期值us
  */
-void MBx_Slave_Engine(_MBX_SLAVE *pSlave, uint32_t Cycle)
+void MBx_Master_Engine(_MBX_MASTER *pMaster, uint32_t Cycle)
 {
-    pSlave->Runtime.TimeCnt += Cycle;
-    pSlave->Runtime.StateFlow = 1;
+    pMaster->Runtime.TimeCnt += Cycle;
+    pMaster->Runtime.StateFlow = 1;
 
-    while(pSlave->Runtime.StateFlow == 1)
+    while(pMaster->Runtime.StateFlow == 1)
     {
-        pSlave->Runtime.StateFlow = 0; // 清除流转动作标识
-        if(pSlave->Runtime.StatePast != pSlave->Runtime.State)
+        pMaster->Runtime.StateFlow = 0; // 清除流转动作标识
+        if(pMaster->Runtime.StatePast != pMaster->Runtime.State)
         {
-            pSlave->Runtime.StatePast = pSlave->Runtime.State;
-            pSlave->Runtime.TimeCnt   = 0; // 状态切换时重置时间计数器
+            pMaster->Runtime.StatePast = pMaster->Runtime.State;
+            pMaster->Runtime.TimeCnt   = 0; // 状态切换时重置时间计数器
         }
 
-        switch(pSlave->Runtime.State)
+        switch(pMaster->Runtime.State)
         {
         case MBX_STATE_IDLE:
-            MBx_Slave_Engine_IDLE(pSlave);
+            MBx_Master_Engine_IDLE(pMaster);
             break;
-        // case MBX_STATE_ERROR:
-        //     break;
+        case MBX_STATE_ERROR:
+            break;
+        case MBX_STATE_WAIT:
+            MBx_Master_Engine_WAIT(pMaster);
+            break;
         case MBX_STATE_WRITE:
-            MBx_Slave_Engine_WRITE(pSlave);
+            MBx_Master_Engine_WRITE(pMaster);
             break;
         case MBX_STATE_READ:
-            MBx_Slave_Engine_READ(pSlave);
+            MBx_Master_Engine_READ(pMaster);
             break;
         default:
-            pSlave->Runtime.State = MBX_STATE_IDLE; // 意外状态, 自动流转至空闲
+            pMaster->Runtime.State = MBX_STATE_IDLE; // 意外状态, 自动流转至空闲
             break;
         }
     }

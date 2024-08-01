@@ -43,4 +43,4 @@ void MBx_Slave_Scan(uint32_t Cycle)
         ChainNow = ChainNow->Next;
     }
 }
-#endif
+#endif /* MBX_SLAVE_ENABLE */

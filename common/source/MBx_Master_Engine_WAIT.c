@@ -5,19 +5,19 @@
  **** All rights reserved                                       ****
 
  ********************************************************************************
- * File Name     : MBx_Init_Runtime.c
+ * File Name     : MBx_Master_Engine_WAIT.c
  * Author        : yono
- * Date          : 2024-07-23
+ * Date          : 2024-07-24
  * Version       : 1.0
 ********************************************************************************/
 /**************************************************************************/
 /*
-    初始化MBX运行时
-    应当是库内调用
+    modbus单机驱动的运行, 空闲态处理分支, 内部函数, 不应由用户调用
 */
 
 /* Includes ------------------------------------------------------------------*/
 #include <MBx_api.h>
+#if MBX_MASTER_ENABLE
 /* Private types -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private Constants ---------------------------------------------------------*/
@@ -26,15 +26,26 @@
 /* Private functions ---------------------------------------------------------*/
 
 /**
- * @brief 初始化MBX运行时的各个参数 
- * @param MBxRuntime 指向MBX运行时结构体的指针
+ * @brief 驱动modbusX主机系统 等待态处理分支
+ * @param pMaster MBX主机对象指针
  */
-void MBx_Init_Runtime(_MBX_COMMON_RUNTIME *MBxRuntime)
+void MBx_Master_Engine_WAIT(_MBX_MASTER *pMaster)
 {
-    MBxRuntime->TimeCnt   = 0;
-    MBxRuntime->NoComNum  = 0;
-    MBxRuntime->State     = MBX_STATE_IDLE;
-    MBxRuntime->StatePast = MBX_STATE_IDLE;
-    MBxRuntime->StateFlow = 0;
-    MBxRuntime->StateWait = 0;
+    uint8_t getc;
+    /* 等待超时审查 */
+    if(pMaster->Runtime.TimeCnt > MBX_MASTER_RESPONSE_TIMEOUT_US)
+    {
+        pMaster->Runtime.State = MBX_STATE_IDLE; // 等待接收已超时, 流转空闲态
+    }
+
+    /* 等待条件 */
+    while(pMaster->Func.Getc(&getc) == MBX_PORT_RETURN_DEFAULT)
+    {
+        MBxRxBufferPutc(pMaster, getc); // 若buffer不够大直接丢数据
+    }
+    if(pMaster->RxExist.Len > 0)
+    {
+        pMaster->Runtime.State = MBX_STATE_READ; // 接收数据, 流转接收态
+    }
 }
+#endif /* MBX_MASTER_ENABLE */

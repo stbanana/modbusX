@@ -5,36 +5,43 @@
  **** All rights reserved                                       ****
 
  ********************************************************************************
- * File Name     : MBx_Init_Runtime.c
+ * File Name     : MBx_Master_Engine_READ.c
  * Author        : yono
- * Date          : 2024-07-23
+ * Date          : 2024-07-24
  * Version       : 1.0
 ********************************************************************************/
 /**************************************************************************/
 /*
-    初始化MBX运行时
-    应当是库内调用
+    modbus单主机驱动的运行, 接收态处理分支, 内部函数, 不应由用户调用
 */
 
 /* Includes ------------------------------------------------------------------*/
 #include <MBx_api.h>
+#if MBX_MASTER_ENABLE
 /* Private types -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
+// extern void MBx_Master_Parse(_MBX_MASTER *pMaster);
 /* Private functions ---------------------------------------------------------*/
 
 /**
- * @brief 初始化MBX运行时的各个参数 
- * @param MBxRuntime 指向MBX运行时结构体的指针
+ * @brief 驱动modbusX主机系统 接收态处理分支
+ * @param pMaster MBX主机对象指针
  */
-void MBx_Init_Runtime(_MBX_COMMON_RUNTIME *MBxRuntime)
+void MBx_Master_Engine_READ(_MBX_MASTER *pMaster)
 {
-    MBxRuntime->TimeCnt   = 0;
-    MBxRuntime->NoComNum  = 0;
-    MBxRuntime->State     = MBX_STATE_IDLE;
-    MBxRuntime->StatePast = MBX_STATE_IDLE;
-    MBxRuntime->StateFlow = 0;
-    MBxRuntime->StateWait = 0;
+    uint8_t getc;
+    while(pMaster->Func.Getc(&getc) == MBX_PORT_RETURN_DEFAULT)
+    {
+        MBxRxBufferPutc(pMaster, getc); // 若buffer不够大直接丢数据
+        pMaster->Runtime.TimeCnt = 0;   // 接收到数据, 计时清零
+    }
+    if(pMaster->Runtime.TimeCnt > pMaster->Attr.T1_5_Cycs)
+    {
+        // MBx_Master_Parse(pMaster);               // 流转此态条件是收到数据, 无需判接收长度, 解析接收即可
+        pMaster->Runtime.State = MBX_STATE_IDLE; // 流转回等待态
+    }
 }
+#endif /* MBX_MASTER_ENABLE */
