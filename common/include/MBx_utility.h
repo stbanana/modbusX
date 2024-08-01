@@ -243,6 +243,8 @@ extern uint32_t MBx_utility_map_addr_data_write(const _MBX_MAP_LIST_ENTRY *Map, 
 extern uint32_t MBx_utility_map_w_continuity_review(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapMax, uint16_t AddrStart, uint16_t RegNum);
 extern uint32_t MBx_utility_map_w_cooperate_review(void);
 
+extern uint32_t MBxMasterErrortAdd(_MBX_MASTER *pMaster, uint8_t Func, uint8_t Error, uint16_t AddrStart, uint16_t RegNum);
+
 extern void     MBxMasterRequestToTx(_MBX_MASTER *pMaster);
 extern uint32_t MBxMasterRequestAdd(_MBX_MASTER *pMaster, uint8_t Func, uint16_t AddrStart, uint16_t RegNum, uint8_t *Value, uint16_t ValueLen);
 

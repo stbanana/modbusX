@@ -34,7 +34,7 @@ void MBx_Master_Engine_IDLE(_MBX_MASTER *pMaster)
     uint8_t getc;
     while(pMaster->Func.Getc(&getc) == MBX_PORT_RETURN_DEFAULT)
     {
-        MBxRxBufferPutc(pMaster, getc); // 若buffer不够大直接丢数据
+        MBxRxBufferPutc(pMaster, getc);
     }
     if(pMaster->Runtime.TimeCnt >= pMaster->Attr.T3_5_Cycs) // 达成3.5字符间隔, 立即流转
     {

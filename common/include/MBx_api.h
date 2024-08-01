@@ -61,8 +61,11 @@ extern "C"
 #define MBX_EXCEPTION_MASTER (8) /*!< 08 0x08错误码, 主控口错误(通常是硬件流校验例如奇偶校验不通过). */
 // #define MBX_EXCEPTION_UNGATEWAY       (10) /*!< 10 0x0A错误码, 网关不可达.(不常用暂不支持) */
 // #define MBX_EXCEPTION_UNTARGETGATEWAY (11) /*!< 11 0x0B错误码, 网关目标无响应.(不常用暂不支持) */
-#define MBX_EXCEPTION_SAFE (32) /*!< 32 0x20错误码, 保护报警错误, 正在报警时对控制类及在线调节命令返回该代码. */
-#define MBX_EXCEPTION_CRC  (64) /*!< 64 0x40错误码, CRC校验错误. */
+
+/* 非标准错误码，协助开发以及拓展功能 */
+#define MBX_EXCEPTION_SAFE    (32)  /*!< 32 0x20错误码, 保护报警错误, 正在报警时对控制类及在线调节命令返回该代码. */
+#define MBX_EXCEPTION_CRC     (64)  /*!< 64 0x40错误码, CRC校验错误. */
+#define MBX_EXCEPTION_TIMEOUT (128) /*!< 128 0x80错误码, 超时错误. */
 
 /* 寄存器映射的数据类型 */
 #define MBX_REG_TYPE_U8           (1)   /*!< 类型定义, 该地址映射的数据是8位的. */
@@ -229,6 +232,7 @@ typedef struct
 typedef struct
 {
     uint8_t  SendFunc;      // 产生错误的帧 发送时的功能码
+    uint8_t  ErrorCode;     // 产生错误的帧 接收的错误码
     uint16_t SendAddrStart; // 产生错误的帧 发送时的地址起始
     uint16_t SendRegNum;    // 产生错误的帧 发送时的操作的寄存器数量
 } _MBX_MASTER_ERROR_RING_NODE;
@@ -306,6 +310,7 @@ typedef struct _MBX_MASTER
 extern void     MBx_Ticks(uint32_t Cycle);
 extern uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE *MBxSlave, uint8_t SlaveID, const _MBX_MAP_LIST_ENTRY *MAP, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate, uint8_t *RxBuffer, uint32_t RxBufferSize, uint8_t *TxBuffer, uint32_t TxBufferSize);
 extern uint32_t MBx_Master_RTU_Init(_MBX_MASTER *MBxMaster, uint8_t SlaveID, const _MBX_MAP_LIST_ENTRY *MAP, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate, uint8_t *RxBuffer, uint32_t RxBufferSize, uint8_t *TxBuffer, uint32_t TxBufferSize);
+extern uint32_t MBx_Master_Errort_Get(_MBX_MASTER *pMaster, uint8_t *Func, uint8_t *Error, uint16_t *AddrStart, uint16_t *RegNum);
 
 /* 便于拓展应用的开发, 用户无需调用 */
 extern void     MBx_Init_Runtime(_MBX_COMMON_RUNTIME *MBxRuntime);

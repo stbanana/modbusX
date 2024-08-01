@@ -148,7 +148,7 @@ void MyRTUMasterTest(void)
 /******************寄存器地址映射表示例******************/
 
 /* 为了实现更快速的查找，库内采用二分法查询地址表
-    地址表必须手动以升序排列，由于C标准不支持动态宏，暂时无法在编译阶段自动检查 */
+    地址表必须手动以升序排列，由于C11标准不支持动态宏，暂时无法在编译阶段自动检查 */
 static const _MBX_MAP_LIST_ENTRY MapList[] = {
     /*  寄存器地址        映射到的内部内存              内部内存数据属性            写时异常回调(NULL为忽略写异常)  */
     {.Addr = 0x0000, .Memory = &u8MapMem[0],  .Type = MBX_REG_TYPE_U8,    .Handle = u8WriteTest1 },

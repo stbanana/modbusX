@@ -28,104 +28,54 @@
 /* Private functions ---------------------------------------------------------*/
 
 /**
- * @brief MBX主机提取一条请求，填充到Txbuffer
- *          调用前需使用MBxMasterRequestEmptyQ()检查错误栈是否为空
- * @param pMBX  MBX对象指针
+ * @brief MBX主站错误队列中添加一个错误
+ * @param pMaster  MBX对象指针
+ * @param Func 错误发送功能码
+ * @param Error 实际收到的错误码
+ * @param AddrStart 错误发送地址起始
+ * @param RegNum 错误发送寄存器数量
+ * @return 
  */
-void MBxMasterRequestToTx(_MBX_MASTER *pMaster)
+uint32_t MBxMasterErrortAdd(_MBX_MASTER *pMaster, uint8_t Func, uint8_t Error, uint16_t AddrStart, uint16_t RegNum)
 {
-    _MBX_CRC16 crc;
-    MBxTxBufferPutc(pMaster, pMaster->Config.SlaveID);
-    MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].Func);
-    MBxTxBufferPutReg(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].AddrStart);
-    switch(pMaster->Request.Queue[pMaster->Request.Tail].Func)
-    {
-    case MBX_FUNC_READ_COIL:
-    case MBX_FUNC_READ_DISC_INPUT:
-    case MBX_FUNC_READ_REG:
-    case MBX_FUNC_READ_INPUT_REG:
-        MBxTxBufferPutReg(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].RegNum);
-        break;
-    case MBX_FUNC_WRITE_COIL:
-        MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].Value[0]);
-        MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].Value[1]);
-        break;
-    case MBX_FUNC_WRITE_REG:
-        MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].Value[0]);
-        MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].Value[1]);
-        break;
-    case MBX_FUNC_WRITE_COIL_MUL:
-        MBxTxBufferPutReg(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].RegNum);
-        MBxTxBufferPutReg(pMaster, ((pMaster->Request.Queue[pMaster->Request.Tail].RegNum / 8) + (pMaster->Request.Queue[pMaster->Request.Tail].RegNum % 8 ? 1 : 0)));
-        for(crc.Val = 0; crc.Val < ((pMaster->Request.Queue[pMaster->Request.Tail].RegNum / 8) + (pMaster->Request.Queue[pMaster->Request.Tail].RegNum % 8 ? 1 : 0)); crc.Val++) // 借助crc变量遍历，节省一个临时变量
-        {
-            MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].Value[crc.Val]);
-        }
-        break;
-    case MBX_FUNC_WRITE_REG_MUL:
-        MBxTxBufferPutReg(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].RegNum);
-        MBxTxBufferPutc(pMaster, (pMaster->Request.Queue[pMaster->Request.Tail].RegNum << 1));
-        for(crc.Val = 0; crc.Val < (pMaster->Request.Queue[pMaster->Request.Tail].RegNum << 1); crc.Val++) // 借助crc变量遍历，节省一个临时变量
-        {
-            MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].Value[crc.Val]);
-        }
-        break;
-    default:
-        break;
-    }
+    /* 审查队列是否已满 */
+    if(MBxMasterErrorFullQ(pMaster))
+        return MBX_API_RETURN_BUFFER_FULL;
 
-    /* 计算CRC填充 */
-    crc.Val = MBx_utility_crc16((uint8_t *)(pMaster->TxExist.Buffer), pMaster->TxExist.Len); // 计算CRC校验码
-    MBxTxBufferPutc(pMaster, crc.H_L.L8);                                                    // CRC低8位
-    MBxTxBufferPutc(pMaster, crc.H_L.H8);                                                    // CRC高8位
+    /* 填充一条错误 */
+    pMaster->Error.Queue[pMaster->Error.Head].SendFunc      = Func;
+    pMaster->Error.Queue[pMaster->Error.Head].ErrorCode     = Error;
+    pMaster->Error.Queue[pMaster->Error.Head].SendAddrStart = AddrStart;
+    pMaster->Error.Queue[pMaster->Error.Head].SendRegNum    = RegNum;
 
-    pMaster->Request.Tail = (pMaster->Request.Tail + 1) % MBX_MASTER_REQUEST_QUEUE_MAX;
+    /* 推进入栈指针 */
+    pMaster->Error.Head = (pMaster->Error.Head + 1) % MBX_MASTER_ERROR_QUEUE_MAX;
+    return MBX_API_RETURN_DEFAULT;
 }
 
 /**
- * @brief MBX主站请求队列中添加一个请求
+ * @brief MBX主站错误队列中获得一个错误
  * @param pMaster  MBX对象指针
- * @param Func 请求功能码
- * @param AddrStart 请求地址起始
- * @param RegNum 请求寄存器数量
- * @param Value 请求数据指针头
- * @param ValueLen 请求数据长度
+ * @param Func 错误发送功能码
+ * @param Error 实际收到的错误码
+ * @param AddrStart 错误发送地址起始
+ * @param RegNum 错误发送寄存器数量
  * @return 
  */
-uint32_t MBxMasterRequestAdd(_MBX_MASTER *pMaster, uint8_t Func, uint16_t AddrStart, uint16_t RegNum, uint8_t *Value, uint16_t ValueLen)
+uint32_t MBx_Master_Errort_Get(_MBX_MASTER *pMaster, uint8_t *Func, uint8_t *Error, uint16_t *AddrStart, uint16_t *RegNum)
 {
     /* 审查队列是否已满 */
-    if(MBxMasterRequestFullQ(pMaster))
-        return MBX_API_RETURN_BUFFER_FULL;
+    if(MBxMasterErrorEmptyQ(pMaster))
+        return MBX_API_RETURN_BUFFER_EMPTY;
 
-    pMaster->Request.Queue[pMaster->Request.Head].Func      = Func;
-    pMaster->Request.Queue[pMaster->Request.Head].AddrStart = AddrStart;
-    switch(Func)
-    {
-    case MBX_FUNC_READ_COIL:
-    case MBX_FUNC_READ_DISC_INPUT:
-    case MBX_FUNC_READ_REG:
-    case MBX_FUNC_READ_INPUT_REG:
-        pMaster->Request.Queue[pMaster->Request.Head].RegNum = RegNum;
-        break;
-    case MBX_FUNC_WRITE_COIL:
-    case MBX_FUNC_WRITE_REG:
-        pMaster->Request.Queue[pMaster->Request.Head].Value[0] = Value[0];
-        pMaster->Request.Queue[pMaster->Request.Head].Value[1] = Value[1];
-        break;
-    case MBX_FUNC_WRITE_COIL_MUL:
-        pMaster->Request.Queue[pMaster->Request.Head].RegNum = RegNum;
-        memcpy(pMaster->Request.Queue[pMaster->Request.Head].Value, Value, ValueLen);
-        break;
-    case MBX_FUNC_WRITE_REG_MUL:
-        pMaster->Request.Queue[pMaster->Request.Head].RegNum = RegNum;
-        memcpy(pMaster->Request.Queue[pMaster->Request.Head].Value, Value, ValueLen);
-        break;
-    default:
-        break;
-    }
+    /* 获得一条错误 */
+    *Func      = pMaster->Error.Queue[pMaster->Error.Tail].SendFunc;
+    *Error     = pMaster->Error.Queue[pMaster->Error.Tail].ErrorCode;
+    *AddrStart = pMaster->Error.Queue[pMaster->Error.Tail].SendAddrStart;
+    *RegNum    = pMaster->Error.Queue[pMaster->Error.Tail].SendRegNum;
 
-    pMaster->Request.Head = (pMaster->Request.Head + 1) % MBX_MASTER_REQUEST_QUEUE_MAX;
+    /* 推进出栈指针 */
+    pMaster->Error.Tail = (pMaster->Error.Tail + 1) % MBX_MASTER_ERROR_QUEUE_MAX;
     return MBX_API_RETURN_DEFAULT;
 }
 

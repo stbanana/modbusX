@@ -35,13 +35,14 @@ void MBx_Master_Engine_WAIT(_MBX_MASTER *pMaster)
     /* 等待超时审查 */
     if(pMaster->Runtime.TimeCnt > MBX_MASTER_RESPONSE_TIMEOUT_US)
     {
+        MBxMasterErrortAdd(pMaster, pMaster->Parse.SendFunc, MBX_EXCEPTION_TIMEOUT, pMaster->Parse.SendAddrStart, pMaster->Parse.SendRegNum);
         pMaster->Runtime.State = MBX_STATE_IDLE; // 等待接收已超时, 流转空闲态
     }
 
     /* 等待条件 */
     while(pMaster->Func.Getc(&getc) == MBX_PORT_RETURN_DEFAULT)
     {
-        MBxRxBufferPutc(pMaster, getc); // 若buffer不够大直接丢数据
+        MBxRxBufferPutc(pMaster, getc);
     }
     if(pMaster->RxExist.Len > 0)
     {

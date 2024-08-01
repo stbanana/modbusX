@@ -5,43 +5,44 @@
  **** All rights reserved                                       ****
 
  ********************************************************************************
- * File Name     : MBx_Slave_Engine_READ.c
+ * File Name     : MBx_Master_Parse.c
  * Author        : yono
- * Date          : 2024-07-24
+ * Date          : 2024-07-25
  * Version       : 1.0
 ********************************************************************************/
 /**************************************************************************/
 /*
-    modbus单从机驱动的运行, 接收态处理分支, 内部函数, 不应由用户调用
+    modbus单主机消息解析系统的运行, 内部函数, 不应由用户调用
 */
 
 /* Includes ------------------------------------------------------------------*/
 #include <MBx_api.h>
-#if MBX_SLAVE_ENABLE
+#if MBX_MASTER_ENABLE
 /* Private types -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-extern void MBx_Slave_Parse(_MBX_SLAVE *pSlave);
+extern void MBx_Master_RTU_Parse(_MBX_SLAVE *pMaster);
 /* Private functions ---------------------------------------------------------*/
 
 /**
- * @brief 驱动modbusX从机系统 接收态处理分支
- * @param pSlave MBX从机对象指针
+ * @brief modbusX从机消息解析系统
+ * @param pMaster MBX从机对象指针
  */
-void MBx_Slave_Engine_READ(_MBX_SLAVE *pSlave)
+void MBx_Master_Parse(_MBX_MASTER *pMaster)
 {
-    uint8_t getc;
-    while(pSlave->Func.Getc(&getc) == MBX_PORT_RETURN_DEFAULT)
+    switch(pMaster->Attr.ModbusModel)
     {
-        MBxRxBufferPutc(pSlave, getc);
-        pSlave->Runtime.TimeCnt = 0; // 接收到数据, 计时清零
-    }
-    if(pSlave->Runtime.TimeCnt > pSlave->Attr.T1_5_Cycs)
-    {
-        MBx_Slave_Parse(pSlave);                // 流转此态条件是收到数据, 无需判接收长度, 解析接收即可
-        pSlave->Runtime.State = MBX_STATE_IDLE; // 流转回等待态
+    case MBX_MODEL_RTU:
+        MBx_Master_RTU_Parse(pMaster);
+        break;
+    case MBX_MODEL_TCP:
+        // MBx_Master_Parse_TCP( );
+        break;
+    default:
+        break;
     }
 }
-#endif /* MBX_SLAVE_ENABLE */
+
+#endif /* MBX_MASTER_ENABLE */
