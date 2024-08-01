@@ -139,16 +139,16 @@ MBx_Slave_RTU_Init(&MBxSlave,      // 从机对象
                    84);            // 发送buffer最大长度
 
 /* 假装初始化从机2(如果真的有，把传参填写正常) */
-MBx_Slave_RTU_Init(&MBxSlave2, // 从机对象
-                   2,          // 从机ID
-                   MapList,    // 地址映射表
-                   NULL,       // 发送函数
-                   NULL,       // 接收函数
-                   NULL,       // 波特率
-                   NULL,       // 库内接收buffer分配
-                   NULL,       // 接收buffer最大长度
-                   NULL,       // 库内发送buffer分配
-                   NULL);      // 发送buffer最大长度
+MBx_Slave_RTU_Init(&MBxSlave2,     // 从机对象
+                    2,              // 从机ID
+                    MapList,        // 地址映射表
+                    MBX_PARA_NULL,  // 发送函数
+                    MBX_PARA_NULL,  // 接收函数
+                    MBX_PARA_NULL,  // 波特率
+                    MBX_PARA_NULL,  // 库内接收buffer分配
+                    MBX_PARA_NULL,  // 接收buffer最大长度
+                    MBX_PARA_NULL,  // 库内发送buffer分配
+                    MBX_PARA_NULL); // 发送buffer最大长度
 ```
 
 
@@ -163,3 +163,6 @@ MBx_Slave_RTU_Init(&MBxSlave2, // 从机对象
     }
 ```
 
+# 程序状态机
+
+![主从状态机流转](Example/README.DATA/MBX状态机.png)

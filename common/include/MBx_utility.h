@@ -56,6 +56,39 @@ extern "C"
     }
 
 /**
+ * @brief 链表结构工具
+ *          将新的主机节点链接到主机链表上
+ *          若已存在链表上, 则不进行操作
+ * @param rootNode 根节点指针 _MBX_MASTER*类型
+ * @param newNode 期望新链接的节点指针 _MBX_MASTER*类型
+ */
+#define NewMasterChainNode(rootNode, newNode)                 \
+    {                                                         \
+        _MBX_MASTER *ChainNow = rootNode;                     \
+        uint8_t      isFound  = 0;                            \
+        if(ChainNow == NULL)                                  \
+        {                                                     \
+            rootNode = newNode;                               \
+        }                                                     \
+        else                                                  \
+        {                                                     \
+            while((ChainNow->Next != NULL) && (isFound == 0)) \
+            {                                                 \
+                if(ChainNow == newNode)                       \
+                {                                             \
+                    isFound = 1;                              \
+                }                                             \
+                ChainNow = ChainNow->Next;                    \
+            }                                                 \
+            if(isFound == 0)                                  \
+            {                                                 \
+                memset(newNode, 0, sizeof(_MBX_MASTER));      \
+                ChainNow->Next = newNode;                     \
+            }                                                 \
+        }                                                     \
+    }
+
+/**
  * @brief 向MBX对象的RXbuffer推入一个字节数据
  * @param pMBX  MBX对象指针
  * @param c 期望推入的 字节数据
@@ -128,6 +161,30 @@ extern "C"
         pMBX->TxExist.Len = 0; \
     }
 
+/**
+ * @brief 查询MBX主机错误栈是否为空
+ * @param pMBX  MBX对象指针
+ */
+#define MBxMasterErrorEmptyQ(pMBX) (pMBX->Error.Head == pMBX->Error.Tail)
+
+/**
+ * @brief 查询MBX主机错误栈是否为满
+ * @param pMBX  MBX对象指针
+ */
+#define MBxMasterErrorFullQ(pMBX) (((pMBX->Error.Head + 1) % MBX_MASTER_ERROR_QUEUE_MAX) == pMBX->Error.Tail)
+
+/**
+ * @brief 查询MBX主机请求栈是否为空
+ * @param pMBX  MBX对象指针
+ */
+#define MBxMasterRequestEmptyQ(pMBX) (pMBX->Request.Head == pMBX->Request.Tail)
+
+/**
+ * @brief 查询MBX主机请求栈是否为满
+ * @param pMBX  MBX对象指针
+ */
+#define MBxMasterRequestFullQ(pMBX) (((pMBX->Request.Head + 1) % MBX_MASTER_REQUEST_QUEUE_MAX) == pMBX->Request.Tail)
+
 /* 错误追踪处理添加, 具有重定义避免 */
 #if MBX_MODULE_ERR_TRACE_ENABLE
 #ifdef MBx_MODULE_TRACE_ADD_ERR
@@ -143,9 +200,6 @@ extern "C"
 #define MBX_MAP_FIND_MODE_CONTINUOUS 1 /* 定义继续查找 */
 
 /* Exported types ------------------------------------------------------------*/
-
-//用于CRC校验的数据结构
-
 /**
  * @brief 一个方便的CRC16结构
  */
@@ -174,19 +228,23 @@ typedef struct
 
 /* Exported variables ---------------------------------------------------------*/
 #if MBX_MODULE_ERR_TRACE_ENABLE
-extern _MBX_ERR_TRACE MBxErrTraceList[];
+extern _MBX_ERR_TRACE MBxErrTraceStack[];
 #endif
 /* Exported functions ---------------------------------------------------------*/
 
 extern uint16_t MBx_utility_crc16(uint8_t *data, uint16_t len);
 
 extern void     MBxErrTraceAdd(uint8_t SlaveID, uint8_t mode, uint8_t State, uint32_t ErrCode);
+extern uint32_t MBxErrTraceGet(uint8_t *SlaveID, uint8_t *mode, uint8_t *State, uint32_t *ErrCode);
 
 extern uint32_t MBx_utility_map_addr_data_read(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapNum, uint16_t Addr, uint16_t *Data, uint8_t mode);
 extern uint32_t MBx_utility_map_r_continuity_review(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapMax, uint16_t AddrStart, uint16_t RegNum);
 extern uint32_t MBx_utility_map_addr_data_write(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapMax, uint16_t Addr, uint16_t Data, uint8_t mode);
 extern uint32_t MBx_utility_map_w_continuity_review(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapMax, uint16_t AddrStart, uint16_t RegNum);
 extern uint32_t MBx_utility_map_w_cooperate_review(void);
+
+extern void     MBxMasterRequestToTx(_MBX_MASTER *pMaster);
+extern uint32_t MBxMasterRequestAdd(_MBX_MASTER *pMaster, uint8_t Func, uint16_t AddrStart, uint16_t RegNum, uint8_t *Value, uint16_t ValueLen);
 
 #ifdef __cplusplus
 }

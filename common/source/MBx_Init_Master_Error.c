@@ -5,14 +5,14 @@
  **** All rights reserved                                       ****
 
  ********************************************************************************
- * File Name     : MBx_Init_Runtime.c
+ * File Name     : MBx_Init_Master_Error.c
  * Author        : yono
- * Date          : 2024-07-23
+ * Date          : 2024-07-30
  * Version       : 1.0
 ********************************************************************************/
 /**************************************************************************/
 /*
-    初始化MBX运行时
+    初始化MBX主机错误栈
     应当是库内调用
 */
 
@@ -26,15 +26,11 @@
 /* Private functions ---------------------------------------------------------*/
 
 /**
- * @brief 初始化MBX运行时的各个参数 
- * @param MBxRuntime 指向MBX运行时结构体的指针
+ * @brief 初始化MBX主机错误栈的各个参数
+ * @param MBxMasterError 指向MBX主机错误栈的指针
  */
-void MBx_Init_Runtime(_MBX_COMMON_RUNTIME *MBxRuntime)
+void MBx_Init_Master_Error(_MBX_MASTER_ERROR_RING *MBxMasterError)
 {
-    MBxRuntime->TimeCnt   = 0;
-    MBxRuntime->NoComNum  = 0;
-    MBxRuntime->State     = MBX_STATE_IDLE;
-    MBxRuntime->StatePast = MBX_STATE_IDLE;
-    MBxRuntime->StateFlow = 0;
-    MBxRuntime->StateWait = 0;
+    MBxMasterError->Head = 0;
+    MBxMasterError->Tail = 0;
 }

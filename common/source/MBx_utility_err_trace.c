@@ -29,7 +29,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-_MBX_ERR_TRACE MBxErrTraceList[MBX_ERR_TRACE_MAX_NUM];
+_MBX_ERR_TRACE MBxErrTraceStack[MBX_ERR_TRACE_MAX_NUM];
 uint8_t        MBxErrTraceTop = 0;
 
 /* Private Constants ---------------------------------------------------------*/
@@ -37,11 +37,11 @@ uint8_t        MBxErrTraceTop = 0;
 /* Private functions ---------------------------------------------------------*/
 
 /**
- * @brief 对trace列表进行添加
+ * @brief 对trace栈进行添加
  * @param SlaveID   从机号, 对于从机是本机从机号, 对于主机是期望与其通信的从机号
- * @param mode 错误出现的对象的类型 0从机 1主机
- * @param State 对象的运行时状态机
- * @param ErrCode 错误码 见 MBx_api.h 的 API返回集 定义
+ * @param mode 错误出现的对象的类型 0从机 1主机 见Mbx_api.h 的 "modbus主从模式定义" 
+ * @param State 对象的运行时状态机 
+ * @param ErrCode 错误码 见 MBx_api.h 的 "API返回集" 定义 
 */
 void MBxErrTraceAdd(uint8_t SlaveID, uint8_t mode, uint8_t State, uint32_t ErrCode)
 {
@@ -49,11 +49,34 @@ void MBxErrTraceAdd(uint8_t SlaveID, uint8_t mode, uint8_t State, uint32_t ErrCo
     {
         return;
     }
-    MBxErrTraceList[MBxErrTraceTop].SlaveID = SlaveID;
-    MBxErrTraceList[MBxErrTraceTop].mode    = mode;
-    MBxErrTraceList[MBxErrTraceTop].State   = State;
-    MBxErrTraceList[MBxErrTraceTop].ErrCode = ErrCode;
+    MBxErrTraceStack[MBxErrTraceTop].SlaveID = SlaveID;
+    MBxErrTraceStack[MBxErrTraceTop].mode    = mode;
+    MBxErrTraceStack[MBxErrTraceTop].State   = State;
+    MBxErrTraceStack[MBxErrTraceTop].ErrCode = ErrCode;
     MBxErrTraceTop++;
+}
+
+/**
+ * @brief 对trace栈进行一次取出
+ * @param SlaveID   从机号, 对于从机是本机从机号, 对于主机是期望与其通信的从机号
+ * @param mode 错误出现的对象的类型 0从机 1主机 见Mbx_api.h 的 "modbus主从模式定义" 
+ * @param State 对象的运行时状态机
+ * @param ErrCode 错误码 见 MBx_api.h 的 API返回集 定义
+ * @return 标准返回
+*/
+uint32_t MBxErrTraceGet(uint8_t *SlaveID, uint8_t *mode, uint8_t *State, uint32_t *ErrCode)
+{
+    /* 审查错误追踪buffer是否是空 */
+    if(MBxErrTraceTop <= 0)
+        return MBX_API_RETURN_BUFFER_EMPTY;
+
+    MBxErrTraceTop--;
+    *SlaveID = MBxErrTraceStack[MBxErrTraceTop].SlaveID;
+    *mode    = MBxErrTraceStack[MBxErrTraceTop].mode;
+    *State   = MBxErrTraceStack[MBxErrTraceTop].State;
+    *ErrCode = MBxErrTraceStack[MBxErrTraceTop].ErrCode;
+
+    return MBX_API_RETURN_DEFAULT;
 }
 
 #endif /* MBX_MODULE_ERR_TRACE_ENABLE */

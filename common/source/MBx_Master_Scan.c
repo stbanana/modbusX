@@ -5,36 +5,42 @@
  **** All rights reserved                                       ****
 
  ********************************************************************************
- * File Name     : MBx_Init_Runtime.c
+ * File Name     : MBx_Master_Scan.c
  * Author        : yono
  * Date          : 2024-07-23
  * Version       : 1.0
 ********************************************************************************/
 /**************************************************************************/
 /*
-    初始化MBX运行时
-    应当是库内调用
+    整个modbus主机驱动的轮询动作, 不应由用户调用, 由外部接口API周期性调用此函数
 */
 
 /* Includes ------------------------------------------------------------------*/
 #include <MBx_api.h>
+#if MBX_MASTER_ENABLE
 /* Private types -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+extern _MBX_MASTER *MbxMChainRoot;
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
+extern void MBx_Master_Engine(_MBX_MASTER *pMaster, uint32_t Cycle);
 /* Private functions ---------------------------------------------------------*/
 
 /**
- * @brief 初始化MBX运行时的各个参数 
- * @param MBxRuntime 指向MBX运行时结构体的指针
+ * @brief 驱动modbusX主机系统
+ * @param Cycle 调用本函数的周期值us
  */
-void MBx_Init_Runtime(_MBX_COMMON_RUNTIME *MBxRuntime)
+void MBx_Master_Scan(uint32_t Cycle)
 {
-    MBxRuntime->TimeCnt   = 0;
-    MBxRuntime->NoComNum  = 0;
-    MBxRuntime->State     = MBX_STATE_IDLE;
-    MBxRuntime->StatePast = MBX_STATE_IDLE;
-    MBxRuntime->StateFlow = 0;
-    MBxRuntime->StateWait = 0;
+    _MBX_MASTER *ChainNow = MbxMChainRoot;
+
+    /* 依次驱动链上所有主机对象 */
+    while(ChainNow != NULL)
+    {
+        // 单主机对象驱动
+        MBx_Master_Engine(ChainNow, Cycle);
+        ChainNow = ChainNow->Next;
+    }
 }
+#endif /* MBX_MASTER_ENABLE */
