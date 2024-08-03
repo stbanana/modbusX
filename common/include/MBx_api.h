@@ -54,11 +54,11 @@ extern "C"
 #define MBX_EXCEPTION_NONE   (0) /*!< 00 0x00错误码, 无错误. */
 #define MBX_EXCEPTION_UNFUNC (1) /*!< 01 0x01错误码, 未知指令错误. */
 #define MBX_EXCEPTION_UNADDR (2) /*!< 02 0x02错误码, 未知数据地址错误. */
-#define MBX_EXCEPTION_DATA   (3) /*!< 03 0x03错误码, 数据不合法错误. */
-#define MBX_EXCEPTION_LEN    (4) /*!< 04 0x04错误码, 数据长度不合法错误. */
+#define MBX_EXCEPTION_DATA   (3) /*!< 03 0x03错误码, 数据不合法错误. 实际代表数据段的长度不合法 */
+#define MBX_EXCEPTION_FAULT  (4) /*!< 04 0x04错误码, 从站设备故障. 实际代表数据处理(写入或读取时)出现异常，超出支持的数据范围等*/
 // #define MBX_EXCEPTION_ACKTIME         5  /*!< 05 0x05错误码, 其实并非错误, 而是收到长耗时指令, 表明已收到并开始处理.(不常用暂不支持) */
 #define MBX_EXCEPTION_BUSY   (7) /*!< 07 0x07错误码, 正在处理耗时命令在忙 */
-#define MBX_EXCEPTION_MASTER (8) /*!< 08 0x08错误码, 主控口错误(通常是硬件流校验例如奇偶校验不通过). */
+#define MBX_EXCEPTION_PARITY (8) /*!< 08 0x08错误码, 存储奇偶性差错 (指示扩展文件区不能通过一致性校验). */
 // #define MBX_EXCEPTION_UNGATEWAY       (10) /*!< 10 0x0A错误码, 网关不可达.(不常用暂不支持) */
 // #define MBX_EXCEPTION_UNTARGETGATEWAY (11) /*!< 11 0x0B错误码, 网关目标无响应.(不常用暂不支持) */
 
@@ -107,7 +107,7 @@ extern "C"
 /* BUFFER相关返回 */
 #define MBX_API_RETURN_BUFFER_FULL  0x20 //BUFFER满
 #define MBX_API_RETURN_BUFFER_EMPTY 0x21 //BUFFER空
-/* BUFFER相关返回 */
+/* 映射表相关返回 */
 #define MBX_API_RETURN_MAP_UNFORMAT 0x101 // MAP格式错误
 #define MBX_API_RETURN_MAP_UNFIND   0x101 // MAP未查找到错误
 
@@ -205,10 +205,19 @@ typedef struct
  */
 typedef struct
 {
-    uint8_t                    SlaveID; // 从机号绑定
-    const _MBX_MAP_LIST_ENTRY *Map;     // 地址映射表头
-    uint16_t                   MapNum;  // 地址映射数量，自动遍历map产生
+    uint8_t SlaveID; // 当前操作的从机号
 } _MBX_MASTER_CONFIG;
+
+/**
+ * @brief 主机下管理的从机的配置结构体
+ */
+typedef struct _MBX_MASTER_TEAM_MEMBER
+{
+    uint8_t                         SlaveID; // 从机号绑定
+    const _MBX_MAP_LIST_ENTRY      *Map;     // 地址映射表头
+    uint16_t                        MapNum;  // 地址映射数量，自动遍历map产生
+    struct _MBX_MASTER_TEAM_MEMBER *Next;    // 下一个从机
+} _MBX_MASTER_TEAM_MEMBER;
 
 /**
  * @brief 主机解析栈
@@ -220,6 +229,7 @@ typedef struct
     uint16_t AddrStart; // 待处理的寄存器地址起始
     uint16_t RegNum;    // 待解析的寄存器数量
 
+    uint8_t  SlaveID;                                 // 发送时的从机ID
     uint8_t  SendFunc;                                // 发送时的功能码
     uint16_t SendAddrStart;                           // 发送时的地址起始
     uint16_t SendRegNum;                              // 发送时的寄存器数量
@@ -249,6 +259,7 @@ typedef struct
  */
 typedef struct
 {
+    uint8_t  SlaveID;                             // 待发送的从机ID
     uint8_t  Func;                                // 待发送的功能码
     uint16_t AddrStart;                           // 待发送的地址起始
     uint16_t RegNum;                              // 待发送的寄存器数量
@@ -288,13 +299,14 @@ typedef struct _MBX_SLAVE
 typedef struct _MBX_MASTER
 {
     /* 初始化时需赋固定值的部分 */
-    _MBX_COMMON_RUNTIME Runtime; // 运行时变量
-    _MBX_COMMON_CONFIG  Attr;    // 属性配置
+    _MBX_COMMON_RUNTIME      Runtime;        // 运行时变量
+    _MBX_COMMON_CONFIG       Attr;           // 属性配置
+    _MBX_MASTER_CONFIG       Config;         // 主机配置
+    _MBX_MASTER_TEAM_MEMBER *SlaveChainRoot; // 从机链头
     /* 需传入初始化函数进行配置的部分 */
     _MBX_EXIST           TxExist; // 供发送的buffer空间
     _MBX_EXIST           RxExist; // 供接收的buffer空间
     _MBX_COMMON_FUNCTION Func;    // 函数绑定
-    _MBX_MASTER_CONFIG   Config;  // 主机配置
     /* 解析过程使用 保持对象独立性 */
     _MBX_MASTER_PARSE_VALUE  Parse;   // 解析栈
     _MBX_MASTER_ERROR_RING   Error;   // 错误栈
@@ -306,11 +318,22 @@ typedef struct _MBX_MASTER
 /* Exported variables ---------------------------------------------------------*/
 /* Exported functions ---------------------------------------------------------*/
 
-/* 用户实用API */
-extern void     MBx_Ticks(uint32_t Cycle);
+/***** 用户实用API *****/
+extern void MBx_Ticks(uint32_t Cycle);
+/*从机API*/
 extern uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE *MBxSlave, uint8_t SlaveID, const _MBX_MAP_LIST_ENTRY *MAP, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate, uint8_t *RxBuffer, uint32_t RxBufferSize, uint8_t *TxBuffer, uint32_t TxBufferSize);
-extern uint32_t MBx_Master_RTU_Init(_MBX_MASTER *MBxMaster, uint8_t SlaveID, const _MBX_MAP_LIST_ENTRY *MAP, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate, uint8_t *RxBuffer, uint32_t RxBufferSize, uint8_t *TxBuffer, uint32_t TxBufferSize);
-extern uint32_t MBx_Master_Errort_Get(_MBX_MASTER *pMaster, uint8_t *Func, uint8_t *Error, uint16_t *AddrStart, uint16_t *RegNum);
+/*主机API*/
+extern uint32_t MBx_Master_RTU_Init(_MBX_MASTER *MBxMaster, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate, uint8_t *RxBuffer, uint32_t RxBufferSize, uint8_t *TxBuffer, uint32_t TxBufferSize);
+extern uint32_t MBx_Master_Member_Add(_MBX_MASTER *MBxMaster, _MBX_MASTER_TEAM_MEMBER *MBxMember, uint8_t SlaveID, const _MBX_MAP_LIST_ENTRY *MAP);
+extern uint32_t MBx_Master_Error_Get(_MBX_MASTER *pMaster, uint8_t *Func, uint8_t *Error, uint16_t *AddrStart, uint16_t *RegNum);
+extern uint32_t MBx_Master_Read_Coil_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t ReadNum);
+extern uint32_t MBx_Master_Read_Disc_Input_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t ReadNum);
+extern uint32_t MBx_Master_Read_Reg_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t ReadNum);
+extern uint32_t MBx_Master_Read_Input_Reg_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t ReadNum);
+extern uint32_t MBx_Master_Write_Coil_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t Addr, uint16_t Value);
+extern uint32_t MBx_Master_Write_Reg_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t Addr, uint16_t Value);
+extern uint32_t MBx_Master_Write_Coil_Mul_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t ReadNum, uint8_t *Data, uint16_t DataLen);
+extern uint32_t MBx_Master_Write_Reg_Mul_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t ReadNum, uint8_t *Data, uint16_t DataLen);
 
 /* 便于拓展应用的开发, 用户无需调用 */
 extern void     MBx_Init_Runtime(_MBX_COMMON_RUNTIME *MBxRuntime);
@@ -320,7 +343,7 @@ extern uint32_t MBx_Init_Slave_Config(_MBX_SLAVE_CONFIG *MBxSlaveConfig, uint8_t
 extern void     MBx_Init_Master_Parse(_MBX_MASTER_PARSE_VALUE *MBxMasterParse);
 extern void     MBx_Init_Master_Error(_MBX_MASTER_ERROR_RING *MBxMasterError);
 extern void     MBx_Init_Master_Request(_MBX_MASTER_REQUEST_RING *MBxMasterRequest);
-extern uint32_t MBx_Init_Master_Config(_MBX_MASTER_CONFIG *MBxMasterConfig, uint8_t ID, const _MBX_MAP_LIST_ENTRY *MAP);
+extern uint32_t MBx_Init_Master_Config(_MBX_MASTER_TEAM_MEMBER *MBxMasterConfig, uint8_t ID, const _MBX_MAP_LIST_ENTRY *MAP);
 
 /* Include MBX utility and system file.  */
 #include "MBx_utility.h"

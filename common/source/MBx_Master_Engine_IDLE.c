@@ -40,8 +40,9 @@ void MBx_Master_Engine_IDLE(_MBX_MASTER *pMaster)
     {
         if(!MBxMasterRequestEmptyQ(pMaster))
         {
-            MBxMasterRequestToTx(pMaster);            // 填充一条请求给发送buffer
-            pMaster->Runtime.State = MBX_STATE_WRITE; // 流转至发送态
+            MBxMasterRequestToTx(pMaster);                // 填充一条请求给发送buffer
+            pMaster->Runtime.State     = MBX_STATE_WRITE; // 流转至发送态
+            pMaster->Runtime.StateFlow = 1;
         }
         else if(pMaster->RxExist.Len > 0)
         {
@@ -51,7 +52,6 @@ void MBx_Master_Engine_IDLE(_MBX_MASTER *pMaster)
         {
             pMaster->Runtime.TimeCnt = pMaster->Attr.T3_5_Cycs; // 无法流转，静止计时器
         }
-        pMaster->Runtime.StateFlow = 1;
     }
 }
 #endif /* MBX_MASTER_ENABLE */

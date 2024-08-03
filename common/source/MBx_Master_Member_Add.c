@@ -5,45 +5,77 @@
  **** All rights reserved                                       ****
 
  ********************************************************************************
- * File Name     : MBx_Init_Master_Config.c
+ * File Name     : MBx_Master_Init.c
  * Author        : yono
  * Date          : 2024-07-30
  * Version       : 1.0
 ********************************************************************************/
 /**************************************************************************/
 /*
-    初始化MBX主机配置
-    应当是库内调用
+    初始化MBX主机对象
 */
 
 /* Includes ------------------------------------------------------------------*/
 #include <MBx_api.h>
+#if MBX_MASTER_ENABLE
 /* Private types -------------------------------------------------------------*/
+
 /* Private variables ---------------------------------------------------------*/
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
+
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
 /**
- * @brief 初始化MBX从机配置的各个参数
- * @param MBxMasterConfig 指向MBX从机解析栈的指针
- * @param ID 期望配置成的从机ID
- * @param MAP 指向地址映射表头的指针
- * @return 标准返回
+ * @brief 添加一个期望管理的从机成员对象给主机对象
+ * @param MBxMaster 期望初始化的MBX主机对象指针
+ * @param MBxMember 期望添加的从机成员对象指针
+ * @param SlaveID 期望添加的从机成员的从机ID
+ * @param MAP 期望添加的从机成员的映射表
+ * @return uint32_t 标准返回
  */
-uint32_t MBx_Init_Master_Config(_MBX_MASTER_TEAM_MEMBER *MBxMasterConfig, uint8_t ID, const _MBX_MAP_LIST_ENTRY *MAP)
+uint32_t MBx_Master_Member_Add(_MBX_MASTER *MBxMaster, _MBX_MASTER_TEAM_MEMBER *MBxMember, uint8_t SlaveID, const _MBX_MAP_LIST_ENTRY *MAP)
 {
-    uint32_t state = MBX_API_RETURN_DEFAULT;
-    uint16_t i; // 遍历map并审查
+    uint32_t                 state = MBX_API_RETURN_DEFAULT;
+    _MBX_MASTER_TEAM_MEMBER *ChainNow;
+    uint32_t                 isFound;
+    uint16_t                 i; // 遍历map并审查
 #if MBX_MODULE_ERR_TRACE_ENABLE
     uint32_t AddrNow; // 当前审查的条目 mb寄存器地址
     AddrNow = 0;
 #endif
 
-    /* 基础配置 */
-    MBxMasterConfig->SlaveID = ID;
-    MBxMasterConfig->Map     = MAP;
+    /* 传参审查 */
+    if(MBxMaster == NULL || MBxMember == NULL || MAP == NULL)
+        return MBX_API_RETURN_ERR_PARAM;
+
+    /* 添加成员 */
+    ChainNow = MBxMaster->SlaveChainRoot;
+    if(ChainNow == NULL)
+    {
+        MBxMaster->SlaveChainRoot = MBxMember;
+    }
+    else
+    {
+        while((ChainNow->Next != NULL) && (isFound == 0))
+        {
+            if(ChainNow == MBxMember)
+            {
+                isFound = 1;
+            }
+            ChainNow = ChainNow->Next;
+        }
+        if(isFound == 0)
+        {
+            memset(MBxMember, 0, sizeof(_MBX_MASTER_TEAM_MEMBER));
+            ChainNow->Next = MBxMember;
+        }
+    }
+
+    /* 设置成员 */
+    MBxMember->SlaveID = SlaveID;
+    MBxMember->Map     = MAP;
 
     /* 审查定义的映射表*/
     for(i = 0;                   // 从0开始遍历
@@ -59,7 +91,9 @@ uint32_t MBx_Init_Master_Config(_MBX_MASTER_TEAM_MEMBER *MBxMasterConfig, uint8_
         AddrNow = MAP[i].Addr;
 #endif
     }
-    MBxMasterConfig->MapNum = i; // 记录条目总数量
+    MBxMember->MapNum = i; // 记录条目总数量
 
     return state;
 }
+
+#endif /* MBX_MASTER_ENABLE */

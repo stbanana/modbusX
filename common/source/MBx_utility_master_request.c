@@ -35,7 +35,9 @@
 void MBxMasterRequestToTx(_MBX_MASTER *pMaster)
 {
     _MBX_CRC16 crc;
-    MBxTxBufferPutc(pMaster, pMaster->Config.SlaveID);
+    MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].SlaveID);
+    pMaster->Config.SlaveID = pMaster->Request.Queue[pMaster->Request.Tail].SlaveID;
+    pMaster->Parse.SlaveID  = pMaster->Request.Queue[pMaster->Request.Tail].SlaveID;
     MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].Func);
     pMaster->Parse.SendFunc = pMaster->Request.Queue[pMaster->Request.Tail].Func;
     MBxTxBufferPutReg(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].AddrStart);
@@ -64,8 +66,8 @@ void MBxMasterRequestToTx(_MBX_MASTER *pMaster)
     case MBX_FUNC_WRITE_COIL_MUL:
         MBxTxBufferPutReg(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].RegNum);
         pMaster->Parse.SendRegNum = pMaster->Request.Queue[pMaster->Request.Tail].RegNum;
-        MBxTxBufferPutReg(pMaster, ((pMaster->Request.Queue[pMaster->Request.Tail].RegNum / 8) + (pMaster->Request.Queue[pMaster->Request.Tail].RegNum % 8 ? 1 : 0)));
-        for(crc.Val = 0; crc.Val < ((pMaster->Request.Queue[pMaster->Request.Tail].RegNum / 8) + (pMaster->Request.Queue[pMaster->Request.Tail].RegNum % 8 ? 1 : 0)); crc.Val++) // 借助crc变量遍历，节省一个临时变量
+        MBxTxBufferPutReg(pMaster, ((pMaster->Request.Queue[pMaster->Request.Tail].RegNum >> 3) + (pMaster->Request.Queue[pMaster->Request.Tail].RegNum % 8 ? 1 : 0)));
+        for(crc.Val = 0; crc.Val < ((pMaster->Request.Queue[pMaster->Request.Tail].RegNum >> 3) + (pMaster->Request.Queue[pMaster->Request.Tail].RegNum % 8 ? 1 : 0)); crc.Val++) // 借助crc变量遍历，节省一个临时变量
         {
             MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].Value[crc.Val]);
             pMaster->Parse.SendValue[crc.Val] = pMaster->Request.Queue[pMaster->Request.Tail].Value[crc.Val];
@@ -96,6 +98,7 @@ void MBxMasterRequestToTx(_MBX_MASTER *pMaster)
 /**
  * @brief MBX主站请求队列中添加一个请求
  * @param pMaster  MBX对象指针
+ * @param SlaveID 请求从机ID
  * @param Func 请求功能码
  * @param AddrStart 请求地址起始
  * @param RegNum 请求寄存器数量
@@ -103,12 +106,13 @@ void MBxMasterRequestToTx(_MBX_MASTER *pMaster)
  * @param ValueLen 请求数据长度
  * @return 
  */
-uint32_t MBxMasterRequestAdd(_MBX_MASTER *pMaster, uint8_t Func, uint16_t AddrStart, uint16_t RegNum, uint8_t *Value, uint16_t ValueLen)
+uint32_t MBxMasterRequestAdd(_MBX_MASTER *pMaster, uint8_t SlaveID, uint8_t Func, uint16_t AddrStart, uint16_t RegNum, uint8_t *Value, uint16_t ValueLen)
 {
     /* 审查队列是否已满 */
     if(MBxMasterRequestFullQ(pMaster))
         return MBX_API_RETURN_BUFFER_FULL;
 
+    pMaster->Request.Queue[pMaster->Request.Head].SlaveID   = SlaveID;
     pMaster->Request.Queue[pMaster->Request.Head].Func      = Func;
     pMaster->Request.Queue[pMaster->Request.Head].AddrStart = AddrStart;
     switch(Func)

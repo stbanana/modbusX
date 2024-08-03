@@ -5,44 +5,50 @@
  **** All rights reserved                                       ****
 
  ********************************************************************************
- * File Name     : MBx_Master_Parse.c
+ * File Name     : MBx_utility_master_request.c
  * Author        : yono
- * Date          : 2024-07-25
+ * Date          : 2024-07-23
  * Version       : 1.0
 ********************************************************************************/
 /**************************************************************************/
 /*
-    modbus单主机消息解析系统的运行, 内部函数, 不应由用户调用
+    modbusX主机成员的操作函数(主机有从机成员)
 */
 
 /* Includes ------------------------------------------------------------------*/
 #include <MBx_api.h>
 #if MBX_MASTER_ENABLE
 /* Private types -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
-/* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
+
+/* Private variables ---------------------------------------------------------*/
+
+/* Private Constants ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-extern void MBx_Master_RTU_Parse(_MBX_MASTER *pMaster);
 /* Private functions ---------------------------------------------------------*/
 
 /**
- * @brief modbusX从机消息解析系统
- * @param pMaster MBX从机对象指针
+ * @brief 寻找与解析从机号对应的唯一成员对象
+ * @param pMaster MBX主机对象指针
+ * @param SlaveID 期望查找的从机号
+ * @return 成员对象指针
  */
-void MBx_Master_Parse(_MBX_MASTER *pMaster)
+_MBX_MASTER_TEAM_MEMBER *MBx_Master_Member_Find(_MBX_MASTER *pMaster, uint8_t SlaveID)
 {
-    switch(pMaster->Attr.ModbusModel)
+    _MBX_MASTER_TEAM_MEMBER *pMember = pMaster->SlaveChainRoot;
+    while((pMember != NULL)) // 未遍历到链尾
     {
-    case MBX_MODEL_RTU:
-        MBx_Master_RTU_Parse(pMaster);
-        break;
-    case MBX_MODEL_TCP:
-        // MBx_Master_Parse_TCP( );
-        break;
-    default:
-        break;
+        if(pMember->SlaveID == SlaveID)
+        {
+            return pMember;
+        }
+        else
+        {
+            pMember = pMember->Next;
+        }
     }
+
+    return NULL;
 }
 
 #endif /* MBX_MASTER_ENABLE */

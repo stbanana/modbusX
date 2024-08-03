@@ -54,7 +54,7 @@ extern "C"
 #endif
 
 #ifndef MBX_MASTER_REQUEST_QUEUE_MAX
-#define MBX_MASTER_REQUEST_QUEUE_MAX 20
+#define MBX_MASTER_REQUEST_QUEUE_MAX 40
 #endif
 #if MBX_MASTER_REQUEST_QUEUE_MAX > 0xFF
 #error "MBX_MASTER_REQUEST_QUEUE_MAX must be not greater than 0xFF"

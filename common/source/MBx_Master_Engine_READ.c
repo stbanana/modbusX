@@ -23,7 +23,7 @@
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-// extern void MBx_Master_Parse(_MBX_MASTER *pMaster);
+extern void MBx_Master_Parse(_MBX_MASTER *pMaster);
 /* Private functions ---------------------------------------------------------*/
 
 /**

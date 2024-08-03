@@ -24,18 +24,18 @@
 /* Private macros ------------------------------------------------------------*/
 
 /* Private function prototypes -----------------------------------------------*/
-extern uint32_t    MBx_Master_RTU_READ_COIL_Handle(_MBX_SLAVE *pMaster);
-extern uint32_t    MBx_Master_RTU_READ_DISC_INPUTL_Handle(_MBX_SLAVE *pMaster);
-extern uint32_t    MBx_Master_RTU_READ_REG_Handle(_MBX_SLAVE *pMaster);
-extern uint32_t    MBx_Master_RTU_READ_INPUT_REG_Handle(_MBX_SLAVE *pMaster);
-extern uint32_t    MBx_Master_RTU_WRITE_COIL_Handle(_MBX_SLAVE *pMaster);
-extern uint32_t    MBx_Master_RTU_WRITE_REG_Handle(_MBX_SLAVE *pMaster);
-extern uint32_t    MBx_Master_RTU_WRITE_COIL_MUL_Handle(_MBX_SLAVE *pMaster);
-extern uint32_t    MBx_Master_RTU_WRITE_REG_MUL_Handle(_MBX_SLAVE *pMaster);
-extern void        MBx_Master_RTU_Error_Handle(_MBX_SLAVE *pMaster, uint8_t ErrorCode);
+extern uint32_t    MBx_Master_RTU_READ_COIL_Handle(_MBX_MASTER *pMaster);
+extern uint32_t    MBx_Master_RTU_READ_DISC_INPUTL_Handle(_MBX_MASTER *pMaster);
+extern uint32_t    MBx_Master_RTU_READ_REG_Handle(_MBX_MASTER *pMaster);
+extern uint32_t    MBx_Master_RTU_READ_INPUT_REG_Handle(_MBX_MASTER *pMaster);
+extern uint32_t    MBx_Master_RTU_WRITE_COIL_Handle(_MBX_MASTER *pMaster);
+extern uint32_t    MBx_Master_RTU_WRITE_REG_Handle(_MBX_MASTER *pMaster);
+extern uint32_t    MBx_Master_RTU_WRITE_COIL_MUL_Handle(_MBX_MASTER *pMaster);
+extern uint32_t    MBx_Master_RTU_WRITE_REG_MUL_Handle(_MBX_MASTER *pMaster);
+extern uint32_t    MBx_Master_RTU_Error_Handle(_MBX_MASTER *pMaster);
 
-static inline void MBx_Master_Parse_RTU_Func_Get(_MBX_SLAVE *pMaster);
-static inline void MBx_Master_Parse_RTU_AddrStar_Get(_MBX_SLAVE *pMaster);
+static inline void MBx_Master_Parse_RTU_Func_Get(_MBX_MASTER *pMaster);
+static inline void MBx_Master_Parse_RTU_AddrStar_Get(_MBX_MASTER *pMaster);
 /* Private functions ---------------------------------------------------------*/
 /**
  * @brief modbusX从机消息解析系统 RTU分支
@@ -43,19 +43,12 @@ static inline void MBx_Master_Parse_RTU_AddrStar_Get(_MBX_SLAVE *pMaster);
  */
 void MBx_Master_RTU_Parse(_MBX_MASTER *pMaster)
 {
-    /* 审查从机ID号是否符合本机。
+    /* 审查从机ID号是否符合请求。
     实际上应该检测提取完整帧后再审查, 为了减少运行语句, 在此审查。 */
-    if(pMaster->Config.SlaveID != pMaster->RxExist.Buffer[0])
+    if(pMaster->Parse.SlaveID != pMaster->RxExist.Buffer[0])
     {
         MBxRxBufferEmpty(pMaster);
         return;
-    }
-
-    /* 审查是否符合最小帧长 */
-    if(pMaster->RxExist.Len < 8)
-    {
-        MBxRxBufferEmpty(pMaster);
-        return; // 帧不完整, 弃帧
     }
 
     uint32_t FrameLen  = 0;                  // 当前帧的完整帧长度。规范应在函数最前定义，为了在审查不通过时减少栈操作，在常规审查后定义
@@ -72,30 +65,24 @@ void MBx_Master_RTU_Parse(_MBX_MASTER *pMaster)
     case MBX_FUNC_READ_DISC_INPUT:
     case MBX_FUNC_READ_REG:
     case MBX_FUNC_READ_INPUT_REG:
+        FrameLen = 5 + pMaster->RxExist.Buffer[2];
+        break;
     case MBX_FUNC_WRITE_COIL:
     case MBX_FUNC_WRITE_REG:
+    case MBX_FUNC_WRITE_COIL_MUL:
+    case MBX_FUNC_WRITE_REG_MUL:
         FrameLen = 8;
         break;
-    case MBX_FUNC_WRITE_COIL_MUL:
-        FrameLen = pMaster->RxExist.Buffer[6]; // 获得设置值字节数
-        FrameLen += 9;                         // 增加定长数据长度
-        if(pMaster->RxExist.Len < FrameLen)
-        {
-            MBxRxBufferEmpty(pMaster);
-            return; // 帧不完整, 弃帧
-        }
+    default: // 可能是异常帧回复
+        FrameLen = 5;
         break;
-    case MBX_FUNC_WRITE_REG_MUL:
-        FrameLen = pMaster->RxExist.Buffer[6]; // 获得设置值字节数
-        FrameLen += 9;                         // 增加定长数据长度
-        if(pMaster->RxExist.Len < FrameLen)
-        {
-            MBxRxBufferEmpty(pMaster);
-            return; // 帧不完整, 弃帧
-        }
-        break;
-    default:
-        break;
+    }
+
+    /* 审查是否符合帧长 */
+    if(pMaster->RxExist.Len < FrameLen)
+    {
+        MBxRxBufferEmpty(pMaster);
+        return; // 帧不完整, 弃帧
     }
 
     /* 检测CRC (一个丑陋的写法，但能稍微节省性能)*/
@@ -135,24 +122,18 @@ void MBx_Master_RTU_Parse(_MBX_MASTER *pMaster)
             ErrorCode = MBx_Master_RTU_WRITE_REG_MUL_Handle(pMaster);
             break;
         default:
-            ErrorCode = MBX_EXCEPTION_UNFUNC; // 产生未知指令错误
+            ErrorCode = MBx_Master_RTU_Error_Handle(pMaster);
             break;
         }
     }
 
     if(ErrorCode != MBX_EXCEPTION_NONE)
     {
-        MBx_Master_RTU_Error_Handle(pMaster, ErrorCode); // 剔除旧消息，产生错误回复消息
+        MBx_MODULE_TRACE_ADD_ERR(pMaster, ErrorCode);
     }
 
-    /* 删除已处理消息 */
-    pMaster->RxExist.Len -= FrameLen;
-    /* 检查RX buffer是否仍有未处理数据 */
-    if(pMaster->RxExist.Len > 0)
-    {
-        /* 将未处理数据前移 */
-        memmove(pMaster->RxExist.Buffer, pMaster->RxExist.Buffer + FrameLen, pMaster->RxExist.Len); // TODO:此处以源码可控性考虑，应优化为自由函数
-    }
+    /* 清空接收buffer */
+    MBxRxBufferEmpty(pMaster);
 }
 
 /**

@@ -73,6 +73,7 @@ _MBX_MAP_WRITE_DATA_CO MPxMapwriteCo = {0};
 /* Private function prototypes -----------------------------------------------*/
 static uint16_t MBX_utility_map_entry_data_get(const _MBX_MAP_LIST_ENTRY *entry);
 static uint32_t MBX_utility_map_entry_data_set(const _MBX_MAP_LIST_ENTRY *entry, _MBX_MAP_WRITE_DATA_CO *co, uint16_t value);
+static uint32_t MBX_utility_map_entry_data_set_cast(const _MBX_MAP_LIST_ENTRY *entry, uint16_t value);
 /* Private functions ---------------------------------------------------------*/
 
 /***********映射读支持部分***********/
@@ -196,7 +197,7 @@ uint32_t MBx_utility_map_r_continuity_review(const _MBX_MAP_LIST_ENTRY *Map, uin
 
 /***********映射写支持部分***********/
 /**
- * @brief 从指定映射表中写指定地址的值
+ * @brief 从指定映射表中写指定地址的值,触发写函数
  * @param Map 地址映射表头
  * @param MapMax 地址映射总数量
  * @param Addr 查找的地址
@@ -248,6 +249,65 @@ uint32_t MBx_utility_map_addr_data_write(const _MBX_MAP_LIST_ENTRY *Map, uint16_
             { /* 已查找到的分支 */
                 midReg = mid;
                 state  = MBX_utility_map_entry_data_set(&Map[mid], &MPxMapwriteCo, Data);
+            }
+        }
+    }
+    return state;
+}
+
+/**
+ * @brief 从指定映射表中写指定地址的值,强制写内存
+ * @param Map 地址映射表头
+ * @param MapMax 地址映射总数量
+ * @param Addr 查找的地址
+ * @param Data 获得映射到的值
+ * @param Mode 查找模式 见 MBx_utility.h "定义map映射查找模式"
+ * @return 标准返回
+ */
+uint32_t MBx_utility_map_addr_data_write_cast(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapMax, uint16_t Addr, uint16_t Data, uint8_t mode)
+{
+    uint32_t state = MBX_API_RETURN_MAP_UNFIND;
+    uint16_t mid   = 0;
+
+    if(mode == MBX_MAP_FIND_MODE_FIRST) /* 首次查找，二分法迅速遍历 */
+    {
+        uint16_t left  = 0;
+        uint16_t right = MapMax - 1;
+
+        while((left <= right) &&                    // 条件1 未完全查找
+              (Map[left].Addr <= Addr) &&           // 条件2 左值节点addr未超越
+              (state == MBX_API_RETURN_MAP_UNFIND)) // 条件3 未找到
+        {
+            mid = left + ((right - left) >> 1);
+
+            /* 计算下次的查找范围 */
+            if(Map[mid].Addr < Addr)
+            {
+                left = mid + 1; // 继续查找右半部分
+            }
+            else if(Map[mid].Addr > Addr)
+            {
+                right = mid - 1; // 继续查找左半部分
+            }
+            else
+            { /* 已查找到的分支 */
+                midReg = mid;
+                state  = MBX_utility_map_entry_data_set(&Map[mid], &MPxMapwriteCo, Data);
+            }
+        }
+    }
+    else if(mode == MBX_MAP_FIND_MODE_CONTINUOUS) /* 继续查找，线性继续 */
+    {
+        for(mid = midReg;                      // 继续前次查找流程
+            (mid < MapMax) &&                  // 条件1 未完全查找
+            (Map[mid].Addr <= Addr) &&         // 条件2 地址未越过
+            (state != MBX_API_RETURN_DEFAULT); // 条件3 未找到
+            mid++)
+        {
+            if(Map[mid].Addr == Addr)
+            { /* 已查找到的分支 */
+                midReg = mid;
+                state  = MBX_utility_map_entry_data_set_cast(&Map[mid], Data);
             }
         }
     }
@@ -367,7 +427,9 @@ uint32_t MBx_utility_map_w_cooperate_review(void)
         default:
             break;
         }
-        state = MPxMapwriteCo.Handle((void *)MPxMapwriteCo.Puzzles);
+
+        if(MPxMapwriteCo.Handle != NULL)
+            state = MPxMapwriteCo.Handle((void *)MPxMapwriteCo.Puzzles);
 
 #else
         switch(MPxMapwriteCo.Type)
@@ -413,15 +475,17 @@ uint32_t MBx_utility_map_w_cooperate_review(void)
         default:
             break;
         }
-        switch(MPxMapwriteCo->Type)
-        {
-        case MBX_REG_TYPE_U8:
-            state = co->Handle((void *)co->Puzzles + 1);
-            break;
-        default:
-            state = co->Handle((void *)co->Puzzles);
-            break;
-        }
+
+        if(MPxMapwriteCo.Handle != NULL)
+            switch(MPxMapwriteCo->Type)
+            {
+            case MBX_REG_TYPE_U8:
+                state = MPxMapwriteCo.Handle((void *)MPxMapwriteCo.Puzzles + 1);
+                break;
+            default:
+                state = MPxMapwriteCo.Handle((void *)MPxMapwriteCo.Puzzles);
+                break;
+            }
 #endif
     }
     return state;
@@ -525,7 +589,7 @@ static uint16_t MBX_utility_map_entry_data_get(const _MBX_MAP_LIST_ENTRY *entry)
 }
 
 /**
- * @brief 依据条目属性 设置对应的16位内存
+ * @brief 依据条目属性 设置对应的16位内存 触发写函数
  * @param entry 条目
  * @param co 协处理协寄存
  * @param value 设置值
@@ -622,29 +686,29 @@ static uint32_t MBX_utility_map_entry_data_set(const _MBX_MAP_LIST_ENTRY *entry,
         co->PuzzlesComplete.bit.PuzzleL3 = 1;
         break;
     case MBX_REG_TYPE_BIT_ONLY:
-        co->Puzzles[0]                   = value ? 0xFFFF : 0X0000;
+        co->Puzzles[0]                   = value ? 0xFFFF : 0x0000;
         co->PuzzlesComplete.bit.PuzzleL0 = 1;
         break;
     default:
         if(entry->Type >= MBX_REG_TYPE_BIT_U8_BASE && entry->Type < MBX_REG_TYPE_BIT_U8_BASE + 8)
         {
             // *(uint8_t *)co->Puzzles[0] |= (((uint8_t)(!!value)) << (entry->Type - MBX_REG_TYPE_BIT_U8_BASE)); // 拼凑，但bit寄存器应当立即处理
-            co->Puzzles[0]                   = value ? 0xFFFF : 0X0000;
+            co->Puzzles[0]                   = value ? 0xFFFF : 0x0000;
             co->PuzzlesComplete.bit.PuzzleL0 = 1;
         }
         else if(entry->Type >= MBX_REG_TYPE_BIT_U16_BASE && entry->Type < MBX_REG_TYPE_BIT_U16_BASE + 16)
         {
-            co->Puzzles[0]                   = value ? 0xFFFF : 0X0000;
+            co->Puzzles[0]                   = value ? 0xFFFF : 0x0000;
             co->PuzzlesComplete.bit.PuzzleL0 = 1;
         }
         else if(entry->Type >= MBX_REG_TYPE_BIT_U32_BASE && entry->Type < MBX_REG_TYPE_BIT_U32_BASE + 32)
         {
-            co->Puzzles[0]                   = value ? 0xFFFF : 0X0000;
+            co->Puzzles[0]                   = value ? 0xFFFF : 0x0000;
             co->PuzzlesComplete.bit.PuzzleL0 = 1;
         }
         else if(entry->Type >= MBX_REG_TYPE_BIT_U64_BASE && entry->Type < MBX_REG_TYPE_BIT_U64_BASE + 64)
         {
-            co->Puzzles[0]                   = value ? 0xFFFF : 0X0000;
+            co->Puzzles[0]                   = value ? 0xFFFF : 0x0000;
             co->PuzzlesComplete.bit.PuzzleL0 = 1;
         }
         break;
@@ -655,7 +719,8 @@ static uint32_t MBX_utility_map_entry_data_set(const _MBX_MAP_LIST_ENTRY *entry,
     {
         co->PendingFlag = 0;
 
-        state           = co->Handle((void *)co->Puzzles);
+        if(co->Handle != NULL)
+            state = co->Handle((void *)co->Puzzles);
     }
 #else /* 大端拼图 */
     switch(entry->Type)
@@ -693,28 +758,28 @@ static uint32_t MBX_utility_map_entry_data_set(const _MBX_MAP_LIST_ENTRY *entry,
         co->PuzzlesComplete.bit.PuzzleL3 = 1;
         break;
     case MBX_REG_TYPE_BIT_ONLY:
-        co->Puzzles[0]                   = value ? 0xFFFF : 0X0000;
+        co->Puzzles[0]                   = value ? 0xFFFF : 0x0000;
         co->PuzzlesComplete.bit.PuzzleL0 = 1;
         break;
     default:
         if(entry->Type >= MBX_REG_TYPE_BIT_U8_BASE && entry->Type < MBX_REG_TYPE_BIT_U8_BASE + 8)
         {
-            co->Puzzles[0]                   = value ? 0xFFFF : 0X0000;
+            co->Puzzles[0]                   = value ? 0xFFFF : 0x0000;
             co->PuzzlesComplete.bit.PuzzleL0 = 1;
         }
         else if(entry->Type >= MBX_REG_TYPE_BIT_U16_BASE && entry->Type < MBX_REG_TYPE_BIT_U16_BASE + 16)
         {
-            co->Puzzles[0]                   = value ? 0xFFFF : 0X0000;
+            co->Puzzles[0]                   = value ? 0xFFFF : 0x0000;
             co->PuzzlesComplete.bit.PuzzleL0 = 1;
         }
         else if(entry->Type >= MBX_REG_TYPE_BIT_U32_BASE && entry->Type < MBX_REG_TYPE_BIT_U32_BASE + 32)
         {
-            co->Puzzles[0]                   = value ? 0xFFFF : 0X0000;
+            co->Puzzles[0]                   = value ? 0xFFFF : 0x0000;
             co->PuzzlesComplete.bit.PuzzleL0 = 1;
         }
         else if(entry->Type >= MBX_REG_TYPE_BIT_U64_BASE && entry->Type < MBX_REG_TYPE_BIT_U64_BASE + 64)
         {
-            co->Puzzles[0]                   = value ? 0xFFFF : 0X0000;
+            co->Puzzles[0]                   = value ? 0xFFFF : 0x0000;
             co->PuzzlesComplete.bit.PuzzleL0 = 1;
         }
         break;
@@ -724,16 +789,95 @@ static uint32_t MBX_utility_map_entry_data_set(const _MBX_MAP_LIST_ENTRY *entry,
     if(co->PuzzlesComplete.all == 0xFF && co->PendingFlag == 1)
     {
         co->PendingFlag == 0;
-        switch(co->Type)
-        {
-        case MBX_REG_TYPE_U8:
-            state = co->Handle((void *)co->Puzzles + 1);
-            break;
-        default:
-            state = co->Handle((void *)co->Puzzles);
-            break;
-        }
+
+        if(co->Handle != NULL)
+            switch(co->Type)
+            {
+            case MBX_REG_TYPE_U8:
+                state = co->Handle((void *)co->Puzzles + 1);
+                break;
+            default:
+                state = co->Handle((void *)co->Puzzles);
+                break;
+            }
     }
+#endif
+    return state;
+}
+
+/**
+ * @brief 依据条目属性 设置对应的16位内存 强制写内存
+ * @param entry 条目
+ * @param value 设置值
+ * @return 标准返回
+ */
+static uint32_t MBX_utility_map_entry_data_set_cast(const _MBX_MAP_LIST_ENTRY *entry, uint16_t value)
+{
+    uint32_t state = MBX_API_RETURN_DEFAULT; // 默认处理成功，存在寄存请求而不处理的情况，处理函数调用时改变状态
+
+#if !MBX_ENDIAN_MODE_BIG /* 小端强制写，大小端在内存中的排布不同 */
+    switch(entry->Type)
+    {
+    case MBX_REG_TYPE_U8:
+        *(uint8_t *)(entry->Memory) = value;
+        break;
+    case MBX_REG_TYPE_U16:
+        *(uint16_t *)(entry->Memory) = value;
+        break;
+    case MBX_REG_TYPE_U32_L:
+        *(uint16_t *)(entry->Memory) = value;
+        break;
+    case MBX_REG_TYPE_U32_H:
+        *(uint16_t *)(entry->Memory + 2) = value;
+        break;
+    case MBX_REG_TYPE_U64_0:
+        *(uint16_t *)(entry->Memory) = value;
+        break;
+    case MBX_REG_TYPE_U64_1:
+        *(uint16_t *)(entry->Memory + 2) = value;
+        break;
+    case MBX_REG_TYPE_U64_2:
+        *(uint16_t *)(entry->Memory + 4) = value;
+        break;
+    case MBX_REG_TYPE_U64_3:
+        *(uint16_t *)(entry->Memory + 6) = value;
+        break;
+    case MBX_REG_TYPE_BIT_ONLY:
+        *(uint8_t *)(entry->Memory) = value;
+        break;
+    default:
+        if(entry->Type >= MBX_REG_TYPE_BIT_U8_BASE && entry->Type < MBX_REG_TYPE_BIT_U8_BASE + 8)
+        {
+            if(value > 0)
+                *(uint8_t *)(entry->Memory) |= (0x01 << (entry->Type - MBX_REG_TYPE_BIT_U8_BASE));
+            else
+                *(uint8_t *)(entry->Memory) &= (~(0x01 << (entry->Type - MBX_REG_TYPE_BIT_U8_BASE)));
+        }
+        else if(entry->Type >= MBX_REG_TYPE_BIT_U16_BASE && entry->Type < MBX_REG_TYPE_BIT_U16_BASE + 16)
+        {
+            if(value > 0)
+                *(uint16_t *)(entry->Memory) |= (0x01 << (entry->Type - MBX_REG_TYPE_BIT_U16_BASE));
+            else
+                *(uint16_t *)(entry->Memory) &= (~(0x01 << (entry->Type - MBX_REG_TYPE_BIT_U16_BASE)));
+        }
+        else if(entry->Type >= MBX_REG_TYPE_BIT_U32_BASE && entry->Type < MBX_REG_TYPE_BIT_U32_BASE + 32)
+        {
+            if(value > 0)
+                *(uint32_t *)(entry->Memory) |= (0x01 << (entry->Type - MBX_REG_TYPE_BIT_U32_BASE));
+            else
+                *(uint32_t *)(entry->Memory) &= (~(0x01 << (entry->Type - MBX_REG_TYPE_BIT_U32_BASE)));
+        }
+        else if(entry->Type >= MBX_REG_TYPE_BIT_U64_BASE && entry->Type < MBX_REG_TYPE_BIT_U64_BASE + 64)
+        {
+            if(value > 0)
+                *(uint64_t *)(entry->Memory) |= (0x01UL << (entry->Type - MBX_REG_TYPE_BIT_U64_BASE));
+            else
+                *(uint64_t *)(entry->Memory) &= (~(0x01UL << (entry->Type - MBX_REG_TYPE_BIT_U64_BASE)));
+        }
+        break;
+    }
+#else /* 大端拼图 */
+
 #endif
     return state;
 }

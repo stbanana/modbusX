@@ -185,7 +185,7 @@ extern "C"
  */
 #define MBxMasterRequestFullQ(pMBX) (((pMBX->Request.Head + 1) % MBX_MASTER_REQUEST_QUEUE_MAX) == pMBX->Request.Tail)
 
-/* 错误追踪处理添加, 具有重定义避免 */
+/* 错误追踪处理添加 */
 #if MBX_MODULE_ERR_TRACE_ENABLE
 #ifdef MBx_MODULE_TRACE_ADD_ERR
 #error "MBx_MODULE_TRACE_ADD_ERR is already defined"
@@ -232,21 +232,24 @@ extern _MBX_ERR_TRACE MBxErrTraceStack[];
 #endif
 /* Exported functions ---------------------------------------------------------*/
 
-extern uint16_t MBx_utility_crc16(uint8_t *data, uint16_t len);
+extern uint16_t                 MBx_utility_crc16(uint8_t *data, uint16_t len);
 
-extern void     MBxErrTraceAdd(uint8_t SlaveID, uint8_t mode, uint8_t State, uint32_t ErrCode);
-extern uint32_t MBxErrTraceGet(uint8_t *SlaveID, uint8_t *mode, uint8_t *State, uint32_t *ErrCode);
+extern void                     MBxErrTraceAdd(uint8_t SlaveID, uint8_t mode, uint8_t State, uint32_t ErrCode);
+extern uint32_t                 MBxErrTraceGet(uint8_t *SlaveID, uint8_t *mode, uint8_t *State, uint32_t *ErrCode);
 
-extern uint32_t MBx_utility_map_addr_data_read(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapNum, uint16_t Addr, uint16_t *Data, uint8_t mode);
-extern uint32_t MBx_utility_map_r_continuity_review(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapMax, uint16_t AddrStart, uint16_t RegNum);
-extern uint32_t MBx_utility_map_addr_data_write(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapMax, uint16_t Addr, uint16_t Data, uint8_t mode);
-extern uint32_t MBx_utility_map_w_continuity_review(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapMax, uint16_t AddrStart, uint16_t RegNum);
-extern uint32_t MBx_utility_map_w_cooperate_review(void);
+extern uint32_t                 MBx_utility_map_addr_data_read(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapNum, uint16_t Addr, uint16_t *Data, uint8_t mode);
+extern uint32_t                 MBx_utility_map_r_continuity_review(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapMax, uint16_t AddrStart, uint16_t RegNum);
+extern uint32_t                 MBx_utility_map_addr_data_write(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapMax, uint16_t Addr, uint16_t Data, uint8_t mode);
+extern uint32_t                 MBx_utility_map_addr_data_write_cast(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapMax, uint16_t Addr, uint16_t Data, uint8_t mode);
+extern uint32_t                 MBx_utility_map_w_continuity_review(const _MBX_MAP_LIST_ENTRY *Map, uint16_t MapMax, uint16_t AddrStart, uint16_t RegNum);
+extern uint32_t                 MBx_utility_map_w_cooperate_review(void);
 
-extern uint32_t MBxMasterErrortAdd(_MBX_MASTER *pMaster, uint8_t Func, uint8_t Error, uint16_t AddrStart, uint16_t RegNum);
+extern uint32_t                 MBxMasterErrortAdd(_MBX_MASTER *pMaster, uint8_t Func, uint8_t Error, uint16_t AddrStart, uint16_t RegNum);
 
-extern void     MBxMasterRequestToTx(_MBX_MASTER *pMaster);
-extern uint32_t MBxMasterRequestAdd(_MBX_MASTER *pMaster, uint8_t Func, uint16_t AddrStart, uint16_t RegNum, uint8_t *Value, uint16_t ValueLen);
+extern void                     MBxMasterRequestToTx(_MBX_MASTER *pMaster);
+extern uint32_t                 MBxMasterRequestAdd(_MBX_MASTER *pMaster, uint8_t SlaveID, uint8_t Func, uint16_t AddrStart, uint16_t RegNum, uint8_t *Value, uint16_t ValueLen);
+
+extern _MBX_MASTER_TEAM_MEMBER *MBx_Master_Member_Find(_MBX_MASTER *pMaster, uint8_t SlaveID);
 
 #ifdef __cplusplus
 }

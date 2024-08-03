@@ -34,7 +34,55 @@ void MBx_Slave_RTU_Error_Handle(_MBX_SLAVE *pSlave, uint8_t ErrorCode);
  */
 uint32_t MBx_Slave_RTU_READ_COIL_Handle(_MBX_SLAVE *pSlave)
 {
-    // 当前无处理
+    uint8_t    ComboBit;
+    uint16_t   i;
+    _MBX_CRC16 crc;
+    /* 提取待解析的寄存器数量 */
+    pSlave->Parse.RegNum = ((uint16_t)pSlave->RxExist.Buffer[4] << 8) + pSlave->RxExist.Buffer[5];
+
+    /* 审查查询数量是否合法 1~2000 */
+    if(pSlave->Parse.RegNum < 0x0001 || pSlave->Parse.RegNum > 0x07D0)
+    {
+        return MBX_EXCEPTION_DATA;
+    }
+
+    /* 审查查询范围是否均存在可读定义 */
+    if((MBx_utility_map_r_continuity_review(pSlave->Config.Map, pSlave->Config.MapNum, pSlave->Parse.AddrStart, pSlave->Parse.RegNum)) != MBX_API_RETURN_DEFAULT)
+    {
+        return MBX_EXCEPTION_UNADDR;
+    }
+
+    /* 提取查询 */
+    for(i = 0; i < pSlave->Parse.RegNum; i++)
+    {
+        if((i & 0x0007) == 0)
+            ComboBit = 0;
+
+        if(MBx_utility_map_addr_data_read(pSlave->Config.Map, pSlave->Config.MapNum, pSlave->Parse.AddrStart + i, &pSlave->Parse.RegData, MBX_MAP_FIND_MODE_CONTINUOUS) != MBX_API_RETURN_DEFAULT)
+        {
+            return MBX_EXCEPTION_FAULT;
+        }
+
+        if(pSlave->Parse.RegData > 0)
+            ComboBit |= (1 << (i & 0x0007));
+        else
+            ComboBit &= ~(1 << (i & 0x0007));
+
+        if((i & 0x0007) == 0x0007)
+            MBxTxBufferPutc(pSlave, ComboBit);
+    }
+
+    /* 验证长度 */
+    if(pSlave->TxExist.Len + 2 > pSlave->TxExist.LenMAX)
+    {
+        return MBX_EXCEPTION_FAULT;
+    }
+
+    /* 计算CRC填充 */
+    crc.Val = MBx_utility_crc16((uint8_t *)(pSlave->TxExist.Buffer), pSlave->TxExist.Len); // 计算CRC校验码
+    MBxTxBufferPutc(pSlave, crc.H_L.L8);                                                   // CRC低8位
+    MBxTxBufferPutc(pSlave, crc.H_L.H8);                                                   // CRC高8位
+
     return MBX_EXCEPTION_NONE;
 }
 
@@ -45,7 +93,55 @@ uint32_t MBx_Slave_RTU_READ_COIL_Handle(_MBX_SLAVE *pSlave)
  */
 uint32_t MBx_Slave_RTU_READ_DISC_INPUTL_Handle(_MBX_SLAVE *pSlave)
 {
-    // 当前无处理
+    uint8_t    ComboBit;
+    uint16_t   i;
+    _MBX_CRC16 crc;
+    /* 提取待解析的寄存器数量 */
+    pSlave->Parse.RegNum = ((uint16_t)pSlave->RxExist.Buffer[4] << 8) + pSlave->RxExist.Buffer[5];
+
+    /* 审查查询数量是否合法 1~2000 */
+    if(pSlave->Parse.RegNum < 0x0001 || pSlave->Parse.RegNum > 0x07D0)
+    {
+        return MBX_EXCEPTION_DATA;
+    }
+
+    /* 审查查询范围是否均存在可读定义 */
+    if((MBx_utility_map_r_continuity_review(pSlave->Config.Map, pSlave->Config.MapNum, pSlave->Parse.AddrStart, pSlave->Parse.RegNum)) != MBX_API_RETURN_DEFAULT)
+    {
+        return MBX_EXCEPTION_UNADDR;
+    }
+
+    /* 提取查询 */
+    for(i = 0; i < pSlave->Parse.RegNum; i++)
+    {
+        if((i & 0x0007) == 0)
+            ComboBit = 0;
+
+        if(MBx_utility_map_addr_data_read(pSlave->Config.Map, pSlave->Config.MapNum, pSlave->Parse.AddrStart + i, &pSlave->Parse.RegData, MBX_MAP_FIND_MODE_CONTINUOUS) != MBX_API_RETURN_DEFAULT)
+        {
+            return MBX_EXCEPTION_FAULT;
+        }
+
+        if(pSlave->Parse.RegData > 0)
+            ComboBit |= (1 << (i & 0x0007));
+        else
+            ComboBit &= ~(1 << (i & 0x0007));
+
+        if((i & 0x0007) == 0x0007)
+            MBxTxBufferPutc(pSlave, ComboBit);
+    }
+
+    /* 验证长度 */
+    if(pSlave->TxExist.Len + 2 > pSlave->TxExist.LenMAX)
+    {
+        return MBX_EXCEPTION_FAULT;
+    }
+
+    /* 计算CRC填充 */
+    crc.Val = MBx_utility_crc16((uint8_t *)(pSlave->TxExist.Buffer), pSlave->TxExist.Len); // 计算CRC校验码
+    MBxTxBufferPutc(pSlave, crc.H_L.L8);                                                   // CRC低8位
+    MBxTxBufferPutc(pSlave, crc.H_L.H8);                                                   // CRC高8位
+
     return MBX_EXCEPTION_NONE;
 }
 
@@ -82,7 +178,7 @@ uint32_t MBx_Slave_RTU_READ_REG_Handle(_MBX_SLAVE *pSlave)
     {
         if(MBx_utility_map_addr_data_read(pSlave->Config.Map, pSlave->Config.MapNum, pSlave->Parse.AddrStart + i, &pSlave->Parse.RegData, MBX_MAP_FIND_MODE_CONTINUOUS) != MBX_API_RETURN_DEFAULT)
         {
-            return MBX_EXCEPTION_LEN;
+            return MBX_EXCEPTION_FAULT;
         }
         MBxTxBufferPutReg(pSlave, pSlave->Parse.RegData);
     }
@@ -90,7 +186,7 @@ uint32_t MBx_Slave_RTU_READ_REG_Handle(_MBX_SLAVE *pSlave)
     /* 验证长度 */
     if(pSlave->TxExist.Len + 2 > pSlave->TxExist.LenMAX)
     {
-        return MBX_EXCEPTION_LEN;
+        return MBX_EXCEPTION_FAULT;
     }
 
     /* 计算CRC填充 */
@@ -135,7 +231,7 @@ uint32_t MBx_Slave_RTU_READ_INPUT_REG_Handle(_MBX_SLAVE *pSlave)
     {
         if(MBx_utility_map_addr_data_read(pSlave->Config.Map, pSlave->Config.MapNum, pSlave->Parse.AddrStart + i, &pSlave->Parse.RegData, MBX_MAP_FIND_MODE_CONTINUOUS) != MBX_API_RETURN_DEFAULT)
         {
-            return MBX_EXCEPTION_LEN;
+            return MBX_EXCEPTION_FAULT;
         }
         MBxTxBufferPutReg(pSlave, pSlave->Parse.RegData);
     }
@@ -143,7 +239,7 @@ uint32_t MBx_Slave_RTU_READ_INPUT_REG_Handle(_MBX_SLAVE *pSlave)
     /* 验证长度 */
     if(pSlave->TxExist.Len + 2 > pSlave->TxExist.LenMAX)
     {
-        return MBX_EXCEPTION_LEN;
+        return MBX_EXCEPTION_FAULT;
     }
 
     /* 计算CRC填充 */
@@ -161,7 +257,41 @@ uint32_t MBx_Slave_RTU_READ_INPUT_REG_Handle(_MBX_SLAVE *pSlave)
  */
 uint32_t MBx_Slave_RTU_WRITE_COIL_Handle(_MBX_SLAVE *pSlave)
 {
-    // 当前无处理
+    _MBX_CRC16 crc;
+    /* 预填充回复流 */
+    MBxTxBufferPutc(pSlave, pSlave->Config.SlaveID);      // 从机ID
+    MBxTxBufferPutc(pSlave, (pSlave->Parse.Func));        // 功能码
+    MBxTxBufferPutReg(pSlave, (pSlave->Parse.AddrStart)); // 寄存器地址
+
+    /* 获得期望写入值 */
+    pSlave->Parse.RegData = ((uint16_t)pSlave->RxExist.Buffer[4] << 8) | (pSlave->RxExist.Buffer[5]);
+
+    /* 审查写入值是否符合标准 */
+    if((pSlave->Parse.RegData != 0xFF00) || (pSlave->Parse.RegData != 0x0000))
+        return MBX_EXCEPTION_DATA;
+
+    if(MBx_utility_map_addr_data_write(pSlave->Config.Map, pSlave->Config.MapNum, pSlave->Parse.AddrStart, pSlave->Parse.RegData, MBX_MAP_FIND_MODE_FIRST) != MBX_API_RETURN_DEFAULT)
+    {
+        return MBX_EXCEPTION_FAULT;
+    }
+    if(MBx_utility_map_w_cooperate_review( ) != MBX_API_RETURN_DEFAULT)
+    {
+        return MBX_EXCEPTION_FAULT;
+    }
+
+    MBxTxBufferPutReg(pSlave, pSlave->Parse.RegData);
+
+    /* 验证长度 */
+    if(pSlave->TxExist.Len + 2 > pSlave->TxExist.LenMAX)
+    {
+        return MBX_EXCEPTION_FAULT;
+    }
+
+    /* 计算CRC填充 */
+    crc.Val = MBx_utility_crc16((uint8_t *)(pSlave->TxExist.Buffer), pSlave->TxExist.Len); // 计算CRC校验码
+    MBxTxBufferPutc(pSlave, crc.H_L.L8);                                                   // CRC低8位
+    MBxTxBufferPutc(pSlave, crc.H_L.H8);                                                   // CRC高8位
+
     return MBX_EXCEPTION_NONE;
 }
 
@@ -174,21 +304,20 @@ uint32_t MBx_Slave_RTU_WRITE_REG_Handle(_MBX_SLAVE *pSlave)
 {
     _MBX_CRC16 crc;
     /* 预填充回复流 */
-    MBxTxBufferPutc(pSlave, pSlave->Config.SlaveID);                             // 从机ID
-    MBxTxBufferPutc(pSlave, (pSlave->Parse.Func));                               // 功能码
-    MBxTxBufferPutc(pSlave, (uint8_t)((pSlave->Parse.AddrStart >> 8) & 0x00FF)); // 寄存器地址高8位
-    MBxTxBufferPutc(pSlave, (uint8_t)((pSlave->Parse.AddrStart) & 0x00FF));      // 寄存器地址低8位
+    MBxTxBufferPutc(pSlave, pSlave->Config.SlaveID);      // 从机ID
+    MBxTxBufferPutc(pSlave, (pSlave->Parse.Func));        // 功能码
+    MBxTxBufferPutReg(pSlave, (pSlave->Parse.AddrStart)); // 寄存器地址
 
     /* 获得期望写入值 */
     pSlave->Parse.RegData = ((uint16_t)pSlave->RxExist.Buffer[4] << 8) | (pSlave->RxExist.Buffer[5]);
 
     if(MBx_utility_map_addr_data_write(pSlave->Config.Map, pSlave->Config.MapNum, pSlave->Parse.AddrStart, pSlave->Parse.RegData, MBX_MAP_FIND_MODE_FIRST) != MBX_API_RETURN_DEFAULT)
     {
-        return MBX_EXCEPTION_LEN;
+        return MBX_EXCEPTION_FAULT;
     }
     if(MBx_utility_map_w_cooperate_review( ) != MBX_API_RETURN_DEFAULT)
     {
-        return MBX_EXCEPTION_LEN;
+        return MBX_EXCEPTION_FAULT;
     }
 
     MBxTxBufferPutReg(pSlave, pSlave->Parse.RegData);
@@ -196,7 +325,7 @@ uint32_t MBx_Slave_RTU_WRITE_REG_Handle(_MBX_SLAVE *pSlave)
     /* 验证长度 */
     if(pSlave->TxExist.Len + 2 > pSlave->TxExist.LenMAX)
     {
-        return MBX_EXCEPTION_LEN;
+        return MBX_EXCEPTION_FAULT;
     }
 
     /* 计算CRC填充 */
@@ -214,7 +343,66 @@ uint32_t MBx_Slave_RTU_WRITE_REG_Handle(_MBX_SLAVE *pSlave)
  */
 uint32_t MBx_Slave_RTU_WRITE_COIL_MUL_Handle(_MBX_SLAVE *pSlave)
 {
-    // 当前无处理
+    uint16_t   i;
+    uint16_t   WriteData;
+    _MBX_CRC16 crc;
+    /* 提取待解析的寄存器数量 */
+    pSlave->Parse.RegNum = ((uint16_t)pSlave->RxExist.Buffer[4] << 8) + pSlave->RxExist.Buffer[5];
+
+    /* 审查写入数量是否合法 1~123 */
+    if(pSlave->Parse.RegNum < 0x0001 || pSlave->Parse.RegNum > 0x007B)
+    {
+        return MBX_EXCEPTION_DATA;
+    }
+
+    /* 审查写入寄存器数量与字节数信息是否匹配 */
+    if(pSlave->RxExist.Buffer[6] != ((pSlave->Parse.RegNum >> 3) + (pSlave->Parse.RegNum & 0x07 ? 1 : 0)))
+    {
+        return MBX_EXCEPTION_DATA;
+    }
+
+    /* 审查查询范围是否均存在定义 */
+    if((MBx_utility_map_w_continuity_review(pSlave->Config.Map, pSlave->Config.MapNum, pSlave->Parse.AddrStart, pSlave->Parse.RegNum)) != MBX_API_RETURN_DEFAULT)
+    {
+        return MBX_EXCEPTION_UNADDR;
+    }
+
+    /* 提取写入 */
+    for(i = 0; i < pSlave->Parse.RegNum; i++)
+    {
+        /* 获得期望写入值 */
+        pSlave->Parse.RegData = ((uint16_t)pSlave->RxExist.Buffer[7 + (i & 0x0007 == 0x0000 ? (i >> 3) : ((i >> 3) + 1))]);
+        if(pSlave->Parse.RegData == 0)
+            WriteData = 0x0000;
+        else
+            WriteData = 0xFF00;
+        if(MBx_utility_map_addr_data_write(pSlave->Config.Map, pSlave->Config.MapNum, pSlave->Parse.AddrStart + i, WriteData, MBX_MAP_FIND_MODE_CONTINUOUS) != MBX_API_RETURN_DEFAULT)
+        {
+            return MBX_EXCEPTION_FAULT;
+        }
+    }
+    if(MBx_utility_map_w_cooperate_review( ) != MBX_API_RETURN_DEFAULT)
+    {
+        return MBX_EXCEPTION_FAULT;
+    }
+
+    /* 填充回复流 */
+    MBxTxBufferPutc(pSlave, pSlave->Config.SlaveID);      // 从机ID
+    MBxTxBufferPutc(pSlave, (pSlave->Parse.Func));        // 功能码
+    MBxTxBufferPutReg(pSlave, (pSlave->Parse.AddrStart)); // 寄存器地址
+    MBxTxBufferPutReg(pSlave, (pSlave->Parse.RegNum));    // 寄存器数
+
+    /* 验证长度 */
+    if(pSlave->TxExist.Len + 2 > pSlave->TxExist.LenMAX)
+    {
+        return MBX_EXCEPTION_FAULT;
+    }
+
+    /* 计算CRC填充 */
+    crc.Val = MBx_utility_crc16((uint8_t *)(pSlave->TxExist.Buffer), pSlave->TxExist.Len); // 计算CRC校验码
+    MBxTxBufferPutc(pSlave, crc.H_L.L8);                                                   // CRC低8位
+    MBxTxBufferPutc(pSlave, crc.H_L.H8);                                                   // CRC高8位
+
     return MBX_EXCEPTION_NONE;
 }
 
@@ -255,25 +443,24 @@ uint32_t MBx_Slave_RTU_WRITE_REG_MUL_Handle(_MBX_SLAVE *pSlave)
         pSlave->Parse.RegData = ((uint16_t)pSlave->RxExist.Buffer[7 + (i << 1)] << 8) | (pSlave->RxExist.Buffer[8 + (i << 1)]);
         if(MBx_utility_map_addr_data_write(pSlave->Config.Map, pSlave->Config.MapNum, pSlave->Parse.AddrStart + i, pSlave->Parse.RegData, MBX_MAP_FIND_MODE_CONTINUOUS) != MBX_API_RETURN_DEFAULT)
         {
-            return MBX_EXCEPTION_LEN;
+            return MBX_EXCEPTION_FAULT;
         }
     }
     if(MBx_utility_map_w_cooperate_review( ) != MBX_API_RETURN_DEFAULT)
     {
-        return MBX_EXCEPTION_LEN;
+        return MBX_EXCEPTION_FAULT;
     }
 
     /* 填充回复流 */
-    MBxTxBufferPutc(pSlave, pSlave->Config.SlaveID);                             // 从机ID
-    MBxTxBufferPutc(pSlave, (pSlave->Parse.Func));                               // 功能码
-    MBxTxBufferPutc(pSlave, (uint8_t)((pSlave->Parse.AddrStart >> 8) & 0x00FF)); // 寄存器地址高8位
-    MBxTxBufferPutc(pSlave, (uint8_t)((pSlave->Parse.AddrStart) & 0x00FF));      // 寄存器地址低8位
-    MBxTxBufferPutReg(pSlave, (pSlave->Parse.RegNum));                           // 寄存器数
+    MBxTxBufferPutc(pSlave, pSlave->Config.SlaveID);      // 从机ID
+    MBxTxBufferPutc(pSlave, (pSlave->Parse.Func));        // 功能码
+    MBxTxBufferPutReg(pSlave, (pSlave->Parse.AddrStart)); // 寄存器地址
+    MBxTxBufferPutReg(pSlave, (pSlave->Parse.RegNum));    // 寄存器数
 
     /* 验证长度 */
     if(pSlave->TxExist.Len + 2 > pSlave->TxExist.LenMAX)
     {
-        return MBX_EXCEPTION_LEN;
+        return MBX_EXCEPTION_FAULT;
     }
 
     /* 计算CRC填充 */
