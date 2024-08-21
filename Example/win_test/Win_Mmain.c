@@ -173,9 +173,7 @@ void MyRTUMasterTest(void)
  */
 static void TestMemUpdate(uint32_t Cycle)
 {
-    static uint8_t  u8buffer[10];  // 测试数组
     static uint16_t u16buffer[10]; // 测试数组
-    static uint8_t  u8test  = 0;
     static uint16_t u16test = 0;
     static uint32_t u32test = 0;
     static float    ftest   = 0.0;
@@ -183,24 +181,30 @@ static void TestMemUpdate(uint32_t Cycle)
     i += Cycle;
     if((i % 500) == 0) // 分频到500ms
     {
-        MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0, 4);     // 请求读取1号从机的0地址的4个寄存器
-        MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x100, 2); // 请求读取1号从机的0x100地址的2个寄存器
-        MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x200, 2); // 请求读取1号从机的0x200地址的2个寄存器 拼凑为32位数据
-        MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x300, 2); // 请求读取1号从机的0x300地址的2个寄存器 拼凑为32位浮点
+        MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0, 4);           // 请求读取1号从机的0地址的4个寄存器
+        MBx_Master_Read_Input_Reg_Request(&MBxMaster, 1, 0x100, 2); // 请求读取1号从机的0x100地址的2个寄存器 (作为输入寄存器只读)
+        MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x200, 2);       // 请求读取1号从机的0x200地址的2个寄存器 拼凑为32位数据
+        MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x300, 2);       // 请求读取1号从机的0x300地址的2个寄存器 拼凑为32位浮点
     }
     if(i >= 2000) // 分频到两秒
     {
-        u8test++;
         u16test++;
         u32test++;
         ftest += 1.1;
-        memset(&u8buffer[0], u8test, 8);
-        MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0, 4, u8buffer, 8); // 请求写入1号从机的0地址的4个寄存器
+        u16buffer[0] = u16test;
+        u16buffer[1] = u16test + 1;
+        u16buffer[2] = u16test + 2;
+        u16buffer[3] = u16test + 3;
+        MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0, 4, (uint8_t *)&u16buffer[0], 8); // 请求写入1号从机的0地址的4个寄存器，写成功时自动同步进映射内存区
         u16buffer[0] = u16test;
         u16buffer[1] = u16test;
         MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0x100, 2, (uint8_t *)&u16buffer[0], 4); // 请求写入1号从机的0x100地址的2个寄存器 由于定义为输入寄存器，应当会产生失败写入
-        MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0x200, 2, (uint8_t *)&u32test, 4);      // 请求写入1号从机的0x200地址的2个寄存器 无符号32位拼凑
-        MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0x300, 2, (uint8_t *)&ftest, 4);        // 请求写入1号从机的0x300地址的2个寄存器 浮点拼凑
+        u16buffer[0] = (u32test >> 16) & 0xFFFF;
+        u16buffer[1] = u32test & 0xFFFF;
+        MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0x200, 2, (uint8_t *)&u16buffer[0], 4); // 请求写入1号从机的0x200地址的2个寄存器 无符号32位拼凑
+        u16buffer[0] = (*(uint32_t *)&ftest >> 16) & 0xFFFF;
+        u16buffer[1] = *(uint32_t *)&ftest & 0xFFFF;
+        MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0x300, 2, (uint8_t *)&u16buffer[0], 4); // 请求写入1号从机的0x300地址的2个寄存器 浮点拼凑
         i = 0;
     }
 }
@@ -264,7 +268,7 @@ static const _MBX_MAP_LIST_ENTRY MapList[] = {
     {.Addr = 0x0101, .Memory = &u16MapMem[11], .Type = MBX_REG_TYPE_U16,   .Handle = u16WriteTest2},
     {.Addr = 0x0200, .Memory = &u36MapMem[10], .Type = MBX_REG_TYPE_U32_H, .Handle = u32WriteTest1}, /* 多寄存器组合映射同一个内存变量，写入异常回调应该是同一个(硬性要求) 模拟大端内存(ABCD排列 基于传输协议，这是最合适的) */
     {.Addr = 0x0201, .Memory = &u36MapMem[10], .Type = MBX_REG_TYPE_U32_L, .Handle = u32WriteTest1},
-    {.Addr = 0x0300, .Memory = &fMapMem[10],   .Type = MBX_REG_TYPE_U32_H, .Handle = fWriteTest1  }, /* 浮点映射测试 (只能模拟大端)*/
+    {.Addr = 0x0300, .Memory = &fMapMem[10],   .Type = MBX_REG_TYPE_U32_H, .Handle = fWriteTest1  }, /* 浮点映射测试 模拟大端内存(ABCD排列 基于传输协议，这是最合适的)*/
     {.Addr = 0x0301, .Memory = &fMapMem[10],   .Type = MBX_REG_TYPE_U32_L, .Handle = fWriteTest1  },
 
     MBX_MAP_LIST_END

@@ -5,14 +5,14 @@
  **** All rights reserved                                       ****
 
  ********************************************************************************
- * File Name     : MBx_Master_Init.c
+ * File Name     : MBx_Master_Member_Add.c
  * Author        : yono
  * Date          : 2024-07-30
  * Version       : 1.0
 ********************************************************************************/
 /**************************************************************************/
 /*
-    初始化MBX主机对象
+    向MBX主机对象添加期望管理的从机成员对象
 */
 
 /* Includes ------------------------------------------------------------------*/
@@ -62,7 +62,11 @@ uint32_t MBx_Master_Member_Add(_MBX_MASTER *MBxMaster, _MBX_MASTER_TEAM_MEMBER *
         {
             if(ChainNow == MBxMember)
             {
-                isFound = 1;
+                isFound |= 0x01;
+            }
+            if(ChainNow->SlaveID == SlaveID)
+            {
+                isFound |= 0x02;
             }
             ChainNow = ChainNow->Next;
         }
@@ -71,6 +75,11 @@ uint32_t MBx_Master_Member_Add(_MBX_MASTER *MBxMaster, _MBX_MASTER_TEAM_MEMBER *
             memset(MBxMember, 0, sizeof(_MBX_MASTER_TEAM_MEMBER));
             ChainNow->Next = MBxMember;
         }
+    }
+
+    if((isFound & 0x02) != 0) // 表明从机号重复
+    {
+        return MBX_API_RETURN_ERR_PARAM;
     }
 
     /* 设置成员 */

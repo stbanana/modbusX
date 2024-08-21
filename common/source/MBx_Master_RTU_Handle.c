@@ -127,10 +127,10 @@ uint32_t MBx_Master_RTU_READ_REG_Handle(_MBX_MASTER *pMaster)
         return MBX_API_RETURN_MAP_UNFIND;
     }
 
-    MBx_utility_map_addr_data_write_cast(pMember->Map, pMember->MapNum, pMaster->Parse.SendAddrStart, *(uint16_t *)&pMaster->RxExist.Buffer[3], MBX_MAP_FIND_MODE_FIRST);
+    MBx_utility_map_addr_data_write_cast(pMember->Map, pMember->MapNum, pMaster->Parse.SendAddrStart, (((uint16_t)pMaster->RxExist.Buffer[3] << 8) + pMaster->RxExist.Buffer[4]), MBX_MAP_FIND_MODE_FIRST);
     for(i = 1; i < pMaster->Parse.SendRegNum; i++)
     {
-        MBx_utility_map_addr_data_write_cast(pMember->Map, pMember->MapNum, pMaster->Parse.SendAddrStart + i, *(uint16_t *)&pMaster->RxExist.Buffer[3 + (i << 1)], MBX_MAP_FIND_MODE_CONTINUOUS);
+        MBx_utility_map_addr_data_write_cast(pMember->Map, pMember->MapNum, pMaster->Parse.SendAddrStart + i, (((uint16_t)pMaster->RxExist.Buffer[3 + (i << 1)] << 8) + pMaster->RxExist.Buffer[4 + (i << 1)]), MBX_MAP_FIND_MODE_CONTINUOUS);
     }
 
     return MBX_EXCEPTION_NONE;
@@ -153,10 +153,10 @@ uint32_t MBx_Master_RTU_READ_INPUT_REG_Handle(_MBX_MASTER *pMaster)
         return MBX_API_RETURN_MAP_UNFIND;
     }
 
-    MBx_utility_map_addr_data_write_cast(pMember->Map, pMember->MapNum, pMaster->Parse.SendAddrStart, *(uint16_t *)&pMaster->RxExist.Buffer[3], MBX_MAP_FIND_MODE_FIRST);
+    MBx_utility_map_addr_data_write_cast(pMember->Map, pMember->MapNum, pMaster->Parse.SendAddrStart, (((uint16_t)pMaster->RxExist.Buffer[3] << 8) + pMaster->RxExist.Buffer[4]), MBX_MAP_FIND_MODE_FIRST);
     for(i = 1; i < pMaster->Parse.SendRegNum; i++)
     {
-        MBx_utility_map_addr_data_write_cast(pMember->Map, pMember->MapNum, pMaster->Parse.SendAddrStart + i, *(uint16_t *)&pMaster->RxExist.Buffer[3 + (i << 1)], MBX_MAP_FIND_MODE_CONTINUOUS);
+        MBx_utility_map_addr_data_write_cast(pMember->Map, pMember->MapNum, pMaster->Parse.SendAddrStart + i, (((uint16_t)pMaster->RxExist.Buffer[3 + (i << 1)] << 8) + pMaster->RxExist.Buffer[4 + (i << 1)]), MBX_MAP_FIND_MODE_CONTINUOUS);
     }
 
     return MBX_EXCEPTION_NONE;

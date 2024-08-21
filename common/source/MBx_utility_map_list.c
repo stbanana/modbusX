@@ -292,7 +292,7 @@ uint32_t MBx_utility_map_addr_data_write_cast(const _MBX_MAP_LIST_ENTRY *Map, ui
             else
             { /* 已查找到的分支 */
                 midReg = mid;
-                state  = MBX_utility_map_entry_data_set(&Map[mid], &MPxMapwriteCo, Data);
+                state  = MBX_utility_map_entry_data_set_cast(&Map[mid], Data);
             }
         }
     }

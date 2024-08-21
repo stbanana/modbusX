@@ -115,6 +115,39 @@ uint32_t MBxMasterRequestAdd(_MBX_MASTER *pMaster, uint8_t SlaveID, uint8_t Func
     pMaster->Request.Queue[pMaster->Request.Head].SlaveID   = SlaveID;
     pMaster->Request.Queue[pMaster->Request.Head].Func      = Func;
     pMaster->Request.Queue[pMaster->Request.Head].AddrStart = AddrStart;
+
+#if !MBX_ENDIAN_MODE_BIG /* 小端，内存非天然模拟 */
+    switch(Func)
+    {
+    case MBX_FUNC_READ_COIL:
+    case MBX_FUNC_READ_DISC_INPUT:
+    case MBX_FUNC_READ_REG:
+    case MBX_FUNC_READ_INPUT_REG:
+        pMaster->Request.Queue[pMaster->Request.Head].RegNum = RegNum;
+        break;
+    case MBX_FUNC_WRITE_COIL:
+    case MBX_FUNC_WRITE_REG:
+        pMaster->Request.Queue[pMaster->Request.Head].Value[1] = Value[0];
+        pMaster->Request.Queue[pMaster->Request.Head].Value[0] = Value[1];
+        break;
+    case MBX_FUNC_WRITE_COIL_MUL:
+        pMaster->Request.Queue[pMaster->Request.Head].RegNum = RegNum;
+        for(int i = 0; i < ValueLen; i++)
+        {
+            pMaster->Request.Queue[pMaster->Request.Head].Value[i] = (i & 0x1) ? (Value[i - 1]) : (Value[i + 1]);
+        }
+        break;
+    case MBX_FUNC_WRITE_REG_MUL:
+        pMaster->Request.Queue[pMaster->Request.Head].RegNum = RegNum;
+        for(int i = 0; i < ValueLen; i++)
+        {
+            pMaster->Request.Queue[pMaster->Request.Head].Value[i] = (i & 0x1) ? (Value[i - 1]) : (Value[i + 1]);
+        }
+        break;
+    default:
+        break;
+    }
+#else
     switch(Func)
     {
     case MBX_FUNC_READ_COIL:
@@ -139,6 +172,7 @@ uint32_t MBxMasterRequestAdd(_MBX_MASTER *pMaster, uint8_t SlaveID, uint8_t Func
     default:
         break;
     }
+#endif
 
     pMaster->Request.Head = (pMaster->Request.Head + 1) % MBX_MASTER_REQUEST_QUEUE_MAX;
     return MBX_API_RETURN_DEFAULT;
