@@ -64,7 +64,7 @@ uint16_t MBx_utility_crc16(uint8_t *data, uint16_t len)
 #else
 
 /**
- * @brief  CRC-modbus16计算 不开启内部CRC算法表示无法接收表查找的RAM消耗
+ * @brief  CRC-modbus16计算 不开启内部CRC算法表示无法接受表查找额外的RAM消耗
  *              采用一个可被覆盖定义的普通计算方式，防止未定义
  * @param data 期望计算的数据内存头指针
  * @param len 期望计算的数据字节长度
