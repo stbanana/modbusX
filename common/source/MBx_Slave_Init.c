@@ -53,7 +53,7 @@ uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE                *MBxSlave, //
                             uint8_t                   *TxBuffer,
                             uint32_t                   TxBufferSize)
 {
-    uint32_t State;
+    uint32_t State = MBX_API_RETURN_DEFAULT;
     /* 传参审查 */
     if(SlaveID < 1 || SlaveID > 247)
         return MBX_API_RETURN_ERR_PARAM;
@@ -89,7 +89,7 @@ uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE                *MBxSlave, //
     if(State != MBX_API_RETURN_DEFAULT)
         MBx_MODULE_TRACE_ADD_ERR(MBxSlave, State);
 
-    return MBX_API_RETURN_DEFAULT;
+    return State;
 }
 
 #endif /* MBX_SLAVE_ENABLE */

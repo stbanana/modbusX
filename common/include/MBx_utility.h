@@ -30,6 +30,7 @@ extern "C"
  * @param newNode 期望新链接的节点指针 _MBX_SLAVE*类型
  */
 #define NewSlaveChainNode(rootNode, newNode)                  \
+    do                                                        \
     {                                                         \
         _MBX_SLAVE *ChainNow = rootNode;                      \
         uint8_t     isFound  = 0;                             \
@@ -53,7 +54,8 @@ extern "C"
                 ChainNow->Next = newNode;                     \
             }                                                 \
         }                                                     \
-    }
+    }                                                         \
+    while(0)
 
 /**
  * @brief 链表结构工具
@@ -63,6 +65,7 @@ extern "C"
  * @param newNode 期望新链接的节点指针 _MBX_MASTER*类型
  */
 #define NewMasterChainNode(rootNode, newNode)                 \
+    do                                                        \
     {                                                         \
         _MBX_MASTER *ChainNow = rootNode;                     \
         uint8_t      isFound  = 0;                            \
@@ -86,7 +89,8 @@ extern "C"
                 ChainNow->Next = newNode;                     \
             }                                                 \
         }                                                     \
-    }
+    }                                                         \
+    while(0)
 
 /**
  * @brief 向MBX对象的RXbuffer推入一个字节数据
@@ -94,6 +98,7 @@ extern "C"
  * @param c 期望推入的 字节数据
  */
 #define MBxRxBufferPutc(pMBX, c)                                        \
+    do                                                                  \
     {                                                                   \
         if((pMBX->RxExist.Len + 1) < pMBX->RxExist.LenMAX)              \
         {                                                               \
@@ -104,7 +109,8 @@ extern "C"
         {                                                               \
             MBx_MODULE_TRACE_ADD_ERR(pMBX, MBX_API_RETURN_BUFFER_FULL); \
         }                                                               \
-    }
+    }                                                                   \
+    while(0)
 
 /**
  * @brief 向MBX对象的TXbuffer推入一个字节数据
@@ -112,6 +118,7 @@ extern "C"
  * @param c 期望推入的 字节数据
  */
 #define MBxTxBufferPutc(pMBX, c)                                        \
+    do                                                                  \
     {                                                                   \
         if((pMBX->TxExist.Len + 1) < pMBX->TxExist.LenMAX)              \
         {                                                               \
@@ -122,7 +129,8 @@ extern "C"
         {                                                               \
             MBx_MODULE_TRACE_ADD_ERR(pMBX, MBX_API_RETURN_BUFFER_FULL); \
         }                                                               \
-    }
+    }                                                                   \
+    while(0)
 
 /**
  * @brief 向MBX对象的TXbuffer推入一个寄存器的数据(16位)
@@ -130,6 +138,7 @@ extern "C"
  * @param reg 期望推入的 寄存器的数据(16位)
  */
 #define MBxTxBufferPutReg(pMBX, reg)                                                      \
+    do                                                                                    \
     {                                                                                     \
         if((pMBX->TxExist.Len + 2) < pMBX->TxExist.LenMAX)                                \
         {                                                                                 \
@@ -141,25 +150,30 @@ extern "C"
         {                                                                                 \
             MBx_MODULE_TRACE_ADD_ERR(pMBX, MBX_API_RETURN_BUFFER_FULL);                   \
         }                                                                                 \
-    }
+    }                                                                                     \
+    while(0)
 
 /**
  * @brief 清空MBX对象的RXbuffer
  * @param pMBX  MBX对象指针
  */
 #define MBxRxBufferEmpty(pMBX) \
+    do                         \
     {                          \
         pMBX->RxExist.Len = 0; \
-    }
+    }                          \
+    while(0)
 
 /**
  * @brief 清空MBX对象的TXbuffer
  * @param pMBX  MBX对象指针
  */
 #define MBxTxBufferEmpty(pMBX) \
+    do                         \
     {                          \
         pMBX->TxExist.Len = 0; \
-    }
+    }                          \
+    while(0)
 
 /**
  * @brief 查询MBX主机错误栈是否为空

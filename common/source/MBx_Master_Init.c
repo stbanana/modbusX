@@ -49,7 +49,7 @@ uint32_t MBx_Master_RTU_Init(_MBX_MASTER *MBxMaster, //
                              uint8_t     *TxBuffer,
                              uint32_t     TxBufferSize)
 {
-    uint32_t State;
+    uint32_t State = MBX_API_RETURN_DEFAULT;
     /* 传参审查 */
     if(MBxSend == NULL || MBxGetc == NULL)
         return MBX_API_RETURN_ERR_PARAM;
@@ -89,7 +89,7 @@ uint32_t MBx_Master_RTU_Init(_MBX_MASTER *MBxMaster, //
     if(State != MBX_API_RETURN_DEFAULT)
         MBx_MODULE_TRACE_ADD_ERR(MBxMaster, State);
 
-    return MBX_API_RETURN_DEFAULT;
+    return State;
 }
 
 #endif /* MBX_MASTER_ENABLE */

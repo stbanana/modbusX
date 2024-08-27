@@ -119,14 +119,18 @@ void MyRTUMasterTest(void)
     uint8_t *STxBuffer = (uint8_t *)malloc(84 * sizeof(uint8_t));
 
     /* 初始化modbus主机1 */
-    MBx_Master_RTU_Init(&MBxMaster,     // 主机对象
-                        SerialSendPort, // 发送函数
-                        SerialGetcPort, // 接收函数
-                        9600,           // 波特率
-                        SRxBuffer,      // 库内接收buffer分配
-                        84,             // 接收buffer最大长度
-                        STxBuffer,      // 库内发送buffer分配
-                        84);            // 发送buffer最大长度
+    if(MBx_Master_RTU_Init(&MBxMaster,     // 主机对象
+                           SerialSendPort, // 发送函数
+                           SerialGetcPort, // 接收函数
+                           9600,           // 波特率
+                           SRxBuffer,      // 库内接收buffer分配
+                           84,             // 接收buffer最大长度
+                           STxBuffer,      // 库内发送buffer分配
+                           84)             // 发送buffer最大长度
+       != MBX_API_RETURN_DEFAULT)
+    {
+        /* 初始化错误 自行判断返回值差错 */
+    }
 
     /* 添加主机1管理的从机1 */
     if(MBx_Master_Member_Add(&MBxMaster,        // 主机对象
