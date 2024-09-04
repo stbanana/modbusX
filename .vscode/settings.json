@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.c": "c",
+        "mbx_api.h": "c",
+        "mbx_port.h": "c"
+    },
+    "makefile.makePath": "cmake"
+}

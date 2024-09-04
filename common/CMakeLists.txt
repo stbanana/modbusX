@@ -1,0 +1,23 @@
+cmake_minimum_required(VERSION 3.22)
+
+project(modbusx)
+add_library(modbusx INTERFACE)
+
+# 递归查找所有源码文件
+file(GLOB_RECURSE SRC ${CMAKE_CURRENT_LIST_DIR}/source/*.c)
+# 非递归的案例
+# file(GLOB SRC ${CMAKE_CURRENT_LIST_DIR}/source/*.c)
+
+target_include_directories(modbusx INTERFACE
+    ${CMAKE_CURRENT_LIST_DIR}/include
+    ../port/generic/inc
+)
+
+target_sources(modbusx INTERFACE
+     ${SRC}
+)
+
+if(CMAKE_C_STANDARD LESS 11)
+    message(ERROR "Generated code requires C11 or higher")
+endif()
+

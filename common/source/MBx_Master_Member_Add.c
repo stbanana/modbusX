@@ -29,13 +29,16 @@
 
 /**
  * @brief 添加一个期望管理的从机成员对象给主机对象
- * @param MBxMaster 期望初始化的MBX主机对象指针
+ * @param MBxMaster 期望添加到的MBX主机对象指针
  * @param MBxMember 期望添加的从机成员对象指针
  * @param SlaveID 期望添加的从机成员的从机ID
  * @param MAP 期望添加的从机成员的映射表
  * @return uint32_t 标准返回
  */
-uint32_t MBx_Master_Member_Add(_MBX_MASTER *MBxMaster, _MBX_MASTER_TEAM_MEMBER *MBxMember, uint8_t SlaveID, const _MBX_MAP_LIST_ENTRY *MAP)
+uint32_t MBx_Master_Member_Add(_MBX_MASTER               *MBxMaster, //
+                               _MBX_MASTER_TEAM_MEMBER   *MBxMember,
+                               uint8_t                    SlaveID,
+                               const _MBX_MAP_LIST_ENTRY *MAP)
 {
     uint32_t                 state = MBX_API_RETURN_DEFAULT;
     _MBX_MASTER_TEAM_MEMBER *ChainNow;

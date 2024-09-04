@@ -487,8 +487,8 @@ HANDLE SerialOpen(const char *com, int baud, int byteSize, int parity, int stopB
 
 /**
  * @brief 关闭串口
- * @param hObject 
- * @return 
+ * @param hObject
+ * @return
  */
 WINBOOL SerialClose(HANDLE hObject)
 {

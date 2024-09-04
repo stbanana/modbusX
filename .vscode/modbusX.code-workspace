@@ -16,7 +16,8 @@
             "limits": "c",
             "string.h": "c",
             "type_traits": "c",
-            "cstdlib": "c"
+            "cstdlib": "c",
+            "windows.h": "c"
         }
     },
     "launch": {

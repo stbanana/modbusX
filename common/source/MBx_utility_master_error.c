@@ -36,7 +36,11 @@
  * @param RegNum 错误发送寄存器数量
  * @return 
  */
-uint32_t MBxMasterErrortAdd(_MBX_MASTER *pMaster, uint8_t Func, uint8_t Error, uint16_t AddrStart, uint16_t RegNum)
+uint32_t MBxMasterErrortAdd(_MBX_MASTER *pMaster, //
+                            uint8_t      Func,
+                            uint8_t      Error,
+                            uint16_t     AddrStart,
+                            uint16_t     RegNum)
 {
     /* 审查队列是否已满 */
     if(MBxMasterErrorFullQ(pMaster))
@@ -62,7 +66,11 @@ uint32_t MBxMasterErrortAdd(_MBX_MASTER *pMaster, uint8_t Func, uint8_t Error, u
  * @param RegNum 错误发送寄存器数量
  * @return 
  */
-uint32_t MBx_Master_Error_Get(_MBX_MASTER *pMaster, uint8_t *Func, uint8_t *Error, uint16_t *AddrStart, uint16_t *RegNum)
+uint32_t MBx_Master_Error_Get(_MBX_MASTER *pMaster, //
+                              uint8_t     *Func,
+                              uint8_t     *Error,
+                              uint16_t    *AddrStart,
+                              uint16_t    *RegNum)
 {
     /* 审查队列是否为空 */
     if(MBxMasterErrorEmptyQ(pMaster))
