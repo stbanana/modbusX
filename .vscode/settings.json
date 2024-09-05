@@ -4,5 +4,6 @@
         "mbx_api.h": "c",
         "mbx_port.h": "c"
     },
-    "makefile.makePath": "cmake"
+    "makefile.makePath": "cmake",
+    "makefile.makefilePath": "${workspaceRoot}\\\\build"
 }

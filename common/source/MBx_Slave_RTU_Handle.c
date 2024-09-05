@@ -371,7 +371,7 @@ uint32_t MBx_Slave_RTU_WRITE_COIL_MUL_Handle(_MBX_SLAVE *pSlave)
     for(i = 0; i < pSlave->Parse.RegNum; i++)
     {
         /* 获得期望写入值 */
-        pSlave->Parse.RegData = ((uint16_t)pSlave->RxExist.Buffer[7 + (i & 0x0007 == 0x0000 ? (i >> 3) : ((i >> 3) + 1))]);
+        pSlave->Parse.RegData = ((uint16_t)pSlave->RxExist.Buffer[7 + ((i & 0x0007) == 0x0000 ? (i >> 3) : ((i >> 3) + 1))]);
         if(pSlave->Parse.RegData == 0)
             WriteData = 0x0000;
         else

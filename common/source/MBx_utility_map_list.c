@@ -380,7 +380,7 @@ uint32_t MBx_utility_map_w_cooperate_review(void)
     uint32_t state = MBX_API_RETURN_DEFAULT;
     if(MPxMapwriteCo.PuzzlesComplete.all != 0xFF && MPxMapwriteCo.PendingFlag == 1)
     {
-        MPxMapwriteCo.PendingFlag == 0;
+        MPxMapwriteCo.PendingFlag = 0;
 
         /* 使用源 Memory 填充至合适长度，触发写处理 */
 #if !MBX_ENDIAN_MODE_BIG

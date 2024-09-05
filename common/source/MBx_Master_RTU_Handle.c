@@ -171,7 +171,6 @@ uint32_t MBx_Master_RTU_WRITE_COIL_Handle(_MBX_MASTER *pMaster)
 {
     // 写入成功，同步映射数据
     _MBX_MASTER_TEAM_MEMBER *pMember;
-    uint16_t                 i = 0;
 
     /* 找到对应的从机成员 */
     pMember = MBx_Master_Member_Find(pMaster, pMaster->Parse.SlaveID);
@@ -202,7 +201,6 @@ uint32_t MBx_Master_RTU_WRITE_REG_Handle(_MBX_MASTER *pMaster)
 {
     // 写入成功，同步映射数据
     _MBX_MASTER_TEAM_MEMBER *pMember;
-    uint16_t                 i = 0;
 
     /* 找到对应的从机成员 */
     pMember = MBx_Master_Member_Find(pMaster, pMaster->Parse.SlaveID);

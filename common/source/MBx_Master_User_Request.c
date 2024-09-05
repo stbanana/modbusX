@@ -45,7 +45,7 @@ uint32_t MBx_Master_Read_Coil_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uin
     }
 
     /* 填充一条请求 */
-    MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_READ_COIL, StartAddr, ReadNum, (uint8_t *)MBX_PARA_NULL, MBX_PARA_NULL);
+    return MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_READ_COIL, StartAddr, ReadNum, (uint8_t *)MBX_PARA_NULL, MBX_PARA_NULL);
 }
 
 /**
@@ -68,7 +68,7 @@ uint32_t MBx_Master_Read_Disc_Input_Request(_MBX_MASTER *pMaster, uint8_t SlaveI
     }
 
     /* 填充一条请求 */
-    MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_READ_DISC_INPUT, StartAddr, ReadNum, (uint8_t *)MBX_PARA_NULL, MBX_PARA_NULL);
+    return MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_READ_DISC_INPUT, StartAddr, ReadNum, (uint8_t *)MBX_PARA_NULL, MBX_PARA_NULL);
 }
 
 /**
@@ -91,7 +91,7 @@ uint32_t MBx_Master_Read_Reg_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint
     }
 
     /* 填充一条请求 */
-    MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_READ_REG, StartAddr, ReadNum, (uint8_t *)MBX_PARA_NULL, MBX_PARA_NULL);
+    return MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_READ_REG, StartAddr, ReadNum, (uint8_t *)MBX_PARA_NULL, MBX_PARA_NULL);
 }
 
 /**
@@ -114,7 +114,7 @@ uint32_t MBx_Master_Read_Input_Reg_Request(_MBX_MASTER *pMaster, uint8_t SlaveID
     }
 
     /* 填充一条请求 */
-    MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_READ_INPUT_REG, StartAddr, ReadNum, (uint8_t *)MBX_PARA_NULL, MBX_PARA_NULL);
+    return MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_READ_INPUT_REG, StartAddr, ReadNum, (uint8_t *)MBX_PARA_NULL, MBX_PARA_NULL);
 }
 
 /**
@@ -149,7 +149,7 @@ uint32_t MBx_Master_Write_Coil_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, ui
     }
 
     /* 填充一条请求 */
-    MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_WRITE_COIL, Addr, MBX_PARA_NULL, StandardData, 2);
+    return MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_WRITE_COIL, Addr, MBX_PARA_NULL, StandardData, 2);
 }
 
 /**
@@ -176,7 +176,7 @@ uint32_t MBx_Master_Write_Reg_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uin
     StandardData[1] = Value & 0x00FF;
 
     /* 填充一条请求 */
-    MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_WRITE_REG, Addr, MBX_PARA_NULL, StandardData, 2);
+    return MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_WRITE_REG, Addr, MBX_PARA_NULL, StandardData, 2);
 }
 
 /**
@@ -202,7 +202,7 @@ uint32_t MBx_Master_Write_Coil_Mul_Request(_MBX_MASTER *pMaster, uint8_t SlaveID
     }
 
     /* 填充一条请求 */
-    MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_WRITE_COIL_MUL, StartAddr, ReadNum, Data, DataLen);
+    return MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_WRITE_COIL_MUL, StartAddr, ReadNum, Data, DataLen);
 }
 
 /**
@@ -227,7 +227,7 @@ uint32_t MBx_Master_Write_Reg_Mul_Request(_MBX_MASTER *pMaster, uint8_t SlaveID,
     }
 
     /* 填充一条请求 */
-    MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_WRITE_REG_MUL, StartAddr, ReadNum, Data, DataLen);
+    return MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_WRITE_REG_MUL, StartAddr, ReadNum, Data, DataLen);
 }
 
 #endif /* MBX_MASTER_ENABLE */

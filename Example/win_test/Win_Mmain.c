@@ -64,8 +64,6 @@ static uint32_t u8WriteTest2(void *value);
 static uint32_t u16WriteTest1(void *value);
 static uint32_t u16WriteTest2(void *value);
 static uint32_t u32WriteTest1(void *value);
-static uint32_t u32WriteTest2(void *value);
-static uint32_t u32WriteTest3(void *value);
 static uint32_t fWriteTest1(void *value);
 
 /* 示例对指令错误的处理 */
@@ -338,31 +336,8 @@ static uint32_t u16WriteTest2(void *value)
 */
 static uint32_t u32WriteTest1(void *value)
 {
-    uint32_t ValueGet = (*(uint32_t *)value);
-    /* 期望写入ValueGet而没有成功写入 */
-    return MBX_API_RETURN_DEFAULT;
-}
-
-/**
- * @brief uint32_t 映射的写失败时处理
- * @param value 库内传参，对于 uint32_t 的映射将传入(uint32_t *)类型
- * @return 标准返回，请依照 MBx_api.h 的 “API返回集” 部分编写
-*/
-static uint32_t u32WriteTest2(void *value)
-{
-    uint32_t ValueGet = (*(uint32_t *)value);
-    /* 期望写入ValueGet而没有成功写入 */
-    return MBX_API_RETURN_DEFAULT;
-}
-
-/**
- * @brief uint32_t 映射的写失败时处理
- * @param value 库内传参，对于 uint32_t 的映射将传入(uint32_t *)类型
- * @return 标准返回，请依照 MBx_api.h 的 “API返回集” 部分编写
-*/
-static uint32_t u32WriteTest3(void *value)
-{
-    uint32_t ValueGet = (*(uint32_t *)value);
+    (void)(value);
+    // (*(uint32_t *)value);
     /* 期望写入ValueGet而没有成功写入 */
     return MBX_API_RETURN_DEFAULT;
 }
@@ -374,7 +349,8 @@ static uint32_t u32WriteTest3(void *value)
 */
 static uint32_t fWriteTest1(void *value)
 {
-    float ValueGet = (*(float *)value);
+    (void)(value);
+    // (*(float *)value);
     /* 期望写入ValueGet而没有成功写入 */
     return MBX_API_RETURN_DEFAULT;
 }
