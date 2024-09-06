@@ -17,7 +17,8 @@
             "string.h": "c",
             "type_traits": "c",
             "cstdlib": "c",
-            "windows.h": "c"
+            "windows.h": "c",
+            "mbx_user.h": "c"
         }
     },
     "launch": {

@@ -1,7 +1,4 @@
-/**
- * 一个用户配置文件的示例模板
- * 你可以复制一份并且改名为 MBx_user.h 加入你的工程
- */
+
 
 #ifndef _MBX_USER_H_
 #define _MBX_USER_H_

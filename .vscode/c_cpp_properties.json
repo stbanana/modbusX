@@ -10,7 +10,8 @@
             "defines": [
                 "_DEBUG",
                 "UNICODE",
-                "_UNICODE"
+                "_UNICODE",
+                "MBX_INCLUDE_USER_DEFINE_FILE"
             ],
             "compilerPath": "C:\\111_APPS\\MSYS2\\mingw64\\bin\\gcc.exe",
             "cStandard": "c17",

@@ -37,6 +37,7 @@
  */
 void MBx_Init_Attr(_MBX_COMMON_CONFIG *MBxAttr, uint8_t Model, uint8_t Mode, uint32_t para1, uint32_t para2)
 {
+    MBX_UNUSED_PARAM(para2)
     MBxAttr->ModbusMode = Mode;
 
     switch(Model)

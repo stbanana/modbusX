@@ -1,6 +1,6 @@
 
 /**
- * @file    Win_Smain.c
+ * @file    RTU_Smain.c
  * windows使用虚拟串口与modbus测试软件进行通信
  * 测试主从机功能
  * 其中大部分代码来自百度, 且懒得格式化
@@ -83,6 +83,8 @@ void MyRTUSlaveTest(void);
 
 int main(int argc, char *argv[])
 {
+    MBX_UNUSED_PARAM(argc)
+    MBX_UNUSED_PARAM(argv)
     /* 打开串口 */
     const char *com = COM_PORT_NAME;
     comHandle       = SerialOpen(com, CBR_9600, 8, NOPARITY, ONESTOPBIT);

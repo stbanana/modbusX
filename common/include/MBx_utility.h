@@ -213,6 +213,9 @@ extern "C"
 #define MBX_MAP_FIND_MODE_FIRST      0 /* 定义首次查找 */
 #define MBX_MAP_FIND_MODE_CONTINUOUS 1 /* 定义继续查找 */
 
+/* 未使用参数标识 去警告 */
+#define MBX_UNUSED_PARAM(x) ((void)(x));
+
 /* Exported types ------------------------------------------------------------*/
 /**
  * @brief 一个方便的CRC16结构

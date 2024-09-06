@@ -31,4 +31,5 @@
  */
 void MBx_Init_Master_Parse(_MBX_MASTER_PARSE_VALUE *MBxMasterParse)
 {
+    MBX_UNUSED_PARAM(MBxMasterParse)
 }

@@ -31,4 +31,5 @@
  */
 void MBx_Init_Slave_Parse(_MBX_SLAVE_PARSE_VALUE *MBxSlaveParse)
 {
+    MBX_UNUSED_PARAM(MBxSlaveParse)
 }

@@ -1,6 +1,6 @@
 
 /**
- * @file    Win_Smain.c
+ * @file    RTU_Smain.c
  * windows使用虚拟串口与modbus测试软件进行通信
  * 测试主机功能
  * 其中大部分代码来自百度, 且懒得格式化
@@ -87,6 +87,8 @@ void MyRTUMasterTest(void);
 
 int main(int argc, char *argv[])
 {
+    MBX_UNUSED_PARAM(argc)
+    MBX_UNUSED_PARAM(argv)
     /* 打开串口 */
     const char *com = COM_PORT_NAME;
     comHandle       = SerialOpen(com, CBR_9600, 8, NOPARITY, ONESTOPBIT);
@@ -336,7 +338,7 @@ static uint32_t u16WriteTest2(void *value)
 */
 static uint32_t u32WriteTest1(void *value)
 {
-    (void)(value);
+    MBX_UNUSED_PARAM(value)
     // (*(uint32_t *)value);
     /* 期望写入ValueGet而没有成功写入 */
     return MBX_API_RETURN_DEFAULT;
@@ -349,7 +351,7 @@ static uint32_t u32WriteTest1(void *value)
 */
 static uint32_t fWriteTest1(void *value)
 {
-    (void)(value);
+    MBX_UNUSED_PARAM(value)
     // (*(float *)value);
     /* 期望写入ValueGet而没有成功写入 */
     return MBX_API_RETURN_DEFAULT;

@@ -20,8 +20,7 @@ set(CMAKE_EXECUTABLE_SUFFIX_CXX     ".exe")     # 设置C++可执行文件后缀
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)   # 设置尝试编译的目标类型为静态库
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+# 设置一些通用的编译标志
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wpedantic -O0 -g0")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g0")
-
-set(CMAKE_C_LINK_FLAGS "")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-pedantic")
