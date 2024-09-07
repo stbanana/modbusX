@@ -33,7 +33,10 @@
  * @param ReadNum 读取数量
  * @return uint32_t 标准返回
  */
-uint32_t MBx_Master_Read_Coil_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t ReadNum)
+uint32_t MBx_Master_Read_Coil_Request(_MBX_MASTER *pMaster, //
+                                      uint8_t      SlaveID,
+                                      uint16_t     StartAddr,
+                                      uint16_t     ReadNum)
 {
     _MBX_MASTER_TEAM_MEMBER *pMember;
 
@@ -56,7 +59,10 @@ uint32_t MBx_Master_Read_Coil_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uin
  * @param ReadNum 读取数量
  * @return uint32_t 标准返回
  */
-uint32_t MBx_Master_Read_Disc_Input_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t ReadNum)
+uint32_t MBx_Master_Read_Disc_Input_Request(_MBX_MASTER *pMaster, //
+                                            uint8_t      SlaveID,
+                                            uint16_t     StartAddr,
+                                            uint16_t     ReadNum)
 {
     _MBX_MASTER_TEAM_MEMBER *pMember;
 
@@ -79,7 +85,10 @@ uint32_t MBx_Master_Read_Disc_Input_Request(_MBX_MASTER *pMaster, uint8_t SlaveI
  * @param ReadNum 读取数量
  * @return uint32_t 标准返回
  */
-uint32_t MBx_Master_Read_Reg_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t ReadNum)
+uint32_t MBx_Master_Read_Reg_Request(_MBX_MASTER *pMaster, //
+                                     uint8_t      SlaveID,
+                                     uint16_t     StartAddr,
+                                     uint16_t     ReadNum)
 {
     _MBX_MASTER_TEAM_MEMBER *pMember;
 
@@ -102,7 +111,10 @@ uint32_t MBx_Master_Read_Reg_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint
  * @param ReadNum 读取数量
  * @return uint32_t 标准返回
  */
-uint32_t MBx_Master_Read_Input_Reg_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t ReadNum)
+uint32_t MBx_Master_Read_Input_Reg_Request(_MBX_MASTER *pMaster, //
+                                           uint8_t      SlaveID,
+                                           uint16_t     StartAddr,
+                                           uint16_t     ReadNum)
 {
     _MBX_MASTER_TEAM_MEMBER *pMember;
 
@@ -125,7 +137,10 @@ uint32_t MBx_Master_Read_Input_Reg_Request(_MBX_MASTER *pMaster, uint8_t SlaveID
  * @param Value 写入值 只有0与>0
  * @return uint32_t 标准返回
  */
-uint32_t MBx_Master_Write_Coil_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t Addr, uint16_t Value)
+uint32_t MBx_Master_Write_Coil_Request(_MBX_MASTER *pMaster, //
+                                       uint8_t      SlaveID,
+                                       uint16_t     Addr,
+                                       uint16_t     Value)
 {
     _MBX_MASTER_TEAM_MEMBER *pMember;
     uint8_t                  StandardData[2];
@@ -160,7 +175,10 @@ uint32_t MBx_Master_Write_Coil_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, ui
  * @param Value 写入值 
  * @return uint32_t 标准返回
  */
-uint32_t MBx_Master_Write_Reg_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t Addr, uint16_t Value)
+uint32_t MBx_Master_Write_Reg_Request(_MBX_MASTER *pMaster, //
+                                      uint8_t      SlaveID,
+                                      uint16_t     Addr,
+                                      uint16_t     Value)
 {
     _MBX_MASTER_TEAM_MEMBER *pMember;
     uint8_t                  StandardData[2];
@@ -185,12 +203,17 @@ uint32_t MBx_Master_Write_Reg_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uin
  * @param pMaster mbx主机对象
  * @param SlaveID 期望请求的从机号
  * @param StartAddr 写入起始地址
- * @param ReadNum 写入数量
- * @param Data 写入数据
+ * @param WriteNum 写入数量
+ * @param Data 写入数据起始指针
  * @param DataLen 写入数据长度
  * @return uint32_t 标准返回
  */
-uint32_t MBx_Master_Write_Coil_Mul_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t ReadNum, uint8_t *Data, uint16_t DataLen)
+uint32_t MBx_Master_Write_Coil_Mul_Request(_MBX_MASTER *pMaster, //
+                                           uint8_t      SlaveID,
+                                           uint16_t     StartAddr,
+                                           uint16_t     WriteNum,
+                                           uint8_t     *Data,
+                                           uint16_t     DataLen)
 {
     _MBX_MASTER_TEAM_MEMBER *pMember;
 
@@ -202,7 +225,7 @@ uint32_t MBx_Master_Write_Coil_Mul_Request(_MBX_MASTER *pMaster, uint8_t SlaveID
     }
 
     /* 填充一条请求 */
-    return MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_WRITE_COIL_MUL, StartAddr, ReadNum, Data, DataLen);
+    return MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_WRITE_COIL_MUL, StartAddr, WriteNum, Data, DataLen);
 }
 
 /**
@@ -210,12 +233,17 @@ uint32_t MBx_Master_Write_Coil_Mul_Request(_MBX_MASTER *pMaster, uint8_t SlaveID
  * @param pMaster mbx主机对象
  * @param SlaveID 期望请求的从机号
  * @param StartAddr 写入起始地址
- * @param ReadNum 写入数量
+ * @param WriteNum 写入数量
  * @param Data 写入数据
  * @param DataLen 写入数据字节长度
  * @return uint32_t 标准返回
  */
-uint32_t MBx_Master_Write_Reg_Mul_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t ReadNum, uint8_t *Data, uint16_t DataLen)
+uint32_t MBx_Master_Write_Reg_Mul_Request(_MBX_MASTER *pMaster, //
+                                          uint8_t      SlaveID,
+                                          uint16_t     StartAddr,
+                                          uint16_t     WriteNum,
+                                          uint8_t     *Data,
+                                          uint16_t     DataLen)
 {
     _MBX_MASTER_TEAM_MEMBER *pMember;
 
@@ -227,7 +255,7 @@ uint32_t MBx_Master_Write_Reg_Mul_Request(_MBX_MASTER *pMaster, uint8_t SlaveID,
     }
 
     /* 填充一条请求 */
-    return MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_WRITE_REG_MUL, StartAddr, ReadNum, Data, DataLen);
+    return MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_WRITE_REG_MUL, StartAddr, WriteNum, Data, DataLen);
 }
 
 #endif /* MBX_MASTER_ENABLE */

@@ -109,7 +109,7 @@ extern "C"
 #define MBX_API_RETURN_BUFFER_EMPTY 0x21 //BUFFER空
 /* 映射表相关返回 */
 #define MBX_API_RETURN_MAP_UNFORMAT 0x101 // MAP格式错误
-#define MBX_API_RETURN_MAP_UNFIND   0x101 // MAP未查找到错误
+#define MBX_API_RETURN_MAP_UNFIND   0x102 // MAP未查找到错误
 
 /* Exported types ------------------------------------------------------------*/
 
@@ -332,8 +332,8 @@ extern uint32_t MBx_Master_Read_Reg_Request(_MBX_MASTER *pMaster, uint8_t SlaveI
 extern uint32_t MBx_Master_Read_Input_Reg_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t ReadNum);
 extern uint32_t MBx_Master_Write_Coil_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t Addr, uint16_t Value);
 extern uint32_t MBx_Master_Write_Reg_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t Addr, uint16_t Value);
-extern uint32_t MBx_Master_Write_Coil_Mul_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t ReadNum, uint8_t *Data, uint16_t DataLen);
-extern uint32_t MBx_Master_Write_Reg_Mul_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t ReadNum, uint8_t *Data, uint16_t DataLen);
+extern uint32_t MBx_Master_Write_Coil_Mul_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t WriteNum, uint8_t *Data, uint16_t DataLen);
+extern uint32_t MBx_Master_Write_Reg_Mul_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t WriteNum, uint8_t *Data, uint16_t DataLen);
 
 /* 便于拓展应用的开发, 用户无需调用 */
 extern void     MBx_Init_Runtime(_MBX_COMMON_RUNTIME *MBxRuntime);

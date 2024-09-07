@@ -34,7 +34,7 @@
  * @param Error 实际收到的错误码
  * @param AddrStart 错误发送地址起始
  * @param RegNum 错误发送寄存器数量
- * @return 
+ * @return uint32_t 标准返回
  */
 uint32_t MBxMasterErrortAdd(_MBX_MASTER *pMaster, //
                             uint8_t      Func,
@@ -64,7 +64,7 @@ uint32_t MBxMasterErrortAdd(_MBX_MASTER *pMaster, //
  * @param Error 实际收到的错误码
  * @param AddrStart 错误发送地址起始
  * @param RegNum 错误发送寄存器数量
- * @return 
+ * @return uint32_t 标准返回
  */
 uint32_t MBx_Master_Error_Get(_MBX_MASTER *pMaster, //
                               uint8_t     *Func,
