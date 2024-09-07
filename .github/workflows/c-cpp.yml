@@ -18,13 +18,20 @@ jobs:
       uses: msys2/setup-msys2@v2
       with:
         install: >
-          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-cmake
-          make
         msystem: MINGW64
 
+    - name: Verify GCC installation
+      run: gcc --version
+      shell: msys2 {0}
+
+    - name: Verify CMake installation
+      run: cmake --version
+      shell: msys2 {0}
+
     - name: Configure CMake
-      run: cmake -S . -B build 
+      run: cmake -S . -B build -G "MinGW Makefiles"
       shell: msys2 {0}
 
     - name: Build
