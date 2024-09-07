@@ -8,8 +8,8 @@ set(CMAKE_C_EXTENSIONS ON)          # 启用编译器扩展
 include("${CMAKE_CURRENT_LIST_DIR}/Example/win-gcc.cmake") # 包含编译环境的配置文件
 include(FetchContent)
 
-enable_language(C)
 project(WinProjects)
+enable_language(C)
 
 # 使用 FetchContent 拉取 modbusX 源码
 FetchContent_Declare(
