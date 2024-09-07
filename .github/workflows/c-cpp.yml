@@ -24,7 +24,7 @@ jobs:
         msystem: MINGW64
 
     - name: Configure CMake
-      run: cmake -S . -B build -G "MinGW Makefiles"
+      run: cmake -S . -B build 
       shell: msys2 {0}
 
     - name: Build
