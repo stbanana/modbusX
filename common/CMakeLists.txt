@@ -9,7 +9,7 @@ file(GLOB_RECURSE SRC ${CMAKE_CURRENT_LIST_DIR}/source/*.c)
 
 target_include_directories(modbusx INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/include
-    ../port/generic/inc
+    ${CMAKE_CURRENT_LIST_DIR}/../port/generic/inc
 )
 
 target_sources(modbusx INTERFACE

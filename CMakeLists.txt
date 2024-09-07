@@ -16,7 +16,7 @@ FetchContent_Declare(
     modbusx
     GIT_REPOSITORY https://github.com/stbanana/modbusX.git
     GIT_TAG main
-    SOURCE_SUBDIR common
+    SOURCE_SUBDIR common  # 使用子目录，避免触发测试主构建
 )
 # 使能 FetchContent_MakeAvailable，这将下载 modbusX
 FetchContent_MakeAvailable(modbusx)
