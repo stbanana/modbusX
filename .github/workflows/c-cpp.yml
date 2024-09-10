@@ -9,8 +9,6 @@ on:
 jobs:
   setup_environment:
     runs-on: windows-latest
-    outputs:
-      cache-path: ${{ steps.cache_path.outputs.cache-path }}
 
     steps:
     - name: Checkout repository
@@ -18,7 +16,15 @@ jobs:
       with:
         submodules: true # 确保检查出子模块
 
+    - name: Cache MSYS2
+      id: cache-msys2
+      uses: actions/cache@v3
+      with:
+        path: C:\tools\msys64
+        key: msys2-v3
+
     - name: Setup MSYS2
+      if: steps.cache-msys2.outputs.cache-hit != 'true'
       uses: msys2/setup-msys2@v2
       with:
         install: >
@@ -44,7 +50,14 @@ jobs:
       with:
         submodules: true # 确保检查出子模块
 
+    - name: Cache MSYS2
+      uses: actions/cache@v3
+      with:
+        path: C:\tools\msys64
+        key: msys2-v3
+
     - name: Setup MSYS2
+      if: steps.cache-msys2.outputs.cache-hit != 'true'
       uses: msys2/setup-msys2@v2
       with:
         install: >
@@ -60,6 +73,12 @@ jobs:
       run: cmake --build build
       shell: msys2 {0}
 
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build
+        path: build
+
   run_tests:
     runs-on: windows-latest
     needs: build
@@ -70,13 +89,26 @@ jobs:
       with:
         submodules: true # 确保检查出子模块
 
+    - name: Cache MSYS2
+      uses: actions/cache@v3
+      with:
+        path: C:\tools\msys64
+        key: msys2-v3
+
     - name: Setup MSYS2
+      if: steps.cache-msys2.outputs.cache-hit != 'true'
       uses: msys2/setup-msys2@v2
       with:
         install: >
           mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-cmake
         msystem: MINGW64
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: build
+        path: build
 
     - name: Run tests
       run: ctest --test-dir build
