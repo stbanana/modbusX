@@ -18,14 +18,14 @@ jobs:
 
     - name: Cache MSYS2
       id: cache-msys2
-      uses: actions/cache@v4
+      uses: actions/cache@v3
       with:
         path: C:\tools\msys64
         key: msys2-v3
 
     - name: Setup MSYS2
       if: steps.cache-msys2.outputs.cache-hit != 'true'
-      uses: msys2/setup-msys2@v4
+      uses: msys2/setup-msys2@v2
       with:
         install: >
           mingw-w64-x86_64-toolchain
@@ -51,14 +51,14 @@ jobs:
         submodules: true # 确保检查出子模块
 
     - name: Cache MSYS2
-      uses: actions/cache@v4
+      uses: actions/cache@v3
       with:
         path: C:\tools\msys64
         key: msys2-v3
 
     - name: Setup MSYS2
       if: steps.cache-msys2.outputs.cache-hit != 'true'
-      uses: msys2/setup-msys2@v4
+      uses: msys2/setup-msys2@v2
       with:
         install: >
           mingw-w64-x86_64-toolchain
@@ -74,7 +74,7 @@ jobs:
       shell: msys2 {0}
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: build
         path: build
@@ -90,14 +90,14 @@ jobs:
         submodules: true # 确保检查出子模块
 
     - name: Cache MSYS2
-      uses: actions/cache@v4
+      uses: actions/cache@v3
       with:
         path: C:\tools\msys64
         key: msys2-v3
 
     - name: Setup MSYS2
       if: steps.cache-msys2.outputs.cache-hit != 'true'
-      uses: msys2/setup-msys2@v4
+      uses: msys2/setup-msys2@v2
       with:
         install: >
           mingw-w64-x86_64-toolchain
@@ -105,7 +105,7 @@ jobs:
         msystem: MINGW64
 
     - name: Download build artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v3
       with:
         name: build
         path: build
