@@ -13,6 +13,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        submodules: true # 确保检查出子模块
 
     - name: Setup MSYS2
       uses: msys2/setup-msys2@v2
