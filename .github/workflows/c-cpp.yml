@@ -37,3 +37,7 @@ jobs:
     - name: Build
       run: cmake --build build
       shell: msys2 {0}
+
+    - name: Run tests
+      run: ctest --test-dir build
+      shell: msys2 {0}
