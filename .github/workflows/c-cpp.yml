@@ -7,8 +7,10 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  setup_environment:
     runs-on: windows-latest
+    outputs:
+      cache-path: ${{ steps.cache_path.outputs.cache-path }}
 
     steps:
     - name: Checkout repository
@@ -32,6 +34,24 @@ jobs:
       run: cmake --version
       shell: msys2 {0}
 
+  build:
+    runs-on: windows-latest
+    needs: setup_environment
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: true # 确保检查出子模块
+
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        install: >
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-cmake
+        msystem: MINGW64
+
     - name: Configure CMake
       run: cmake -S . -B build -G "MinGW Makefiles"
       shell: msys2 {0}
@@ -39,6 +59,24 @@ jobs:
     - name: Build
       run: cmake --build build
       shell: msys2 {0}
+
+  run_tests:
+    runs-on: windows-latest
+    needs: build
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: true # 确保检查出子模块
+
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        install: >
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-cmake
+        msystem: MINGW64
 
     - name: Run tests
       run: ctest --test-dir build
