@@ -2,7 +2,9 @@
     "files.associations": {
         "*.c": "c",
         "mbx_api.h": "c",
-        "mbx_port.h": "c"
+        "mbx_port.h": "c",
+        "random": "cpp",
+        "mbx_utility.h": "c"
     },
     "makefile.makePath": "cmake",
     "makefile.makefilePath": "${workspaceRoot}\\\\build"

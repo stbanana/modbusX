@@ -1,0 +1,6 @@
+[submodule "Example/boost"]
+	path = Example/boost
+	url = git@github.com:boostorg/boost.git
+[submodule "unitTest/googletest"]
+	path = unitTest/googletest
+	url = git@github.com:stbanana/googletest.git

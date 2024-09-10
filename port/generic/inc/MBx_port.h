@@ -37,22 +37,6 @@ extern "C"
 #define MBX_MASTER_ENABLE 1
 #endif
 
-#ifndef MBX_MODULE_ERR_TRACE_ENABLE
-#define MBX_MODULE_ERR_TRACE_ENABLE 1
-#endif
-
-#ifndef MBX_SEND_MODE_BYTES
-#define MBX_SEND_MODE_BYTES 1
-#endif
-
-#ifndef MBX_BUILT_UTILTY_CRC_ENABLE
-#define MBX_BUILT_UTILTY_CRC_ENABLE 1
-#endif
-
-#ifndef MBX_ENDIAN_MODE_BIG
-#define MBX_ENDIAN_MODE_BIG 0
-#endif
-
 #ifndef MBX_MASTER_REQUEST_QUEUE_MAX
 #define MBX_MASTER_REQUEST_QUEUE_MAX 40
 #endif
@@ -76,6 +60,26 @@ extern "C"
 
 #ifndef MBX_MASTER_RESPONSE_TIMEOUT_US
 #define MBX_MASTER_RESPONSE_TIMEOUT_US 100000
+#endif
+
+#ifndef MBX_MODULE_ERR_TRACE_ENABLE
+#define MBX_MODULE_ERR_TRACE_ENABLE 1
+#endif
+
+#ifndef MBX_ERR_TRACE_MAX_NUM
+#define MBX_ERR_TRACE_MAX_NUM 20
+#endif
+
+#ifndef MBX_SEND_MODE_BYTES
+#define MBX_SEND_MODE_BYTES 1
+#endif
+
+#ifndef MBX_BUILT_UTILTY_CRC_ENABLE
+#define MBX_BUILT_UTILTY_CRC_ENABLE 1
+#endif
+
+#ifndef MBX_ENDIAN_MODE_BIG
+#define MBX_ENDIAN_MODE_BIG 0
 #endif
 
 /* Exported constants --------------------------------------------------------*/

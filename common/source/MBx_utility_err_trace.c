@@ -24,9 +24,6 @@
 /* Private types -------------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
 
-/* 定义最大记录的条目数 */
-#define MBX_ERR_TRACE_MAX_NUM 20
-
 /* Private variables ---------------------------------------------------------*/
 
 _MBX_ERR_TRACE MBxErrTraceStack[MBX_ERR_TRACE_MAX_NUM];

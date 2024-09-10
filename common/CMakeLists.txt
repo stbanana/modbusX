@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
+project(MODBUSX)
 add_library(modbusx INTERFACE) # INTERFACE意味着这个库本身并不会被编译，而是作为依赖被其他目标使用，以便于MBx_user.h可以自己定义并且对库行为进行变更
 
 # 递归查找所有源码文件
