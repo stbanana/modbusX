@@ -66,3 +66,4 @@ enable_testing()
 
 # 添加子目录
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unitTest/test_case/test_utility)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unitTest/test_case/test_library)
