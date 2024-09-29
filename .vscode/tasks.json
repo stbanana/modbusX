@@ -17,6 +17,7 @@
                 "${fileDirname}",
                 "-D",
                 "MBX_INCLUDE_USER_DEFINE_FILE",
+                "-lws2_32",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
             ],

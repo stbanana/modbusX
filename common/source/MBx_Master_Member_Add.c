@@ -40,9 +40,9 @@ uint32_t MBx_Master_Member_Add(_MBX_MASTER               *MBxMaster, //
                                uint8_t                    SlaveID,
                                const _MBX_MAP_LIST_ENTRY *MAP)
 {
-    uint32_t                 state = MBX_API_RETURN_DEFAULT;
-    _MBX_MASTER_TEAM_MEMBER *ChainNow;
-    uint32_t                 isFound;
+    uint32_t                 state    = MBX_API_RETURN_DEFAULT;
+    _MBX_MASTER_TEAM_MEMBER *ChainNow = NULL;
+    uint32_t                 isFound  = 0;
     uint16_t                 i; // 遍历map并审查
 #if MBX_MODULE_ERR_TRACE_ENABLE
     uint32_t AddrNow; // 当前审查的条目 mb寄存器地址

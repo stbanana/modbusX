@@ -36,4 +36,5 @@ void MBx_Init_Runtime(_MBX_COMMON_RUNTIME *MBxRuntime)
     MBxRuntime->State     = MBX_STATE_IDLE;
     MBxRuntime->StatePast = MBX_STATE_IDLE;
     MBxRuntime->StateFlow = 0;
+    MBxRuntime->TransID   = 0;
 }

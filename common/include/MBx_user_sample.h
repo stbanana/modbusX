@@ -15,9 +15,7 @@
 //   <0=> 裁剪去掉从机功能
 //   <1=> 从机启用
 // <i> Default: 从机启用
-#ifndef MBX_SLAVE_ENABLE
 #define MBX_SLAVE_ENABLE 1
-#endif
 
 // </e>
 
@@ -26,9 +24,7 @@
 //   <0=> 裁剪去掉主机功能
 //   <1=> 主机启用
 // <i> Default: 主机启用
-#ifndef MBX_MASTER_ENABLE
 #define MBX_MASTER_ENABLE 1
-#endif
 
 //   <o> 主机请求队列的最大深度 <32-255>
 //   <i> 是队列中的最大寄存条数，用于连续读写请求，寄存并自动发送处理。是8位存储故而不超过255
@@ -52,13 +48,18 @@
 
 // </e>
 
+// <e> 错误追踪模组是否开启
 // <o> 错误追踪模组是否开启
 //   <0=> 裁剪掉错误追踪模组
 //   <1=> 错误追踪模组启用
 // <i> Default: 错误追踪模组启用
-#ifndef MBX_MODULE_ERR_TRACE_ENABLE
 #define MBX_MODULE_ERR_TRACE_ENABLE 1
-#endif
+
+//   <o> 错误追踪记录的条目数 <5-255>
+//   <i> 整个系统追踪栈的最大深度。是8位存储故而不超过255
+//   <i> Default: 20
+#define MBX_ERR_TRACE_MAX_NUM 20
+// </e>
 
 // </h>
 

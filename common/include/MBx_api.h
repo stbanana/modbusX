@@ -173,8 +173,8 @@ typedef struct
     uint32_t StatePast:4; // 运行时状态机前一态寄存, 状态流转时可以处理数据
     uint32_t StateFlow:1; // 状态机立即流转动作 1立即流转 0按流程流转
     // uint32_t StateWait:1; // 状态机保持等待标识 1保持等待 0流转出去
-    // uint32_t TransID  :16; // modbusTCP专用, 当前累计的事务号
-    uint32_t reg:19; // 补位
+    uint32_t TransID:16; // modbusTCP专用, 当前累计的事务号
+    uint32_t reg    :3;  // 补位
 } _MBX_COMMON_RUNTIME;
 
 /***********提供从机对象使用的定义***********/
@@ -322,8 +322,10 @@ typedef struct _MBX_MASTER
 extern void MBx_Ticks(uint32_t Cycle);
 /*从机API*/
 extern uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE *MBxSlave, uint8_t SlaveID, const _MBX_MAP_LIST_ENTRY *MAP, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate, uint8_t *RxBuffer, uint32_t RxBufferSize, uint8_t *TxBuffer, uint32_t TxBufferSize);
+extern uint32_t MBx_Slave_TCP_Init(_MBX_SLAVE *MBxSlave, uint8_t SlaveID, const _MBX_MAP_LIST_ENTRY *MAP, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate, uint8_t *RxBuffer, uint32_t RxBufferSize, uint8_t *TxBuffer, uint32_t TxBufferSize);
 /*主机API*/
 extern uint32_t MBx_Master_RTU_Init(_MBX_MASTER *MBxMaster, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate, uint8_t *RxBuffer, uint32_t RxBufferSize, uint8_t *TxBuffer, uint32_t TxBufferSize);
+extern uint32_t MBx_Master_TCP_Init(_MBX_MASTER *MBxMaster, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate, uint8_t *RxBuffer, uint32_t RxBufferSize, uint8_t *TxBuffer, uint32_t TxBufferSize);
 extern uint32_t MBx_Master_Member_Add(_MBX_MASTER *MBxMaster, _MBX_MASTER_TEAM_MEMBER *MBxMember, uint8_t SlaveID, const _MBX_MAP_LIST_ENTRY *MAP);
 extern uint32_t MBx_Master_Error_Get(_MBX_MASTER *pMaster, uint8_t *Func, uint8_t *Error, uint16_t *AddrStart, uint16_t *RegNum);
 extern uint32_t MBx_Master_Read_Coil_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t ReadNum);

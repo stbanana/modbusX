@@ -34,7 +34,7 @@ void MBx_Slave_RTU_Error_Handle(_MBX_SLAVE *pSlave, uint8_t ErrorCode);
  */
 uint32_t MBx_Slave_RTU_READ_COIL_Handle(_MBX_SLAVE *pSlave)
 {
-    uint8_t    ComboBit;
+    uint8_t    ComboBit = 0;
     uint16_t   i;
     _MBX_CRC16 crc;
     /* 提取待解析的寄存器数量 */
@@ -93,7 +93,7 @@ uint32_t MBx_Slave_RTU_READ_COIL_Handle(_MBX_SLAVE *pSlave)
  */
 uint32_t MBx_Slave_RTU_READ_DISC_INPUTL_Handle(_MBX_SLAVE *pSlave)
 {
-    uint8_t    ComboBit;
+    uint8_t    ComboBit = 0;
     uint16_t   i;
     _MBX_CRC16 crc;
     /* 提取待解析的寄存器数量 */

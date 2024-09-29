@@ -178,9 +178,10 @@ void MyRTUMasterTest(void)
 static void TestMemUpdate(uint32_t Cycle)
 {
     static uint16_t u16buffer[10]; // 测试数组
-    static uint16_t u16test = 0;
-    static uint32_t u32test = 0;
-    static float    ftest   = 0.0;
+    static uint16_t u16test   = 0;
+    static uint32_t u32test   = 0;
+    static float    ftest     = 0.0;
+    static uint32_t ftest_cpy = 0;
     static uint32_t i;
     i += Cycle;
     if((i % 500) == 0) // 分频到500ms
@@ -206,8 +207,13 @@ static void TestMemUpdate(uint32_t Cycle)
         u16buffer[0] = (u32test >> 16) & 0xFFFF;
         u16buffer[1] = u32test & 0xFFFF;
         MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0x200, 2, (uint8_t *)&u16buffer[0], 4); // 请求写入1号从机的0x200地址的2个寄存器 无符号32位拼凑
-        u16buffer[0] = (*(uint32_t *)&ftest >> 16) & 0xFFFF;
-        u16buffer[1] = *(uint32_t *)&ftest & 0xFFFF;
+        /* 取真实内存值的原版写法，但会带来警告 */
+        // u16buffer[0] = (*(uint32_t *)(&ftest) >> 16) & 0xFFFF;
+        // u16buffer[1] = (*(uint32_t *)(&ftest)) & 0xFFFF;
+        /* 增加开销的写法，但能消除警告 */
+        memcpy(&ftest_cpy, &ftest, sizeof(float));
+        u16buffer[0] = (ftest_cpy >> 16) & 0xFFFF;
+        u16buffer[1] = ftest_cpy & 0xFFFF;
         MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0x300, 2, (uint8_t *)&u16buffer[0], 4); // 请求写入1号从机的0x300地址的2个寄存器 浮点拼凑
         i = 0;
     }

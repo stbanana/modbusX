@@ -51,6 +51,7 @@ jobs:
         submodules: true # 确保检查出子模块
 
     - name: Cache MSYS2
+      id: cache-msys2
       uses: actions/cache@v3
       with:
         path: C:\tools\msys64
@@ -90,6 +91,7 @@ jobs:
         submodules: true # 确保检查出子模块
 
     - name: Cache MSYS2
+      id: cache-msys2
       uses: actions/cache@v3
       with:
         path: C:\tools\msys64

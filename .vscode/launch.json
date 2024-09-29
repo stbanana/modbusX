@@ -1,6 +1,12 @@
 {
     "configurations": [
         {
+            "name": "CMake: Script debugging",
+            "type": "cmake",
+            "request": "launch",
+            "cmakeDebugType": "configure"
+        },
+        {
             "name": "gcc build_test",
             "type": "cppdbg",
             "request": "launch",

@@ -11,7 +11,7 @@ Language:        Cpp
 # - GNU: https://www.gnu.org/prep/standards/standards.html
 # - InheritParentConfig: 继承父目录的编码规范, 如果有的话, 不是一个真正的编码规范
 # - None: 不使用, 即自动配置, 也就是本文件中的自定义内容
-# BasedOnStyle:  LLVM
+BasedOnStyle:  InheritParentConfig
 
 
 #访问声明符缩进
@@ -236,7 +236,6 @@ ExperimentalAutoDetectBinPacking: false
 # - CurrentLine: 所有参数放置于一行, 如果放不下, 就一个参数一行
 # - NextLine: 同CurrentLine有点像, 唯一不同就是如果放不行, 将剩余参数放置于下一行(即不自动一参一行)
 PackConstructorInitializers: Never
-BasedOnStyle:    ''
 
 # 废弃配置
 ConstructorInitializerAllOnOneLineOrOnePerLine: false

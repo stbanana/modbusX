@@ -15,16 +15,18 @@ include(FetchContent)
 project(WinProjects)
 enable_language(C)
 
-# 使用 FetchContent 拉取 modbusX 源码
-FetchContent_Declare(
-    modbusx
-    GIT_REPOSITORY https://github.com/stbanana/modbusX.git
-    GIT_TAG main
-    SOURCE_SUBDIR common  # 使用子目录，避免触发测试主构建
-)
-# 使能 FetchContent_MakeAvailable，这将下载 modbusX
-FetchContent_MakeAvailable(modbusx)
+# # 使用 FetchContent 拉取 modbusX 源码
+# FetchContent_Declare(
+#     modbusx
+#     GIT_REPOSITORY https://github.com/stbanana/modbusX.git
+#     GIT_TAG main
+#     SOURCE_SUBDIR common  # 使用子目录，避免触发测试主构建
+# )
+# # 使能 FetchContent_MakeAvailable，这将下载 modbusX
+# FetchContent_MakeAvailable(modbusx)
 
+# 使用本地文件不进行拉取
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/common)     # 添加子目录
 
 set(BUILD_PROJECT_NAME RTU_Mmain)   # 控制编译RTU主机测试
 add_executable(${BUILD_PROJECT_NAME})
@@ -42,7 +44,11 @@ target_sources(${BUILD_PROJECT_NAME} PRIVATE
 target_link_libraries(${BUILD_PROJECT_NAME} # 没有修饰词默认为 PRIVATE 
     modbusx 
 )
-
+# 添加链接器选项以生成 map 文件
+target_link_options(${BUILD_PROJECT_NAME} PRIVATE
+    -Wl,-Map=${BUILD_PROJECT_NAME}.map
+    -Wl,--gc-sections
+)
 
 set(BUILD_PROJECT_NAME RTU_Smain) # 控制编译RTU从机测试
 add_executable(${BUILD_PROJECT_NAME})
@@ -58,6 +64,11 @@ target_sources(${BUILD_PROJECT_NAME} PRIVATE
 )
 target_link_libraries(${BUILD_PROJECT_NAME} # 没有修饰词默认为 PRIVATE 
     modbusx 
+)
+# 添加链接器选项以生成 map 文件
+target_link_options(${BUILD_PROJECT_NAME} PRIVATE
+    -Wl,-Map=${BUILD_PROJECT_NAME}.map
+    -Wl,--gc-sections
 )
 
 

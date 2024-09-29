@@ -54,4 +54,5 @@ void MBx_Master_Engine_IDLE(_MBX_MASTER *pMaster)
         }
     }
 }
+
 #endif /* MBX_MASTER_ENABLE */

@@ -20,4 +20,3 @@ target_sources(modbusx INTERFACE
 if(CMAKE_C_STANDARD LESS 11)
     message(ERROR "Generated code requires C11 or higher")
 endif()
-
