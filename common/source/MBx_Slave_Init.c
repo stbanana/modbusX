@@ -99,7 +99,6 @@ uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE                *MBxSlave, //
  * @param MAP 指向地址映射表头的指针
  * @param MBxSend 绑定的从机发送port函数
  * @param MBxGetc 绑定的从机接收port函数
- * @param BaudRate 典型波特率
  * @param RxBuffer 绑定的接收buffer区域
  * @param RxBufferSize 绑定的接收buffer最大长度
  * @param TxBuffer 绑定的发送buffer区域
@@ -111,7 +110,6 @@ uint32_t MBx_Slave_TCP_Init(_MBX_SLAVE                *MBxSlave, //
                             const _MBX_MAP_LIST_ENTRY *MAP,
                             MBX_SEND_PTR               MBxSend,
                             MBX_GTEC_PTR               MBxGetc,
-                            uint32_t                   BaudRate,
                             uint8_t                   *RxBuffer,
                             uint32_t                   RxBufferSize,
                             uint8_t                   *TxBuffer,
@@ -147,7 +145,7 @@ uint32_t MBx_Slave_TCP_Init(_MBX_SLAVE                *MBxSlave, //
     MBxSlave->TxExist.Buffer = TxBuffer;
     MBxSlave->TxExist.LenMAX = TxBufferSize;
     /* 初始化属性 */
-    MBx_Init_Attr(&MBxSlave->Attr, MBX_MODEL_TCP, MBX_MODE_SLAVE, BaudRate, MBX_PARA_NULL);
+    MBx_Init_Attr(&MBxSlave->Attr, MBX_MODEL_TCP, MBX_MODE_SLAVE, MBX_PARA_NULL, MBX_PARA_NULL);
     /* 初始化从机配置 */
     State = MBx_Init_Slave_Config(&MBxSlave->Config, SlaveID, MAP);
     if(State != MBX_API_RETURN_DEFAULT)

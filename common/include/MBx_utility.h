@@ -113,6 +113,22 @@ extern "C"
     while(0)
 
 /**
+ * @brief MBX对象的RXbuffer删除部分长度
+ * @param pMBX  MBX对象指针
+ * @param rLen 期望删除的 字节长度
+ */
+#define MBxRxBufferRemove(pMBX, rLen)                                                                        \
+    do                                                                                                       \
+    {                                                                                                        \
+        pSlave->RxExist.Len -= rLen;                                                                         \
+        if(pSlave->RxExist.Len > 0)                                                                          \
+        {                                                                                                    \
+            MBx_utility_MemMove(pSlave->RxExist.Buffer, pSlave->RxExist.Buffer + rLen, pSlave->RxExist.Len); \
+        }                                                                                                    \
+    }                                                                                                        \
+    while(0)
+
+/**
  * @brief 向MBX对象的TXbuffer推入一个字节数据
  * @param pMBX  MBX对象指针
  * @param c 期望推入的 字节数据
@@ -250,6 +266,8 @@ extern _MBX_ERR_TRACE MBxErrTraceStack[];
 /* Exported functions ---------------------------------------------------------*/
 
 extern uint16_t                 MBx_utility_crc16(uint8_t *data, uint16_t len);
+
+extern void                     MBx_utility_MemMove(void *dest, const void *src, size_t n);
 
 extern void                     MBxErrTraceAdd(uint8_t SlaveID, uint8_t mode, uint8_t State, uint32_t ErrCode);
 extern uint32_t                 MBxErrTraceGet(uint8_t *SlaveID, uint8_t *mode, uint8_t *State, uint32_t *ErrCode);

@@ -43,8 +43,7 @@ static inline void MBx_Master_Parse_RTU_AddrStar_Get(_MBX_MASTER *pMaster);
  */
 void MBx_Master_RTU_Parse(_MBX_MASTER *pMaster)
 {
-    /* 审查从机ID号是否符合请求。
-    实际上应该检测提取完整帧后再审查, 为了减少运行语句, 在此审查。 */
+    /* 审查从机ID号是否符合请求 */
     if(pMaster->Parse.SlaveID != pMaster->RxExist.Buffer[0])
     {
         MBxRxBufferEmpty(pMaster);

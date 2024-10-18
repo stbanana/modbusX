@@ -5,46 +5,52 @@
  **** All rights reserved                                       ****
 
  ********************************************************************************
- * File Name     : MBx_Slave_Parse.c
+ * File Name     : MBx_utility_MemMove.c
  * Author        : yono
- * Date          : 2024-07-25
+ * Date          : 2024-07-23
  * Version       : 1.0
 ********************************************************************************/
 /**************************************************************************/
 /*
-    modbus单从机消息解析系统的运行, 内部函数, 不应由用户调用
+    modbusX 内存拷贝工具
 */
 
 /* Includes ------------------------------------------------------------------*/
 #include <MBx_api.h>
-#if MBX_SLAVE_ENABLE
 /* Private types -------------------------------------------------------------*/
+/* Private macros ------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private Constants ---------------------------------------------------------*/
-/* Private macros ------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-extern void MBx_Slave_RTU_Parse(_MBX_SLAVE *pSlave);
-extern void MBx_Slave_TCP_Parse(_MBX_SLAVE *pSlave);
 /* Private functions ---------------------------------------------------------*/
 
 /**
- * @brief modbusX从机消息解析系统
- * @param pSlave MBX从机对象指针
+ * @brief 移动内存块
+ * @param dest 目标内存地址
+ * @param src 源内存地址
+ * @param n 要移动的字节数
  */
-void MBx_Slave_Parse(_MBX_SLAVE *pSlave)
+void MBx_utility_MemMove(void *dest, const void *src, size_t n)
 {
-    switch(pSlave->Attr.ModbusModel)
+    uint8_t       *d = dest;
+    const uint8_t *s = src;
+
+    if(d < s)
     {
-    case MBX_MODEL_RTU:
-        MBx_Slave_RTU_Parse(pSlave);
-        break;
-    case MBX_MODEL_TCP:
-        MBx_Slave_TCP_Parse(pSlave);
-        // MBx_Slave_Parse_TCP( );
-        break;
-    default:
-        break;
+        // 从前往后拷贝
+        while(n--)
+        {
+            *d++ = *s++;
+        }
+    }
+    else
+    {
+        // 从后往前拷贝
+        d += n;
+        s += n;
+        while(n--)
+        {
+            *--d = *--s;
+        }
     }
 }
-
-#endif /* MBX_SLAVE_ENABLE */

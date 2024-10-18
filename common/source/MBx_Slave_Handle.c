@@ -5,14 +5,14 @@
  **** All rights reserved                                       ****
 
  ********************************************************************************
- * File Name     : MBx_Slave_RTU_Handle.c
+ * File Name     : MBx_Slave_Handle.c
  * Author        : yono
  * Date          : 2024-07-25
  * Version       : 1.0
 ********************************************************************************/
 /**************************************************************************/
 /*
-    modbus RTU从机消息系统的底层消息处理, 内部函数, 不应由用户调用
+    modbus 从机消息系统的底层消息处理, 内部函数, 不应由用户调用
      此时应当已经提取了完整指令
      系列函数应当使用标准返回，但这样导致外层包装冗长，采用直接返回错误码
 */
@@ -25,18 +25,18 @@
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-void MBx_Slave_RTU_Error_Handle(_MBX_SLAVE *pSlave, uint8_t ErrorCode);
+void MBx_Slave_Error_Handle(_MBX_SLAVE *pSlave, uint8_t ErrorCode);
 /* Private functions ---------------------------------------------------------*/
 /**
- * @brief modbus RTU从机消息系统的底层消息处理 读取一组线圈
+ * @brief modbus 从机消息系统的底层消息处理 读取一组线圈
  * @param pSlave MBX从机对象指针
  * @return 错误码返回
  */
-uint32_t MBx_Slave_RTU_READ_COIL_Handle(_MBX_SLAVE *pSlave)
+uint32_t MBx_Slave_READ_COIL_Handle(_MBX_SLAVE *pSlave)
 {
-    uint8_t    ComboBit = 0;
-    uint16_t   i;
-    _MBX_CRC16 crc;
+    uint8_t  ComboBit = 0;
+    uint16_t i;
+
     /* 提取待解析的寄存器数量 */
     pSlave->Parse.RegNum = ((uint16_t)pSlave->RxExist.Buffer[4] << 8) + pSlave->RxExist.Buffer[5];
 
@@ -78,24 +78,19 @@ uint32_t MBx_Slave_RTU_READ_COIL_Handle(_MBX_SLAVE *pSlave)
         return MBX_EXCEPTION_FAULT;
     }
 
-    /* 计算CRC填充 */
-    crc.Val = MBx_utility_crc16((uint8_t *)(pSlave->TxExist.Buffer), pSlave->TxExist.Len); // 计算CRC校验码
-    MBxTxBufferPutc(pSlave, crc.H_L.L8);                                                   // CRC低8位
-    MBxTxBufferPutc(pSlave, crc.H_L.H8);                                                   // CRC高8位
-
     return MBX_EXCEPTION_NONE;
 }
 
 /**
- * @brief modbus RTU从机消息系统的底层消息处理 读取一组离散输入寄存器
+ * @brief modbus 从机消息系统的底层消息处理 读取一组离散输入寄存器
  * @param pSlave MBX从机对象指针
  * @return 错误码返回
  */
-uint32_t MBx_Slave_RTU_READ_DISC_INPUTL_Handle(_MBX_SLAVE *pSlave)
+uint32_t MBx_Slave_READ_DISC_INPUTL_Handle(_MBX_SLAVE *pSlave)
 {
-    uint8_t    ComboBit = 0;
-    uint16_t   i;
-    _MBX_CRC16 crc;
+    uint8_t  ComboBit = 0;
+    uint16_t i;
+
     /* 提取待解析的寄存器数量 */
     pSlave->Parse.RegNum = ((uint16_t)pSlave->RxExist.Buffer[4] << 8) + pSlave->RxExist.Buffer[5];
 
@@ -137,23 +132,18 @@ uint32_t MBx_Slave_RTU_READ_DISC_INPUTL_Handle(_MBX_SLAVE *pSlave)
         return MBX_EXCEPTION_FAULT;
     }
 
-    /* 计算CRC填充 */
-    crc.Val = MBx_utility_crc16((uint8_t *)(pSlave->TxExist.Buffer), pSlave->TxExist.Len); // 计算CRC校验码
-    MBxTxBufferPutc(pSlave, crc.H_L.L8);                                                   // CRC低8位
-    MBxTxBufferPutc(pSlave, crc.H_L.H8);                                                   // CRC高8位
-
     return MBX_EXCEPTION_NONE;
 }
 
 /**
- * @brief modbus RTU从机消息系统的底层消息处理 读取一个或多个保持寄存器
+ * @brief modbus 从机消息系统的底层消息处理 读取一个或多个保持寄存器
  * @param pSlave MBX从机对象指针
  * @return 错误码返回
  */
-uint32_t MBx_Slave_RTU_READ_REG_Handle(_MBX_SLAVE *pSlave)
+uint32_t MBx_Slave_READ_REG_Handle(_MBX_SLAVE *pSlave)
 {
-    uint16_t   i;
-    _MBX_CRC16 crc;
+    uint16_t i;
+
     /* 提取待解析的寄存器数量 */
     pSlave->Parse.RegNum = ((uint16_t)pSlave->RxExist.Buffer[4] << 8) + pSlave->RxExist.Buffer[5];
 
@@ -189,23 +179,18 @@ uint32_t MBx_Slave_RTU_READ_REG_Handle(_MBX_SLAVE *pSlave)
         return MBX_EXCEPTION_FAULT;
     }
 
-    /* 计算CRC填充 */
-    crc.Val = MBx_utility_crc16((uint8_t *)(pSlave->TxExist.Buffer), pSlave->TxExist.Len); // 计算CRC校验码
-    MBxTxBufferPutc(pSlave, crc.H_L.L8);                                                   // CRC低8位
-    MBxTxBufferPutc(pSlave, crc.H_L.H8);                                                   // CRC高8位
-
     return MBX_EXCEPTION_NONE;
 }
 
 /**
- * @brief modbus RTU从机消息系统的底层消息处理 读取一个或多个输入寄存器
+ * @brief modbus 从机消息系统的底层消息处理 读取一个或多个输入寄存器
  * @param pSlave MBX从机对象指针
  * @return 错误码返回
  */
-uint32_t MBx_Slave_RTU_READ_INPUT_REG_Handle(_MBX_SLAVE *pSlave)
+uint32_t MBx_Slave_READ_INPUT_REG_Handle(_MBX_SLAVE *pSlave)
 {
-    uint16_t   i;
-    _MBX_CRC16 crc;
+    uint16_t i;
+
     /* 提取待解析的寄存器数量 */
     pSlave->Parse.RegNum = ((uint16_t)pSlave->RxExist.Buffer[4] << 8) + pSlave->RxExist.Buffer[5];
 
@@ -242,22 +227,16 @@ uint32_t MBx_Slave_RTU_READ_INPUT_REG_Handle(_MBX_SLAVE *pSlave)
         return MBX_EXCEPTION_FAULT;
     }
 
-    /* 计算CRC填充 */
-    crc.Val = MBx_utility_crc16((uint8_t *)(pSlave->TxExist.Buffer), pSlave->TxExist.Len); // 计算CRC校验码
-    MBxTxBufferPutc(pSlave, crc.H_L.L8);                                                   // CRC低8位
-    MBxTxBufferPutc(pSlave, crc.H_L.H8);                                                   // CRC高8位
-
     return MBX_EXCEPTION_NONE;
 }
 
 /**
- * @brief modbus RTU从机消息系统的底层消息处理 写单个线圈
+ * @brief modbus 从机消息系统的底层消息处理 写单个线圈
  * @param pSlave MBX从机对象指针
  * @return 错误码返回
  */
-uint32_t MBx_Slave_RTU_WRITE_COIL_Handle(_MBX_SLAVE *pSlave)
+uint32_t MBx_Slave_WRITE_COIL_Handle(_MBX_SLAVE *pSlave)
 {
-    _MBX_CRC16 crc;
     /* 预填充回复流 */
     MBxTxBufferPutc(pSlave, pSlave->Config.SlaveID);      // 从机ID
     MBxTxBufferPutc(pSlave, (pSlave->Parse.Func));        // 功能码
@@ -287,22 +266,16 @@ uint32_t MBx_Slave_RTU_WRITE_COIL_Handle(_MBX_SLAVE *pSlave)
         return MBX_EXCEPTION_FAULT;
     }
 
-    /* 计算CRC填充 */
-    crc.Val = MBx_utility_crc16((uint8_t *)(pSlave->TxExist.Buffer), pSlave->TxExist.Len); // 计算CRC校验码
-    MBxTxBufferPutc(pSlave, crc.H_L.L8);                                                   // CRC低8位
-    MBxTxBufferPutc(pSlave, crc.H_L.H8);                                                   // CRC高8位
-
     return MBX_EXCEPTION_NONE;
 }
 
 /**
- * @brief modbus RTU从机消息系统的底层消息处理 写单个保持寄存器
+ * @brief modbus 从机消息系统的底层消息处理 写单个保持寄存器
  * @param pSlave MBX从机对象指针
  * @return 错误码返回
  */
-uint32_t MBx_Slave_RTU_WRITE_REG_Handle(_MBX_SLAVE *pSlave)
+uint32_t MBx_Slave_WRITE_REG_Handle(_MBX_SLAVE *pSlave)
 {
-    _MBX_CRC16 crc;
     /* 预填充回复流 */
     MBxTxBufferPutc(pSlave, pSlave->Config.SlaveID);      // 从机ID
     MBxTxBufferPutc(pSlave, (pSlave->Parse.Func));        // 功能码
@@ -328,24 +301,19 @@ uint32_t MBx_Slave_RTU_WRITE_REG_Handle(_MBX_SLAVE *pSlave)
         return MBX_EXCEPTION_FAULT;
     }
 
-    /* 计算CRC填充 */
-    crc.Val = MBx_utility_crc16((uint8_t *)(pSlave->TxExist.Buffer), pSlave->TxExist.Len); // 计算CRC校验码
-    MBxTxBufferPutc(pSlave, crc.H_L.L8);                                                   // CRC低8位
-    MBxTxBufferPutc(pSlave, crc.H_L.H8);                                                   // CRC高8位
-
     return MBX_EXCEPTION_NONE;
 }
 
 /**
- * @brief modbus RTU从机消息系统的底层消息处理 写多个线圈
+ * @brief modbus 从机消息系统的底层消息处理 写多个线圈
  * @param pSlave MBX从机对象指针
  * @return 错误码返回
  */
-uint32_t MBx_Slave_RTU_WRITE_COIL_MUL_Handle(_MBX_SLAVE *pSlave)
+uint32_t MBx_Slave_WRITE_COIL_MUL_Handle(_MBX_SLAVE *pSlave)
 {
-    uint16_t   i;
-    uint16_t   WriteData;
-    _MBX_CRC16 crc;
+    uint16_t i;
+    uint16_t WriteData;
+
     /* 提取待解析的寄存器数量 */
     pSlave->Parse.RegNum = ((uint16_t)pSlave->RxExist.Buffer[4] << 8) + pSlave->RxExist.Buffer[5];
 
@@ -398,23 +366,18 @@ uint32_t MBx_Slave_RTU_WRITE_COIL_MUL_Handle(_MBX_SLAVE *pSlave)
         return MBX_EXCEPTION_FAULT;
     }
 
-    /* 计算CRC填充 */
-    crc.Val = MBx_utility_crc16((uint8_t *)(pSlave->TxExist.Buffer), pSlave->TxExist.Len); // 计算CRC校验码
-    MBxTxBufferPutc(pSlave, crc.H_L.L8);                                                   // CRC低8位
-    MBxTxBufferPutc(pSlave, crc.H_L.H8);                                                   // CRC高8位
-
     return MBX_EXCEPTION_NONE;
 }
 
 /**
- * @brief modbus RTU从机消息系统的底层消息处理 写入多个保持寄存器
+ * @brief modbus 从机消息系统的底层消息处理 写入多个保持寄存器
  * @param pSlave MBX从机对象指针
  * @return 错误码返回
  */
-uint32_t MBx_Slave_RTU_WRITE_REG_MUL_Handle(_MBX_SLAVE *pSlave)
+uint32_t MBx_Slave_WRITE_REG_MUL_Handle(_MBX_SLAVE *pSlave)
 {
-    uint16_t   i;
-    _MBX_CRC16 crc;
+    uint16_t i;
+
     /* 提取待解析的寄存器数量 */
     pSlave->Parse.RegNum = ((uint16_t)pSlave->RxExist.Buffer[4] << 8) + pSlave->RxExist.Buffer[5];
 
@@ -463,31 +426,21 @@ uint32_t MBx_Slave_RTU_WRITE_REG_MUL_Handle(_MBX_SLAVE *pSlave)
         return MBX_EXCEPTION_FAULT;
     }
 
-    /* 计算CRC填充 */
-    crc.Val = MBx_utility_crc16((uint8_t *)(pSlave->TxExist.Buffer), pSlave->TxExist.Len); // 计算CRC校验码
-    MBxTxBufferPutc(pSlave, crc.H_L.L8);                                                   // CRC低8位
-    MBxTxBufferPutc(pSlave, crc.H_L.H8);                                                   // CRC高8位
-
     return MBX_EXCEPTION_NONE;
 }
 
 /**
- * @brief modbus RTU从机消息系统的底层消息处理 产生错误代码处理
+ * @brief modbus 从机消息系统的底层消息处理 产生错误代码处理
  * @param pSlave MBX从机对象指针
  * @param ErrorCode 解析过程产生的错误代码 见MBx_api.h "错误码定义" 部分
  */
-void MBx_Slave_RTU_Error_Handle(_MBX_SLAVE *pSlave, uint8_t ErrorCode)
+void MBx_Slave_Error_Handle(_MBX_SLAVE *pSlave, uint8_t ErrorCode)
 {
-    _MBX_CRC16 crc;
-
     MBxTxBufferEmpty(pSlave); // 舍弃原有发送消息
     /* 产生错误消息流 */
-    MBxTxBufferPutc(pSlave, pSlave->Config.SlaveID);                                       // 从机ID
-    MBxTxBufferPutc(pSlave, (pSlave->Parse.Func + MBX_FUNC_EXCEPTION_OFFSET));             // 功能码+错误附加标识
-    MBxTxBufferPutc(pSlave, ErrorCode);                                                    // 错误码
-    crc.Val = MBx_utility_crc16((uint8_t *)(pSlave->TxExist.Buffer), pSlave->TxExist.Len); // 计算CRC校验码
-    MBxTxBufferPutc(pSlave, crc.H_L.L8);                                                   // CRC低8位
-    MBxTxBufferPutc(pSlave, crc.H_L.H8);                                                   // CRC高8位
+    MBxTxBufferPutc(pSlave, pSlave->Config.SlaveID);                           // 从机ID
+    MBxTxBufferPutc(pSlave, (pSlave->Parse.Func + MBX_FUNC_EXCEPTION_OFFSET)); // 功能码+错误附加标识
+    MBxTxBufferPutc(pSlave, ErrorCode);                                        // 错误码
 }
 
 #endif /* MBX_SLAVE_ENABLE */

@@ -40,17 +40,18 @@ void MBx_Slave_Engine_IDLE(_MBX_SLAVE *pSlave)
     {
         if(pSlave->TxExist.Len > 0)
         {
-            pSlave->Runtime.State = MBX_STATE_WRITE; // 流转至发送态
+            pSlave->Runtime.State     = MBX_STATE_WRITE; // 流转至发送态
+            pSlave->Runtime.StateFlow = 1;
         }
         else if(pSlave->RxExist.Len > 0)
         {
-            pSlave->Runtime.State = MBX_STATE_READ; // 流转至接收态
+            pSlave->Runtime.State     = MBX_STATE_READ; // 流转至接收态
+            pSlave->Runtime.StateFlow = 1;
         }
         else
         {
             pSlave->Runtime.TimeCnt = pSlave->Attr.T3_5_Cycs; // 无法流转，静止计时器
         }
-        pSlave->Runtime.StateFlow = 1;
     }
 }
 #endif /* MBX_SLAVE_ENABLE */

@@ -71,6 +71,28 @@ target_link_options(${BUILD_PROJECT_NAME} PRIVATE
     -Wl,--gc-sections
 )
 
+set(BUILD_PROJECT_NAME TCP_Smain) # 控制编译TCP从机测试
+add_executable(${BUILD_PROJECT_NAME})
+
+target_compile_definitions(${BUILD_PROJECT_NAME} PRIVATE 
+    MBX_INCLUDE_USER_DEFINE_FILE # 控制使用用户自定义的配置文件
+)
+target_include_directories(${BUILD_PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/Example/win_test
+)
+target_sources(${BUILD_PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/Example/win_test/TCP_Smain.c
+)
+target_link_libraries(${BUILD_PROJECT_NAME} # 没有修饰词默认为 PRIVATE 
+    modbusx 
+    wsock32 ws2_32
+)
+# 添加链接器选项以生成 map 文件
+target_link_options(${BUILD_PROJECT_NAME} PRIVATE
+    -Wl,-Map=${BUILD_PROJECT_NAME}.map
+    -Wl,--gc-sections
+)
+
 
 # 启用测试
 enable_testing()
