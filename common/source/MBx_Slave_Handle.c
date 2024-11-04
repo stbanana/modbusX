@@ -25,7 +25,6 @@
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-void MBx_Slave_Error_Handle(_MBX_SLAVE *pSlave, uint8_t ErrorCode);
 /* Private functions ---------------------------------------------------------*/
 /**
  * @brief modbus 从机消息系统的底层消息处理 读取一组线圈
@@ -434,9 +433,25 @@ uint32_t MBx_Slave_WRITE_REG_MUL_Handle(_MBX_SLAVE *pSlave)
  * @param pSlave MBX从机对象指针
  * @param ErrorCode 解析过程产生的错误代码 见MBx_api.h "错误码定义" 部分
  */
-void MBx_Slave_Error_Handle(_MBX_SLAVE *pSlave, uint8_t ErrorCode)
+void MBx_Slave_Error_RTU_Handle(_MBX_SLAVE *pSlave, uint8_t ErrorCode)
 {
     MBxTxBufferEmpty(pSlave); // 舍弃原有发送消息
+    /* 产生错误消息流 */
+    MBxTxBufferPutc(pSlave, pSlave->Config.SlaveID);                           // 从机ID
+    MBxTxBufferPutc(pSlave, (pSlave->Parse.Func + MBX_FUNC_EXCEPTION_OFFSET)); // 功能码+错误附加标识
+    MBxTxBufferPutc(pSlave, ErrorCode);                                        // 错误码
+}
+
+/**
+ * @brief modbus 从机消息系统的底层消息处理 产生错误代码处理
+ * @param pSlave MBX从机对象指针
+ * @param ErrorCode 解析过程产生的错误代码 见MBx_api.h "错误码定义" 部分
+ */
+void MBx_Slave_Error_TCP_Handle(_MBX_SLAVE *pSlave, uint8_t ErrorCode)
+{
+    pSlave->TxExist.Len = 4; // 保留事务号和协议标识，舍弃其他消息
+    /* 重新填充帧长度 */
+    MBxTxBufferPutReg(pSlave, 3);
     /* 产生错误消息流 */
     MBxTxBufferPutc(pSlave, pSlave->Config.SlaveID);                           // 从机ID
     MBxTxBufferPutc(pSlave, (pSlave->Parse.Func + MBX_FUNC_EXCEPTION_OFFSET)); // 功能码+错误附加标识

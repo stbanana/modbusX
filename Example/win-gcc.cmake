@@ -6,7 +6,7 @@ set(CMAKE_CXX_COMPILER_FORCED TRUE)     # 强制指定C++编译器
 set(CMAKE_C_COMPILER_ID GNU)            # 设置C编译器ID为GNU
 set(CMAKE_CXX_COMPILER_ID GNU)          # 设置C++编译器ID为GNU
 
-set(TOOLCHAIN_PREFIX                 )
+set(TOOLCHAIN_PREFIX                 x86_64-w64-mingw32-)
 
 set(CMAKE_C_COMPILER                ${TOOLCHAIN_PREFIX}gcc)     # 设置C编译器
 set(CMAKE_ASM_COMPILER              ${CMAKE_C_COMPILER})        # 设置汇编编译器，使用C编译器

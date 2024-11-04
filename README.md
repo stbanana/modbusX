@@ -4,7 +4,7 @@
 ![Static Badge](https://img.shields.io/badge/license%20-%20MIT%20-%20blue)
 [![C/C++ CI](https://github.com/stbanana/modbusX/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/stbanana/modbusX/actions/workflows/c-cpp.yml)
 
-一个正在开发中的 modbus 协议解析栈。
+一个物理驱动层解耦的 modbus 协议解析栈。
 
 我对协议库的理解是：只需要另外实现数据的流入和流出 port，并最多另外定时调用一个时基函数，就可以驱动起整个库(轮询)。
 
@@ -30,6 +30,7 @@
 - [ ] TCP 主从机的输入和保持寄存器读写
 - [ ] RTU 主从机的线圈和离散输入读写
 - [ ] TCP 主从机的线圈和离散输入读写
+- [ ] 动态地址映射表的支持
 
 
 

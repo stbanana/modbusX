@@ -24,6 +24,7 @@
 /* Private macros ------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 extern void MBx_Master_RTU_Parse(_MBX_MASTER *pMaster);
+extern void MBx_Master_TCP_Parse(_MBX_MASTER *pMaster);
 /* Private functions ---------------------------------------------------------*/
 
 /**
@@ -38,7 +39,7 @@ void MBx_Master_Parse(_MBX_MASTER *pMaster)
         MBx_Master_RTU_Parse(pMaster);
         break;
     case MBX_MODEL_TCP:
-        // MBx_Master_Parse_TCP( );
+        MBx_Master_TCP_Parse(pMaster);
         break;
     default:
         break;

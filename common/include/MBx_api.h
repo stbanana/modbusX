@@ -325,7 +325,7 @@ extern uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE *MBxSlave, uint8_t SlaveID, const 
 extern uint32_t MBx_Slave_TCP_Init(_MBX_SLAVE *MBxSlave, uint8_t SlaveID, const _MBX_MAP_LIST_ENTRY *MAP, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint8_t *RxBuffer, uint32_t RxBufferSize, uint8_t *TxBuffer, uint32_t TxBufferSize);
 /*主机API*/
 extern uint32_t MBx_Master_RTU_Init(_MBX_MASTER *MBxMaster, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate, uint8_t *RxBuffer, uint32_t RxBufferSize, uint8_t *TxBuffer, uint32_t TxBufferSize);
-extern uint32_t MBx_Master_TCP_Init(_MBX_MASTER *MBxMaster, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint32_t BaudRate, uint8_t *RxBuffer, uint32_t RxBufferSize, uint8_t *TxBuffer, uint32_t TxBufferSize);
+extern uint32_t MBx_Master_TCP_Init(_MBX_MASTER *MBxMaster, MBX_SEND_PTR MBxSend, MBX_GTEC_PTR MBxGetc, uint8_t *RxBuffer, uint32_t RxBufferSize, uint8_t *TxBuffer, uint32_t TxBufferSize);
 extern uint32_t MBx_Master_Member_Add(_MBX_MASTER *MBxMaster, _MBX_MASTER_TEAM_MEMBER *MBxMember, uint8_t SlaveID, const _MBX_MAP_LIST_ENTRY *MAP);
 extern uint32_t MBx_Master_Error_Get(_MBX_MASTER *pMaster, uint8_t *Func, uint8_t *Error, uint16_t *AddrStart, uint16_t *RegNum);
 extern uint32_t MBx_Master_Read_Coil_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t ReadNum);
@@ -336,6 +336,7 @@ extern uint32_t MBx_Master_Write_Coil_Request(_MBX_MASTER *pMaster, uint8_t Slav
 extern uint32_t MBx_Master_Write_Reg_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t Addr, uint16_t Value);
 extern uint32_t MBx_Master_Write_Coil_Mul_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t WriteNum, uint8_t *Data, uint16_t DataLen);
 extern uint32_t MBx_Master_Write_Reg_Mul_Request(_MBX_MASTER *pMaster, uint8_t SlaveID, uint16_t StartAddr, uint16_t WriteNum, uint8_t *Data, uint16_t DataLen);
+/*地址映射表API*/
 
 /* 便于拓展应用的开发, 用户无需调用 */
 extern void     MBx_Init_Runtime(_MBX_COMMON_RUNTIME *MBxRuntime);

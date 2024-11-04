@@ -32,7 +32,7 @@ extern uint32_t    MBx_Slave_WRITE_COIL_Handle(_MBX_SLAVE *pSlave);
 extern uint32_t    MBx_Slave_WRITE_REG_Handle(_MBX_SLAVE *pSlave);
 extern uint32_t    MBx_Slave_WRITE_COIL_MUL_Handle(_MBX_SLAVE *pSlave);
 extern uint32_t    MBx_Slave_WRITE_REG_MUL_Handle(_MBX_SLAVE *pSlave);
-extern void        MBx_Slave_Error_Handle(_MBX_SLAVE *pSlave, uint8_t ErrorCode);
+extern void        MBx_Slave_Error_RTU_Handle(_MBX_SLAVE *pSlave, uint8_t ErrorCode);
 
 static inline void MBx_Slave_Parse_RTU_Func_Get(_MBX_SLAVE *pSlave);
 static inline void MBx_Slave_Parse_RTU_AddrStar_Get(_MBX_SLAVE *pSlave);
@@ -97,6 +97,13 @@ void MBx_Slave_RTU_Parse(_MBX_SLAVE *pSlave)
         return;
     }
 
+    /* 审查是否符合帧长 */
+    if(pSlave->RxExist.Len < FrameLen)
+    {
+        MBxRxBufferEmpty(pSlave);
+        return; // 帧不完整, 弃帧
+    }
+
     /* 检测CRC (一个丑陋的写法，但能稍微节省性能)*/
     if((((uint16_t)(pSlave->RxExist.Buffer[FrameLen - 1]) << 8) | (pSlave->RxExist.Buffer[FrameLen - 2])) != // 提取CRC值
        MBx_utility_crc16(pSlave->RxExist.Buffer, FrameLen - 2))                                              // 计算CRC值
@@ -141,7 +148,7 @@ void MBx_Slave_RTU_Parse(_MBX_SLAVE *pSlave)
 
     if(ErrorCode != MBX_EXCEPTION_NONE)
     {
-        MBx_Slave_Error_Handle(pSlave, ErrorCode); // 剔除旧消息，产生错误回复消息
+        MBx_Slave_Error_RTU_Handle(pSlave, ErrorCode); // 剔除旧消息，产生错误回复消息
     }
 
     _MBX_CRC16 crc;

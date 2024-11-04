@@ -117,15 +117,15 @@ extern "C"
  * @param pMBX  MBX对象指针
  * @param rLen 期望删除的 字节长度
  */
-#define MBxRxBufferRemove(pMBX, rLen)                                                                        \
-    do                                                                                                       \
-    {                                                                                                        \
-        pSlave->RxExist.Len -= rLen;                                                                         \
-        if(pSlave->RxExist.Len > 0)                                                                          \
-        {                                                                                                    \
-            MBx_utility_MemMove(pSlave->RxExist.Buffer, pSlave->RxExist.Buffer + rLen, pSlave->RxExist.Len); \
-        }                                                                                                    \
-    }                                                                                                        \
+#define MBxRxBufferRemove(pMBX, rLen)                                                                  \
+    do                                                                                                 \
+    {                                                                                                  \
+        pMBX->RxExist.Len -= rLen;                                                                     \
+        if(pMBX->RxExist.Len > 0)                                                                      \
+        {                                                                                              \
+            MBx_utility_MemMove(pMBX->RxExist.Buffer, pMBX->RxExist.Buffer + rLen, pMBX->RxExist.Len); \
+        }                                                                                              \
+    }                                                                                                  \
     while(0)
 
 /**

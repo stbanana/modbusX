@@ -72,8 +72,6 @@ uint32_t MBx_Master_RTU_Init(_MBX_MASTER *MBxMaster, //
     MBx_Init_Master_Request(&MBxMaster->Request);
     /* 将当前操作的从机号清除 */
     MBxMaster->Config.SlaveID = 0;
-    /* 将从机链表头清除 */
-    MBxMaster->SlaveChainRoot = NULL;
 
     /*  传参有关部分    */
     /* 绑定回调函数部分 */
@@ -97,7 +95,6 @@ uint32_t MBx_Master_RTU_Init(_MBX_MASTER *MBxMaster, //
  * @param MBxMaster 期望初始化的MBX主机对象指针
  * @param MBxSend 绑定的主机发送port函数
  * @param MBxGetc 绑定的主机接收port函数
- * @param BaudRate 典型波特率
  * @param RxBuffer 绑定的接收buffer区域
  * @param RxBufferSize 绑定的接收buffer最大长度
  * @param TxBuffer 绑定的发送buffer区域
@@ -107,7 +104,6 @@ uint32_t MBx_Master_RTU_Init(_MBX_MASTER *MBxMaster, //
 uint32_t MBx_Master_TCP_Init(_MBX_MASTER *MBxMaster, //
                              MBX_SEND_PTR MBxSend,
                              MBX_GTEC_PTR MBxGetc,
-                             uint32_t     BaudRate,
                              uint8_t     *RxBuffer,
                              uint32_t     RxBufferSize,
                              uint8_t     *TxBuffer,
@@ -136,8 +132,7 @@ uint32_t MBx_Master_TCP_Init(_MBX_MASTER *MBxMaster, //
     MBx_Init_Master_Request(&MBxMaster->Request);
     /* 将当前操作的从机号清除 */
     MBxMaster->Config.SlaveID = 0;
-    /* 将从机链表头清除 */
-    MBxMaster->SlaveChainRoot = NULL;
+    /* 将当前累计的事务号清除 */
 
     /*  传参有关部分    */
     /* 绑定回调函数部分 */
@@ -149,7 +144,7 @@ uint32_t MBx_Master_TCP_Init(_MBX_MASTER *MBxMaster, //
     MBxMaster->TxExist.Buffer = TxBuffer;
     MBxMaster->TxExist.LenMAX = TxBufferSize;
     /* 初始化属性 */
-    MBx_Init_Attr(&MBxMaster->Attr, MBX_MODEL_TCP, MBX_MODE_MASTER, BaudRate, MBX_PARA_NULL);
+    MBx_Init_Attr(&MBxMaster->Attr, MBX_MODEL_TCP, MBX_MODE_MASTER, MBX_PARA_NULL, MBX_PARA_NULL);
     if(State != MBX_API_RETURN_DEFAULT)
         MBx_MODULE_TRACE_ADD_ERR(MBxMaster, State);
 
