@@ -290,7 +290,7 @@ uint32_t MBx_Master_WRITE_REG_MUL_Handle(_MBX_MASTER *pMaster)
  * @param pMaster MBX主机对象指针
  * @return 标准返回
  */
-uint32_t MBx_Master_Error_Handle(_MBX_MASTER *pMaster)
+uint32_t MBx_Master_Error_rtu_Handle(_MBX_MASTER *pMaster)
 {
     _MBX_MASTER_TEAM_MEMBER *pMember;
     uint16_t                 i = 0; // 临时参数
@@ -370,6 +370,54 @@ uint32_t MBx_Master_Error_Handle(_MBX_MASTER *pMaster)
 
     /* 清理所有处理请求 */
     MBx_utility_map_w_cooperate_review( );
+
+    return MBX_API_RETURN_DEFAULT;
+}
+
+/**
+ * @brief modbus 主机消息系统的底层消息处理 对于错误代码的处理
+ * @param pMaster MBX主机对象指针
+ * @return 标准返回
+ */
+uint32_t MBx_Master_Error_TCP_Handle(_MBX_MASTER *pMaster)
+{
+    _MBX_MASTER_TEAM_MEMBER *pMember;
+    uint16_t                 i = 0; // 临时参数
+
+    /* 提取到实际错误码 */
+    switch(pMaster->RxExist.Buffer[2])
+    {
+    case MBX_EXCEPTION_UNFUNC:
+    case MBX_EXCEPTION_UNADDR:
+    case MBX_EXCEPTION_DATA:
+    case MBX_EXCEPTION_FAULT:
+    case MBX_EXCEPTION_PARITY:
+        MBxMasterErrortAdd(pMaster, pMaster->Parse.SendFunc, pMaster->RxExist.Buffer[2], pMaster->Parse.SendAddrStart, pMaster->Parse.SendRegNum);
+        break;
+    default:
+        break;
+    }
+
+    /* 找到对应的从机成员 */
+    pMember = MBx_Master_Member_Find(pMaster, pMaster->Parse.SlaveID);
+    if(pMember == NULL)
+    {
+        return MBX_API_RETURN_MAP_UNFIND;
+    }
+
+    /* 写时错误处理 */
+    switch(pMaster->Parse.Func - MBX_FUNC_EXCEPTION_OFFSET)
+    {
+    case MBX_FUNC_WRITE_COIL:
+    case MBX_FUNC_WRITE_REG:
+        break;
+    case MBX_FUNC_WRITE_COIL_MUL: /* 复杂的多线圈提取 */
+        break;
+    case MBX_FUNC_WRITE_REG_MUL:
+        break;
+    default:
+        break;
+    }
 
     return MBX_API_RETURN_DEFAULT;
 }

@@ -32,7 +32,7 @@ extern uint32_t    MBx_Master_WRITE_COIL_Handle(_MBX_MASTER *pMaster);
 extern uint32_t    MBx_Master_WRITE_REG_Handle(_MBX_MASTER *pMaster);
 extern uint32_t    MBx_Master_WRITE_COIL_MUL_Handle(_MBX_MASTER *pMaster);
 extern uint32_t    MBx_Master_WRITE_REG_MUL_Handle(_MBX_MASTER *pMaster);
-extern uint32_t    MBx_Master_Error_Handle(_MBX_MASTER *pMaster);
+extern uint32_t    MBx_Master_Error_TCP_Handle(_MBX_MASTER *pMaster);
 
 static inline void MBx_Master_Parse_TCP_Func_Get(_MBX_MASTER *pMaster);
 static inline void MBx_Master_Parse_TCP_AddrStar_Get(_MBX_MASTER *pMaster);
@@ -106,7 +106,7 @@ void MBx_Master_TCP_Parse(_MBX_MASTER *pMaster)
             ErrorCode = MBx_Master_WRITE_REG_MUL_Handle(pMaster);
             break;
         default:
-            ErrorCode = MBx_Master_Error_Handle(pMaster);
+            ErrorCode = MBx_Master_Error_TCP_Handle(pMaster);
             break;
         }
     }
