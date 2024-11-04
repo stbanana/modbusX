@@ -32,7 +32,7 @@ extern uint32_t    MBx_Slave_WRITE_COIL_Handle(_MBX_SLAVE *pSlave);
 extern uint32_t    MBx_Slave_WRITE_REG_Handle(_MBX_SLAVE *pSlave);
 extern uint32_t    MBx_Slave_WRITE_COIL_MUL_Handle(_MBX_SLAVE *pSlave);
 extern uint32_t    MBx_Slave_WRITE_REG_MUL_Handle(_MBX_SLAVE *pSlave);
-extern void        MBx_Slave_Error_Handle(_MBX_SLAVE *pSlave, uint8_t ErrorCode);
+extern void        MBx_Slave_Error_TCP_Handle(_MBX_SLAVE *pSlave, uint8_t ErrorCode);
 
 static inline void MBx_Slave_Parse_TCP_Func_Get(_MBX_SLAVE *pSlave);
 static inline void MBx_Slave_Parse_TCP_AddrStar_Get(_MBX_SLAVE *pSlave);
@@ -143,7 +143,7 @@ void MBx_Slave_TCP_Parse(_MBX_SLAVE *pSlave)
 
     if(ErrorCode != MBX_EXCEPTION_NONE)
     {
-        MBx_Slave_Error_Handle(pSlave, ErrorCode); // 剔除旧消息，产生错误回复消息
+        MBx_Slave_Error_TCP_Handle(pSlave, ErrorCode); // 剔除旧消息，产生错误回复消息
     }
 
     /* 删除已处理消息 */

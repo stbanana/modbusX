@@ -5,14 +5,14 @@
  **** All rights reserved                                       ****
 
  ********************************************************************************
- * File Name     : MBx_Master_RTU_Handle.c
+ * File Name     : MBx_Master_Handle.c
  * Author        : yono
  * Date          : 2024-08-02
  * Version       : 1.0
 ********************************************************************************/
 /**************************************************************************/
 /*
-    modbus RTU主机消息系统的底层消息处理, 内部函数, 不应由用户调用
+    modbus 主机消息系统的底层消息处理, 内部函数, 不应由用户调用
      此时应当已经提取了完整指令
      系列函数使用标准返回
 */
@@ -27,11 +27,11 @@
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 /**
- * @brief modbus RTU主机消息系统的底层消息处理 读取一组线圈
+ * @brief modbus 主机消息系统的底层消息处理 读取一组线圈
  * @param pMaster MBX主机对象指针
  * @return 标准返回
  */
-uint32_t MBx_Master_RTU_READ_COIL_Handle(_MBX_MASTER *pMaster)
+uint32_t MBx_Master_READ_COIL_Handle(_MBX_MASTER *pMaster)
 {
     _MBX_MASTER_TEAM_MEMBER *pMember;
     uint16_t                 i = 0;
@@ -69,11 +69,11 @@ uint32_t MBx_Master_RTU_READ_COIL_Handle(_MBX_MASTER *pMaster)
 }
 
 /**
- * @brief modbus RTU主机消息系统的底层消息处理 读取一组离散输入寄存器
+ * @brief modbus 主机消息系统的底层消息处理 读取一组离散输入寄存器
  * @param pMaster MBX主机对象指针
  * @return 标准返回
  */
-uint32_t MBx_Master_RTU_READ_DISC_INPUTL_Handle(_MBX_MASTER *pMaster)
+uint32_t MBx_Master_READ_DISC_INPUTL_Handle(_MBX_MASTER *pMaster)
 {
     _MBX_MASTER_TEAM_MEMBER *pMember;
     uint16_t                 i = 0;
@@ -111,11 +111,11 @@ uint32_t MBx_Master_RTU_READ_DISC_INPUTL_Handle(_MBX_MASTER *pMaster)
 }
 
 /**
- * @brief modbus RTU主机消息系统的底层消息处理 读取一个或多个保持寄存器
+ * @brief modbus 主机消息系统的底层消息处理 读取一个或多个保持寄存器
  * @param pMaster MBX主机对象指针
  * @return 标准返回
  */
-uint32_t MBx_Master_RTU_READ_REG_Handle(_MBX_MASTER *pMaster)
+uint32_t MBx_Master_READ_REG_Handle(_MBX_MASTER *pMaster)
 {
     _MBX_MASTER_TEAM_MEMBER *pMember;
     uint16_t                 i = 0;
@@ -137,11 +137,11 @@ uint32_t MBx_Master_RTU_READ_REG_Handle(_MBX_MASTER *pMaster)
 }
 
 /**
- * @brief modbus RTU主机消息系统的底层消息处理 读取一个或多个输入寄存器
+ * @brief modbus 主机消息系统的底层消息处理 读取一个或多个输入寄存器
  * @param pMaster MBX主机对象指针
  * @return 标准返回
  */
-uint32_t MBx_Master_RTU_READ_INPUT_REG_Handle(_MBX_MASTER *pMaster)
+uint32_t MBx_Master_READ_INPUT_REG_Handle(_MBX_MASTER *pMaster)
 {
     _MBX_MASTER_TEAM_MEMBER *pMember;
     uint16_t                 i = 0;
@@ -163,11 +163,11 @@ uint32_t MBx_Master_RTU_READ_INPUT_REG_Handle(_MBX_MASTER *pMaster)
 }
 
 /**
- * @brief modbus RTU主机消息系统的底层消息处理 写单个线圈
+ * @brief modbus 主机消息系统的底层消息处理 写单个线圈
  * @param pMaster MBX主机对象指针
  * @return 标准返回
  */
-uint32_t MBx_Master_RTU_WRITE_COIL_Handle(_MBX_MASTER *pMaster)
+uint32_t MBx_Master_WRITE_COIL_Handle(_MBX_MASTER *pMaster)
 {
     // 写入成功，同步映射数据
     _MBX_MASTER_TEAM_MEMBER *pMember;
@@ -193,11 +193,11 @@ uint32_t MBx_Master_RTU_WRITE_COIL_Handle(_MBX_MASTER *pMaster)
 }
 
 /**
- * @brief modbus RTU主机消息系统的底层消息处理 写单个保持寄存器
+ * @brief modbus 主机消息系统的底层消息处理 写单个保持寄存器
  * @param pMaster MBX主机对象指针
  * @return 标准返回
  */
-uint32_t MBx_Master_RTU_WRITE_REG_Handle(_MBX_MASTER *pMaster)
+uint32_t MBx_Master_WRITE_REG_Handle(_MBX_MASTER *pMaster)
 {
     // 写入成功，同步映射数据
     _MBX_MASTER_TEAM_MEMBER *pMember;
@@ -215,11 +215,11 @@ uint32_t MBx_Master_RTU_WRITE_REG_Handle(_MBX_MASTER *pMaster)
 }
 
 /**
- * @brief modbus RTU主机消息系统的底层消息处理 写多个线圈
+ * @brief modbus 主机消息系统的底层消息处理 写多个线圈
  * @param pMaster MBX主机对象指针
  * @return 标准返回
  */
-uint32_t MBx_Master_RTU_WRITE_COIL_MUL_Handle(_MBX_MASTER *pMaster)
+uint32_t MBx_Master_WRITE_COIL_MUL_Handle(_MBX_MASTER *pMaster)
 {
     // 写入成功，同步映射数据
     _MBX_MASTER_TEAM_MEMBER *pMember;
@@ -258,11 +258,11 @@ uint32_t MBx_Master_RTU_WRITE_COIL_MUL_Handle(_MBX_MASTER *pMaster)
 }
 
 /**
- * @brief modbus RTU主机消息系统的底层消息处理 写入多个保持寄存器
+ * @brief modbus 主机消息系统的底层消息处理 写入多个保持寄存器
  * @param pMaster MBX主机对象指针
  * @return 标准返回
  */
-uint32_t MBx_Master_RTU_WRITE_REG_MUL_Handle(_MBX_MASTER *pMaster)
+uint32_t MBx_Master_WRITE_REG_MUL_Handle(_MBX_MASTER *pMaster)
 {
     // 写入成功，同步映射数据
     _MBX_MASTER_TEAM_MEMBER *pMember;
@@ -286,11 +286,11 @@ uint32_t MBx_Master_RTU_WRITE_REG_MUL_Handle(_MBX_MASTER *pMaster)
 }
 
 /**
- * @brief modbus RTU主机消息系统的底层消息处理 对于错误代码的处理
+ * @brief modbus 主机消息系统的底层消息处理 对于错误代码的处理
  * @param pMaster MBX主机对象指针
  * @return 标准返回
  */
-uint32_t MBx_Master_RTU_Error_Handle(_MBX_MASTER *pMaster)
+uint32_t MBx_Master_Error_Handle(_MBX_MASTER *pMaster)
 {
     _MBX_MASTER_TEAM_MEMBER *pMember;
     uint16_t                 i = 0; // 临时参数
