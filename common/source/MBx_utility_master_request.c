@@ -20,9 +20,20 @@
 #if MBX_MASTER_ENABLE
 /* Private types -------------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
-
+#if MBX_MODULE_TCP_MASTER_ENABLE
+#define MASTER_PARSE_SLAVEID(pMB)       pMB->Parse.SlaveID[pMB->Parse.Tail]
+#define MASTER_PARSE_SENDFUNC(pMB)      pMB->Parse.SendFunc[pMB->Parse.Tail]
+#define MASTER_PARSE_SENDADDRSTART(pMB) pMB->Parse.SendAddrStart[pMB->Parse.Tail]
+#define MASTER_PARSE_SENDREGNUM(pMB)    pMB->Parse.SendRegNum[pMB->Parse.Tail]
+#define MASTER_PARSE_SENDVALUE(pMB)     pMB->Parse.SendValue[pMB->Parse.Tail]
+#else
+#define MASTER_PARSE_SLAVEID(pMB)       pMB->Parse.SlaveID
+#define MASTER_PARSE_SENDFUNC(pMB)      pMB->Parse.SendFunc
+#define MASTER_PARSE_SENDADDRSTART(pMB) pMB->Parse.SendAddrStart
+#define MASTER_PARSE_SENDREGNUM(pMB)    pMB->Parse.SendRegNum
+#define MASTER_PARSE_SENDVALUE(pMB)     pMB->Parse.SendValue
+#endif
 /* Private variables ---------------------------------------------------------*/
-
 /* Private Constants ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -35,13 +46,21 @@
 void MBxMasterRequestToTx(_MBX_MASTER *pMaster)
 {
     _MBX_CRC16 crc;
+
+    if(pMaster->Attr.ModbusModel == MBX_MODEL_TCP)
+    {
+        MBxTxBufferPutReg(pMaster, pMaster->Runtime.TransID); // 事务号填充
+        MBxTxBufferPutReg(pMaster, 0x0000);                   // 协议标识填充
+        MBxTxBufferPutReg(pMaster, 0x0000);                   // 帧长度预填充
+    }
+
     MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].SlaveID);
-    pMaster->Config.SlaveID = pMaster->Request.Queue[pMaster->Request.Tail].SlaveID;
-    pMaster->Parse.SlaveID  = pMaster->Request.Queue[pMaster->Request.Tail].SlaveID;
+    pMaster->Config.SlaveID       = pMaster->Request.Queue[pMaster->Request.Tail].SlaveID;
+    MASTER_PARSE_SLAVEID(pMaster) = pMaster->Request.Queue[pMaster->Request.Tail].SlaveID;
     MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].Func);
-    pMaster->Parse.SendFunc = pMaster->Request.Queue[pMaster->Request.Tail].Func;
+    MASTER_PARSE_SENDFUNC(pMaster) = pMaster->Request.Queue[pMaster->Request.Tail].Func;
     MBxTxBufferPutReg(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].AddrStart);
-    pMaster->Parse.SendAddrStart = pMaster->Request.Queue[pMaster->Request.Tail].AddrStart;
+    MASTER_PARSE_SENDADDRSTART(pMaster) = pMaster->Request.Queue[pMaster->Request.Tail].AddrStart;
     switch(pMaster->Request.Queue[pMaster->Request.Tail].Func)
     {
     case MBX_FUNC_READ_COIL:
@@ -49,48 +68,59 @@ void MBxMasterRequestToTx(_MBX_MASTER *pMaster)
     case MBX_FUNC_READ_REG:
     case MBX_FUNC_READ_INPUT_REG:
         MBxTxBufferPutReg(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].RegNum);
-        pMaster->Parse.SendRegNum = pMaster->Request.Queue[pMaster->Request.Tail].RegNum;
+        MASTER_PARSE_SENDREGNUM(pMaster) = pMaster->Request.Queue[pMaster->Request.Tail].RegNum;
         break;
     case MBX_FUNC_WRITE_COIL:
         MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].Value[0]);
         MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].Value[1]);
-        pMaster->Parse.SendValue[0] = pMaster->Request.Queue[pMaster->Request.Tail].Value[0];
-        pMaster->Parse.SendValue[1] = pMaster->Request.Queue[pMaster->Request.Tail].Value[1];
+        MASTER_PARSE_SENDVALUE(pMaster)[0] = pMaster->Request.Queue[pMaster->Request.Tail].Value[0];
+        MASTER_PARSE_SENDVALUE(pMaster)[1] = pMaster->Request.Queue[pMaster->Request.Tail].Value[1];
         break;
     case MBX_FUNC_WRITE_REG:
         MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].Value[0]);
         MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].Value[1]);
-        pMaster->Parse.SendValue[0] = pMaster->Request.Queue[pMaster->Request.Tail].Value[0];
-        pMaster->Parse.SendValue[1] = pMaster->Request.Queue[pMaster->Request.Tail].Value[1];
+        MASTER_PARSE_SENDVALUE(pMaster)[0] = pMaster->Request.Queue[pMaster->Request.Tail].Value[0];
+        MASTER_PARSE_SENDVALUE(pMaster)[1] = pMaster->Request.Queue[pMaster->Request.Tail].Value[1];
         break;
     case MBX_FUNC_WRITE_COIL_MUL:
         MBxTxBufferPutReg(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].RegNum);
-        pMaster->Parse.SendRegNum = pMaster->Request.Queue[pMaster->Request.Tail].RegNum;
+        MASTER_PARSE_SENDREGNUM(pMaster) = pMaster->Request.Queue[pMaster->Request.Tail].RegNum;
         MBxTxBufferPutReg(pMaster, ((pMaster->Request.Queue[pMaster->Request.Tail].RegNum >> 3) + (pMaster->Request.Queue[pMaster->Request.Tail].RegNum % 8 ? 1 : 0)));
         for(crc.Val = 0; crc.Val < ((pMaster->Request.Queue[pMaster->Request.Tail].RegNum >> 3) + (pMaster->Request.Queue[pMaster->Request.Tail].RegNum % 8 ? 1 : 0)); crc.Val++) // 借助crc变量遍历，节省一个临时变量
         {
             MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].Value[crc.Val]);
-            pMaster->Parse.SendValue[crc.Val] = pMaster->Request.Queue[pMaster->Request.Tail].Value[crc.Val];
+            MASTER_PARSE_SENDVALUE(pMaster)[crc.Val] = pMaster->Request.Queue[pMaster->Request.Tail].Value[crc.Val];
         }
         break;
     case MBX_FUNC_WRITE_REG_MUL:
         MBxTxBufferPutReg(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].RegNum);
-        pMaster->Parse.SendRegNum = pMaster->Request.Queue[pMaster->Request.Tail].RegNum;
+        MASTER_PARSE_SENDREGNUM(pMaster) = pMaster->Request.Queue[pMaster->Request.Tail].RegNum;
         MBxTxBufferPutc(pMaster, (pMaster->Request.Queue[pMaster->Request.Tail].RegNum << 1));
         for(crc.Val = 0; crc.Val < (pMaster->Request.Queue[pMaster->Request.Tail].RegNum << 1); crc.Val++) // 借助crc变量遍历，节省一个临时变量
         {
             MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].Value[crc.Val]);
-            pMaster->Parse.SendValue[crc.Val] = pMaster->Request.Queue[pMaster->Request.Tail].Value[crc.Val];
+            MASTER_PARSE_SENDVALUE(pMaster)[crc.Val] = pMaster->Request.Queue[pMaster->Request.Tail].Value[crc.Val];
         }
         break;
     default:
         break;
     }
 
-    /* 计算CRC填充 */
-    crc.Val = MBx_utility_crc16((uint8_t *)(pMaster->TxExist.Buffer), pMaster->TxExist.Len); // 计算CRC校验码
-    MBxTxBufferPutc(pMaster, crc.H_L.L8);                                                    // CRC低8位
-    MBxTxBufferPutc(pMaster, crc.H_L.H8);                                                    // CRC高8位
+    if(pMaster->Attr.ModbusModel == MBX_MODEL_TCP)
+    {
+        pMaster->TxExist.Buffer[4] = ((pMaster->TxExist.Len - 6) >> 8) & 0xFF; // 帧长度填充
+        pMaster->TxExist.Buffer[5] = (pMaster->TxExist.Len - 6) & 0xFF;
+#if MBX_MODULE_TCP_MASTER_ENABLE
+        pMaster->Parse.Head = (pMaster->Parse.Head + 1) % MBX_MASTER_REQUEST_QUEUE_MAX;
+#endif
+    }
+    else if(pMaster->Attr.ModbusModel == MBX_MODEL_RTU)
+    {
+        /* 计算CRC填充 */
+        crc.Val = MBx_utility_crc16((uint8_t *)(pMaster->TxExist.Buffer), pMaster->TxExist.Len); // 计算CRC校验码
+        MBxTxBufferPutc(pMaster, crc.H_L.L8);                                                    // CRC低8位
+        MBxTxBufferPutc(pMaster, crc.H_L.H8);                                                    // CRC高8位
+    }
 
     pMaster->Request.Tail = (pMaster->Request.Tail + 1) % MBX_MASTER_REQUEST_QUEUE_MAX;
 }
@@ -177,5 +207,11 @@ uint32_t MBxMasterRequestAdd(_MBX_MASTER *pMaster, uint8_t SlaveID, uint8_t Func
     pMaster->Request.Head = (pMaster->Request.Head + 1) % MBX_MASTER_REQUEST_QUEUE_MAX;
     return MBX_API_RETURN_DEFAULT;
 }
+
+#undef MASTER_PARSE_SLAVEID
+#undef MASTER_PARSE_SENDFUNC
+#undef MASTER_PARSE_SENDADDRSTART
+#undef MASTER_PARSE_SENDREGNUM
+#undef MASTER_PARSE_SENDVALUE
 
 #endif /* MBX_MASTER_ENABLE */

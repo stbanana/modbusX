@@ -70,6 +70,10 @@ extern "C"
 #define MBX_ERR_TRACE_MAX_NUM 20
 #endif
 
+#ifndef MBX_MODULE_TCP_MASTER_ENABLE
+#define MBX_MODULE_TCP_MASTER_ENABLE 0
+#endif
+
 #ifndef MBX_SEND_MODE_BYTES
 #define MBX_SEND_MODE_BYTES 1
 #endif

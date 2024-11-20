@@ -229,11 +229,22 @@ typedef struct
     uint16_t AddrStart; // 待处理的寄存器地址起始
     uint16_t RegNum;    // 待解析的寄存器数量
 
+#if MBX_MODULE_TCP_MASTER_ENABLE
+    /* 具有TCP主机功能，需要寄存所有的发送请求 */
+    uint8_t  SlaveID[MBX_MASTER_REQUEST_QUEUE_MAX];                                 // 发送时的从机ID
+    uint8_t  SendFunc[MBX_MASTER_REQUEST_QUEUE_MAX];                                // 发送时的功能码
+    uint16_t SendAddrStart[MBX_MASTER_REQUEST_QUEUE_MAX];                           // 发送时的地址起始
+    uint16_t SendRegNum[MBX_MASTER_REQUEST_QUEUE_MAX];                              // 发送时的寄存器数量
+    uint8_t  SendValue[MBX_MASTER_REQUEST_QUEUE_MAX][MBX_MASTER_MULTI_REG_MAX * 2]; // 发送时的设置值域
+    uint8_t  Head;                                                                  // 环形队列的头指针(入)
+    uint8_t  Tail;                                                                  // 环形队列的尾指针(出)
+#else
     uint8_t  SlaveID;                                 // 发送时的从机ID
     uint8_t  SendFunc;                                // 发送时的功能码
     uint16_t SendAddrStart;                           // 发送时的地址起始
     uint16_t SendRegNum;                              // 发送时的寄存器数量
     uint8_t  SendValue[MBX_MASTER_MULTI_REG_MAX * 2]; // 发送时的设置值域
+#endif
 } _MBX_MASTER_PARSE_VALUE;
 
 /**

@@ -18,6 +18,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <MBx_api.h>
 #if MBX_MASTER_ENABLE
+#if MBX_MODULE_TCP_MASTER_ENABLE
 /* Private types -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private Constants ---------------------------------------------------------*/
@@ -61,13 +62,6 @@ void MBx_Master_TCP_Parse(_MBX_MASTER *pMaster)
     MBx_Master_Parse_TCP_Func_Get(pMaster);
     /* 提取寄存器起始地址 */
     MBx_Master_Parse_TCP_AddrStar_Get(pMaster);
-
-    /* 审查从机ID号是否符合请求 */
-    if(pMaster->Parse.SlaveID != pMaster->RxExist.Buffer[0])
-    {
-        MBxRxBufferRemove(pMaster, FrameLen);
-        return;
-    }
 
     /* 审查是否符合帧长 */
     if(pMaster->RxExist.Len < FrameLen)
@@ -137,6 +131,15 @@ static inline void MBx_Master_Parse_TCP_AddrStar_Get(_MBX_MASTER *pMaster)
 {
     pMaster->Parse.AddrStart = (((uint16_t)pMaster->RxExist.Buffer[2] << 8) //地址高八位
                                 | pMaster->RxExist.Buffer[3]);              // 地址低八位
+}
+
+#else
+/**
+ * @brief modbusX从机消息解析系统 TCP分支 未开启TCP主机功能 空处理
+ * @param pMaster MBX从机对象指针
+ */
+void MBx_Master_TCP_Parse(_MBX_MASTER *pMaster)
+{
 }
 
 #endif /* MBX_MASTER_ENABLE */

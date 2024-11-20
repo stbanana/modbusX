@@ -1,5 +1,5 @@
 <p align="center">
- <h1 align="center">modbusX</h1>
+ <h1 align="center">modbusX(待翻译)</h1>
  <p align="center">一个物理驱动层解耦的 modbus 协议解析栈</p>
 </p>
 
@@ -14,10 +14,10 @@
         <img alt="C/C++ CI" src="https://github.com/stbanana/modbusX/actions/workflows/c-cpp.yml/badge.svg" />
     </a>
 </p>
-
 <p align="center">
-    <a href="https://stbanana.github.io/ModbusX-Doc/zh-hans/">文档</a>
+    <a href="https://stbanana.github.io/ModbusX-Doc/en/">文档</a>
 </p>
+
 
 <p align="center">
     <a href="/README.md">简体中文</a>
@@ -323,11 +323,11 @@ MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0, 4, (uint8_t *)&u16buffer[0], 
 
 # ✏️程序状态机
 
-![主从状态机流转](Example/README.DATA/MBX状态机.svg)
+![主从状态机流转](\Example\README.DATA\MBX状态机.png)
 
 # 程序模型
 
-![主从模型](Example/README.DATA/MBX模型.svg)
+![主从模型](\Example\README.DATA\MBX模型.png)
 
 # 可优化
 

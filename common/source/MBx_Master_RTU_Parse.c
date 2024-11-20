@@ -43,6 +43,12 @@ static inline void MBx_Master_Parse_RTU_AddrStar_Get(_MBX_MASTER *pMaster);
  */
 void MBx_Master_RTU_Parse(_MBX_MASTER *pMaster)
 {
+#if MBX_MODULE_TCP_MASTER_ENABLE
+#define MASTER_PARSE_SLAVEID(pMB) pMB->Parse.SlaveID[pMB->Parse.Tail]
+#else
+#define MASTER_PARSE_SLAVEID(pMB) pMB->Parse.SlaveID
+#endif
+
     uint32_t FrameLen  = 0;                  // 当前帧的完整帧长度。规范应在函数最前定义。
     uint32_t ErrorCode = MBX_EXCEPTION_NONE; // 错误码
 
@@ -71,7 +77,7 @@ void MBx_Master_RTU_Parse(_MBX_MASTER *pMaster)
     }
 
     /* 审查从机ID号是否符合请求 */
-    if(pMaster->Parse.SlaveID != pMaster->RxExist.Buffer[0])
+    if(MASTER_PARSE_SLAVEID(pMaster) != pMaster->RxExist.Buffer[0])
     {
         MBxRxBufferRemove(pMaster, FrameLen);
         return;
@@ -133,6 +139,8 @@ void MBx_Master_RTU_Parse(_MBX_MASTER *pMaster)
 
     /* 清空接收buffer */
     MBxRxBufferEmpty(pMaster);
+
+#undef MASTER_PARSE_SLAVEID
 }
 
 /**
