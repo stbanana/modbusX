@@ -21,8 +21,9 @@
 /* Private types -------------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
 
-#define IP   "127.0.0.1"
-#define PORT 49152
+#define IP          "127.0.0.1"
+#define PORT        502
+#define MAX_CLIENTS 5
 
 /* Private variables ---------------------------------------------------------*/
 
@@ -414,7 +415,7 @@ static void TCP_Server_Open(void)
     }
 
     // 开始监听
-    if(listen(serverSocket, 3) == SOCKET_ERROR)
+    if(listen(serverSocket, MAX_CLIENTS) == SOCKET_ERROR)
     {
         printf("Listen failed. Error Code: %d\n", WSAGetLastError( ));
         closesocket(serverSocket);

@@ -22,7 +22,19 @@
 /* Private variables ---------------------------------------------------------*/
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
-
+#if MBX_MODULE_TCP_MASTER_ENABLE
+#define MASTER_PARSE_SLAVEID(pMB)       pMB->Parse.SlaveID[pMB->Parse.Tail]
+#define MASTER_PARSE_SENDFUNC(pMB)      pMB->Parse.SendFunc[pMB->Parse.Tail]
+#define MASTER_PARSE_SENDADDRSTART(pMB) pMB->Parse.SendAddrStart[pMB->Parse.Tail]
+#define MASTER_PARSE_SENDREGNUM(pMB)    pMB->Parse.SendRegNum[pMB->Parse.Tail]
+#define MASTER_PARSE_SENDVALUE(pMB)     pMB->Parse.SendValue[pMB->Parse.Tail]
+#else
+#define MASTER_PARSE_SLAVEID(pMB)       pMB->Parse.SlaveID
+#define MASTER_PARSE_SENDFUNC(pMB)      pMB->Parse.SendFunc
+#define MASTER_PARSE_SENDADDRSTART(pMB) pMB->Parse.SendAddrStart
+#define MASTER_PARSE_SENDREGNUM(pMB)    pMB->Parse.SendRegNum
+#define MASTER_PARSE_SENDVALUE(pMB)     pMB->Parse.SendValue
+#endif
 /* Private function prototypes -----------------------------------------------*/
 extern uint32_t    MBx_Master_READ_COIL_Handle(_MBX_MASTER *pMaster);
 extern uint32_t    MBx_Master_READ_DISC_INPUTL_Handle(_MBX_MASTER *pMaster);
@@ -43,12 +55,6 @@ static inline void MBx_Master_Parse_RTU_AddrStar_Get(_MBX_MASTER *pMaster);
  */
 void MBx_Master_RTU_Parse(_MBX_MASTER *pMaster)
 {
-#if MBX_MODULE_TCP_MASTER_ENABLE
-#define MASTER_PARSE_SLAVEID(pMB) pMB->Parse.SlaveID[pMB->Parse.Tail]
-#else
-#define MASTER_PARSE_SLAVEID(pMB) pMB->Parse.SlaveID
-#endif
-
     uint32_t FrameLen  = 0;                  // 当前帧的完整帧长度。规范应在函数最前定义。
     uint32_t ErrorCode = MBX_EXCEPTION_NONE; // 错误码
 
@@ -139,8 +145,6 @@ void MBx_Master_RTU_Parse(_MBX_MASTER *pMaster)
 
     /* 清空接收buffer */
     MBxRxBufferEmpty(pMaster);
-
-#undef MASTER_PARSE_SLAVEID
 }
 
 /**
@@ -161,5 +165,11 @@ static inline void MBx_Master_Parse_RTU_AddrStar_Get(_MBX_MASTER *pMaster)
     pMaster->Parse.AddrStart = (((uint16_t)pMaster->RxExist.Buffer[2] << 8) //地址高八位
                                 | pMaster->RxExist.Buffer[3]);              // 地址低八位
 }
+
+#undef MASTER_PARSE_SLAVEID
+#undef MASTER_PARSE_SENDFUNC
+#undef MASTER_PARSE_SENDADDRSTART
+#undef MASTER_PARSE_SENDREGNUM
+#undef MASTER_PARSE_SENDVALUE
 
 #endif /* MBX_MASTER_ENABLE */

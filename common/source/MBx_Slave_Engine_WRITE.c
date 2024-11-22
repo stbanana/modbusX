@@ -39,6 +39,11 @@ void MBx_Slave_Engine_WRITE(_MBX_SLAVE *pSlave)
     }
     else
     {
+        if(pSlave->Runtime.TimeCnt > MBX_SENDERR_TIMEOUT_US)
+        {
+            pSlave->TxExist.Len   = 0;
+            pSlave->Runtime.State = MBX_STATE_IDLE; // 未成功发送且超时,作为从机不产生错误 流转空闲态
+        }
         // 发送失败, 下次轮询继续发送态
     }
 #else

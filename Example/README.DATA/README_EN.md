@@ -7,13 +7,14 @@
     <a href="https://github.com/anuraghazra/github-readme-stats/graphs/contributors">
         <img alt="C" src="https://img.shields.io/badge/C-00599C.svg?logo=c&logoColor=white" />
     </a>
-    <a href="https://mit-license.org>
+    <a href="https://mit-license.org">
         <img alt="Static Badge" src="https://img.shields.io/badge/license%20-%20MIT%20-%20blue" />
     </a>
     <a href="https://github.com/stbanana/modbusX/actions/workflows/c-cpp.yml">
         <img alt="C/C++ CI" src="https://github.com/stbanana/modbusX/actions/workflows/c-cpp.yml/badge.svg" />
     </a>
 </p>
+
 <p align="center">
     <a href="https://stbanana.github.io/ModbusX-Doc/en/">文档</a>
 </p>

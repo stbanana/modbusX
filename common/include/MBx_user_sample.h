@@ -67,6 +67,11 @@
 #define MBX_ERR_TRACE_MAX_NUM 20
 // </e>
 
+//   <o> 发送失败的时间判定阈值[us] <1000-5000000>
+//   <i> 若连续这段时间都无法正常发送帧，则判定为通信不良
+//   <i> Default: 10000
+#define MBX_SENDERR_TIMEOUT_US 10000
+
 // </h>
 
 // <h> 属性配置

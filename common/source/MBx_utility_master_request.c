@@ -21,6 +21,7 @@
 /* Private types -------------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
 #if MBX_MODULE_TCP_MASTER_ENABLE
+#define MASTER_PARSE_TRANSNUM(pMB)      pMB->Parse.TransNum[pMB->Parse.Tail]
 #define MASTER_PARSE_SLAVEID(pMB)       pMB->Parse.SlaveID[pMB->Parse.Tail]
 #define MASTER_PARSE_SENDFUNC(pMB)      pMB->Parse.SendFunc[pMB->Parse.Tail]
 #define MASTER_PARSE_SENDADDRSTART(pMB) pMB->Parse.SendAddrStart[pMB->Parse.Tail]
@@ -47,12 +48,17 @@ void MBxMasterRequestToTx(_MBX_MASTER *pMaster)
 {
     _MBX_CRC16 crc;
 
+#if MBX_MODULE_TCP_MASTER_ENABLE
     if(pMaster->Attr.ModbusModel == MBX_MODEL_TCP)
     {
-        MBxTxBufferPutReg(pMaster, pMaster->Runtime.TransID); // 事务号填充
-        MBxTxBufferPutReg(pMaster, 0x0000);                   // 协议标识填充
-        MBxTxBufferPutReg(pMaster, 0x0000);                   // 帧长度预填充
+        _MBX_MASTER_TEAM_MEMBER *pMember = MBx_Master_Member_Find(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].SlaveID);
+        MBxTxBufferPutReg(pMaster, pMember->TransID); // 事务号填充
+        MASTER_PARSE_TRANSNUM(pMaster) = pMember->TransID;
+        pMember->TransID += 1;              // 事务号累计(自动溢出清零)
+        MBxTxBufferPutReg(pMaster, 0x0000); // 协议标识填充
+        MBxTxBufferPutReg(pMaster, 0x0000); // 帧长度预填充
     }
+#endif
 
     MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].SlaveID);
     pMaster->Config.SlaveID       = pMaster->Request.Queue[pMaster->Request.Tail].SlaveID;

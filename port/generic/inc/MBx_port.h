@@ -44,6 +44,10 @@ extern "C"
 #error "MBX_MASTER_REQUEST_QUEUE_MAX must be not greater than 0xFF"
 #endif
 
+#ifndef MBX_MODULE_TCP_MASTER_ENABLE
+#define MBX_MODULE_TCP_MASTER_ENABLE 0
+#endif
+
 #ifndef MBX_MASTER_ERROR_QUEUE_MAX
 #define MBX_MASTER_ERROR_QUEUE_MAX 10
 #endif
@@ -70,8 +74,8 @@ extern "C"
 #define MBX_ERR_TRACE_MAX_NUM 20
 #endif
 
-#ifndef MBX_MODULE_TCP_MASTER_ENABLE
-#define MBX_MODULE_TCP_MASTER_ENABLE 0
+#ifndef MBX_SENDERR_TIMEOUT_US
+#define MBX_SENDERR_TIMEOUT_US 10000
 #endif
 
 #ifndef MBX_SEND_MODE_BYTES

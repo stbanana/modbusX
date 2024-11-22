@@ -7,7 +7,7 @@
     <a href="https://github.com/anuraghazra/github-readme-stats/graphs/contributors">
         <img alt="C" src="https://img.shields.io/badge/C-00599C.svg?logo=c&logoColor=white" />
     </a>
-    <a href="https://mit-license.org>
+    <a href="https://mit-license.org">
         <img alt="Static Badge" src="https://img.shields.io/badge/license%20-%20MIT%20-%20blue" />
     </a>
     <a href="https://github.com/stbanana/modbusX/actions/workflows/c-cpp.yml">
@@ -22,7 +22,7 @@
 <p align="center">
     <a href="/README.md">简体中文</a>
     ·
-    <a href="/docs/readme_en.md">English</a>
+    <a href="/Example/README.DATA/readme_en.md">English</a>
 </p>
 
 ## ✨特性

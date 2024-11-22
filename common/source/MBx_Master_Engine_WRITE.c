@@ -22,6 +22,19 @@
 /* Private variables ---------------------------------------------------------*/
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
+#if MBX_MODULE_TCP_MASTER_ENABLE
+#define MASTER_PARSE_SLAVEID(pMB)       pMB->Parse.SlaveID[pMB->Parse.Tail]
+#define MASTER_PARSE_SENDFUNC(pMB)      pMB->Parse.SendFunc[pMB->Parse.Tail]
+#define MASTER_PARSE_SENDADDRSTART(pMB) pMB->Parse.SendAddrStart[pMB->Parse.Tail]
+#define MASTER_PARSE_SENDREGNUM(pMB)    pMB->Parse.SendRegNum[pMB->Parse.Tail]
+#define MASTER_PARSE_SENDVALUE(pMB)     pMB->Parse.SendValue[pMB->Parse.Tail]
+#else
+#define MASTER_PARSE_SLAVEID(pMB)       pMB->Parse.SlaveID
+#define MASTER_PARSE_SENDFUNC(pMB)      pMB->Parse.SendFunc
+#define MASTER_PARSE_SENDADDRSTART(pMB) pMB->Parse.SendAddrStart
+#define MASTER_PARSE_SENDREGNUM(pMB)    pMB->Parse.SendRegNum
+#define MASTER_PARSE_SENDVALUE(pMB)     pMB->Parse.SendValue
+#endif
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -39,6 +52,12 @@ void MBx_Master_Engine_WRITE(_MBX_MASTER *pMaster)
     }
     else
     {
+        if(pMaster->Runtime.TimeCnt > MBX_SENDERR_TIMEOUT_US)
+        {
+            pMaster->TxExist.Len = 0;
+            MBxMasterErrortAdd(pMaster, MASTER_PARSE_SENDFUNC(pMaster), MBX_EXCEPTION_SENDERR, MASTER_PARSE_SENDADDRSTART(pMaster), MASTER_PARSE_SENDREGNUM(pMaster));
+            pMaster->Runtime.State = MBX_STATE_IDLE; // 未成功发送且超时, 流转空闲态
+        }
         // 发送失败, 下次轮询继续发送态
     }
 #else
@@ -63,4 +82,11 @@ void MBx_Master_Engine_WRITE(_MBX_MASTER *pMaster)
     }
 #endif
 }
+
+#undef MASTER_PARSE_SLAVEID
+#undef MASTER_PARSE_SENDFUNC
+#undef MASTER_PARSE_SENDADDRSTART
+#undef MASTER_PARSE_SENDREGNUM
+#undef MASTER_PARSE_SENDVALUE
+
 #endif /* MBX_MASTER_ENABLE */

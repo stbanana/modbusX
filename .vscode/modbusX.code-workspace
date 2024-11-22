@@ -82,7 +82,8 @@
             "thread": "cpp",
             "cinttypes": "cpp",
             "typeinfo": "cpp",
-            "variant": "cpp"
+            "variant": "cpp",
+            "stdio.h": "c"
         }
     },
     "launch": {

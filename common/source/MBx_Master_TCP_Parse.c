@@ -112,6 +112,8 @@ void MBx_Master_TCP_Parse(_MBX_MASTER *pMaster)
 
     /* 清空接收buffer */
     MBxRxBufferEmpty(pMaster);
+
+    pMaster->Parse.Tail = (pMaster->Parse.Tail + 1) % MBX_MASTER_REQUEST_QUEUE_MAX;
 }
 
 /**
@@ -141,5 +143,7 @@ static inline void MBx_Master_Parse_TCP_AddrStar_Get(_MBX_MASTER *pMaster)
 void MBx_Master_TCP_Parse(_MBX_MASTER *pMaster)
 {
 }
+
+#endif /* MBX_MODULE_TCP_MASTER_ENABLE */
 
 #endif /* MBX_MASTER_ENABLE */
