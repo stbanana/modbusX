@@ -341,7 +341,7 @@ static uint32_t fWriteTest1(void *value)
     return MBX_API_RETURN_DEFAULT;
 }
 
-/******************利用TCP服务器驱动编写的mbx port函数******************/
+/******************利用TCP客户端驱动编写的mbx port函数******************/
 /**
  * @brief 将 MBX_SEND_MODE_BYTES 宏置1后, 可用多字节发送port
  * @param Data 发送buffer指针
@@ -383,7 +383,7 @@ uint32_t TCPClientGetcPort(uint8_t *Data)
     }
 }
 
-/******************以下为TCP服务器驱动, 应当分离为port文件, 示例就算了******************/
+/******************以下为TCP客户端驱动, 应当分离为port文件, 示例就算了******************/
 static void TCP_Client_Open(void)
 {
     WSADATA wsaData;

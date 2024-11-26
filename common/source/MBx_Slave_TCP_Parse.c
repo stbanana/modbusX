@@ -74,7 +74,8 @@ void MBx_Slave_TCP_Parse(_MBX_SLAVE *pSlave)
     }
 
     /* 审查从机ID号是否符合本机 */
-    if(pSlave->Config.SlaveID != pSlave->RxExist.Buffer[0])
+    if(pSlave->Config.SlaveID != pSlave->RxExist.Buffer[0] && // 不等于本机
+       0 != pSlave->RxExist.Buffer[0])                        // 非广播
     {
         MBxRxBufferRemove(pSlave, FrameLen);
         MBxTxBufferEmpty(pSlave);

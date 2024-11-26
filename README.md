@@ -22,7 +22,7 @@
 <p align="center">
     <a href="/README.md">简体中文</a>
     ·
-    <a href="/Example/README.DATA/readme_en.md">English</a>
+    <a href="/Example/README.DATA/README_EN.md">English</a>
 </p>
 
 ## ✨特性
