@@ -4,15 +4,9 @@
 </p>
 
 <p align="center">
-    <a href="https://github.com/anuraghazra/github-readme-stats/graphs/contributors">
-        <img alt="C" src="https://img.shields.io/badge/C-00599C.svg?logo=c&logoColor=white" />
-    </a>
-    <a href="https://mit-license.org">
-        <img alt="Static Badge" src="https://img.shields.io/badge/license%20-%20MIT%20-%20blue" />
-    </a>
-    <a href="https://github.com/stbanana/modbusX/actions/workflows/c-cpp.yml">
-        <img alt="C/C++ CI" src="https://github.com/stbanana/modbusX/actions/workflows/c-cpp.yml/badge.svg" />
-    </a>
+    <a href="https://github.com/anuraghazra/github-readme-stats/graphs/contributors"><img alt="C" src="https://img.shields.io/badge/C-00599C.svg?logo=c&logoColor=white" /></a>
+    <a href="https://mit-license.org"><img alt="Static Badge" src="https://img.shields.io/badge/license%20-%20MIT%20-%20blue" /></a>
+    <a href="https://github.com/stbanana/modbusX/actions/workflows/c-cpp.yml"><img alt="C/C++ CI" src="https://github.com/stbanana/modbusX/actions/workflows/c-cpp.yml/badge.svg" /></a>
 </p>
 
 <p align="center">
@@ -110,7 +104,7 @@ uint32_t SerialGetcPort(uint8_t *Data)
 然后制作一张类似如下的地址映射表，注意以下两点，
 
 > 1. 数据模型的**寄存器地址必须递增**，库内使用二分法查找以提高查找效率
-> 2. **如果映射到的内部内存变量相同，那么回调处理也应该相同**，因为库会最终将整个变量期望修改的值以 void* 形式传入写时回调，写时回调应当再翻译为对应的数据，详见例程 [在windows平台的RTU从机例子](Example/win_test/RTU_Smain.c)
+> 2. **如果映射到的内部内存变量相同，那么回调处理也应该相同**，因为库会最终将整个变量期望修改的值以 void* 形式传入写时回调，写时回调应当再翻译为对应的数据，详见例程 [在 windows 平台的 RTU 从机例子](Example/win_test/RTU_Smain.c)
 
 ```c
 /* 供映射的内存区域 */
@@ -208,7 +202,7 @@ MBx_Slave_RTU_Init(&MBxSlave2,     // 从机对象
 然后制作一张类似如下的地址映射表，注意以下两点，
 
 > 1. 数据模型的**寄存器地址必须递增**，库内使用二分法查找以提高查找效率
-> 2. **如果映射到的内部内存变量相同，那么回调处理也应该相同**，因为库会最终将整个变量期望修改的值以 void* 形式传入写时回调，写时回调应当再翻译为对应的数据，详见例程 [在windows平台的RTU主机例子](Example/win_test/RTU_Mmain.c)
+> 2. **如果映射到的内部内存变量相同，那么回调处理也应该相同**，因为库会最终将整个变量期望修改的值以 void* 形式传入写时回调，写时回调应当再翻译为对应的数据，详见例程 [在 windows 平台的 RTU 主机例子](Example/win_test/RTU_Mmain.c)
 
 ```c
 /* 供映射的内存区域 */
@@ -306,19 +300,19 @@ MBx_Master_Read_Input_Reg_Request(&MBxMaster, 1, 0x100, 2); // 请求读取1号�
 MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0, 4, (uint8_t *)&u16buffer[0], 8); // 请求写入1号从机的0地址的4个寄存器，写成功时自动同步进映射内存区
 ```
 
-另外可以实现一个错误处理的部分，取出错误队列中存在的东西，对事实存在的错误进行统一的自定义处理。详见例程 [在windows平台的RTU主机例子](Example/win_test/RTU_Mmain.c)
+另外可以实现一个错误处理的部分，取出错误队列中存在的东西，对事实存在的错误进行统一的自定义处理。详见例程 [在 windows 平台的 RTU 主机例子](Example/win_test/RTU_Mmain.c)
 
-## TCP从机
+## TCP 从机
 
-与RTU从机几乎完全相同，将初始化时的API从`MBx_Slave_RTU_Init()`替换为`MBx_Slave_TCP_Init()`即可。
+与 RTU 从机几乎完全相同，将初始化时的 API 从`MBx_Slave_RTU_Init()`替换为`MBx_Slave_TCP_Init()`即可。
 
-详见例程 [在windows平台的TCP从机例子](Example/win_test/TCP_Smain.c)
+详见例程 [在 windows 平台的 TCP 从机例子](Example/win_test/TCP_Smain.c)
 
-## TCP主机
+## TCP 主机
 
-与RTU主机几乎完全相同，将初始化时的API从`MBx_Master_RTU_Init()`替换为`MBx_Master_TCP_Init()`即可。
+与 RTU 主机几乎完全相同，将初始化时的 API 从`MBx_Master_RTU_Init()`替换为`MBx_Master_TCP_Init()`即可。
 
-详见例程 [在windows平台的TCP主机例子](Example/win_test/TCP_Mmain.c)
+详见例程 [在 windows 平台的 TCP 主机例子](Example/win_test/TCP_Mmain.c)
 
 
 # ✏️程序状态机

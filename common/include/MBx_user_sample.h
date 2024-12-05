@@ -67,6 +67,12 @@
 #define MBX_ERR_TRACE_MAX_NUM 20
 // </e>
 
+// <o> 拓展回调(需拓展定义表，造成明显消耗)
+//   <0=> 关闭
+//   <1=> 启用
+// <i> Default: 关闭
+#define MBX_EXTEN_REG_HANDLE_ENABLE 0
+
 //   <o> 发送失败的时间判定阈值[us] <1000-5000000>
 //   <i> 若连续这段时间都无法正常发送帧，则判定为通信不良
 //   <i> Default: 10000

@@ -91,7 +91,7 @@ extern "C"
 #define MBX_STATE_READ  (4) /*!< 4 0x04状态定义, 接收状态. */
 
 /* 寄存器地址表的结尾 */
-#define MBX_MAP_LIST_END {.Addr = 0, .Memory = NULL, .Type = 0, .Handle = NULL}
+#define MBX_MAP_LIST_END {.Addr = 0, .Memory = NULL, .Type = 0, .Handle = NULL, .Para = &DefaultPara}
 
 /* MBX空参数定义 */
 #define MBX_PARA_NULL 0
@@ -115,7 +115,6 @@ extern "C"
 /* Exported types ------------------------------------------------------------*/
 
 /***********地址映射表的定义***********/
-typedef uint32_t (*MBX_MAP_REG_HANDLE)(void *value); //地址映射表中的写时处理函数 类型定义
 /**
  * 定义MBx寄存器地址查询表的单条结构
  */
@@ -125,6 +124,9 @@ typedef struct
     void              *Memory; // 内存区域头地址
     uint8_t            Type;   // 内存区域映射的数据类型
     MBX_MAP_REG_HANDLE Handle; // 写时处理函数
+#if MBX_EXTEN_REG_HANDLE_ENABLE
+    _MBX_REG_HANDLE_PARA *Para; // 写时传入协参
+#endif
 } _MBX_MAP_LIST_ENTRY;
 
 /***********提供主机从机对象 共用的定义***********/

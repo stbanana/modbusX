@@ -74,6 +74,10 @@ extern "C"
 #define MBX_ERR_TRACE_MAX_NUM 20
 #endif
 
+#ifndef MBX_EXTEN_REG_HANDLE_ENABLE
+#define MBX_EXTEN_REG_HANDLE_ENABLE 0
+#endif
+
 #ifndef MBX_SENDERR_TIMEOUT_US
 #define MBX_SENDERR_TIMEOUT_US 10000
 #endif
@@ -112,6 +116,19 @@ typedef uint32_t (*MBX_SEND_PTR)(const uint8_t *Data);
 
 /* 定义接收port函数的类型 */
 typedef uint32_t (*MBX_GTEC_PTR)(uint8_t *Data);
+
+/* 地址映射表中的写时处理函数 类型定义 */
+#if MBX_EXTEN_REG_HANDLE_ENABLE
+typedef struct
+{
+    uint32_t Para1;
+    uint32_t Para2;
+} _MBX_REG_HANDLE_PARA;
+extern _MBX_REG_HANDLE_PARA DefaultPara;
+typedef uint32_t (*MBX_MAP_REG_HANDLE)(void *value, _MBX_REG_HANDLE_PARA *para);
+#else
+typedef uint32_t (*MBX_MAP_REG_HANDLE)(void *value);
+#endif
 
 /* Exported variables ---------------------------------------------------------*/
 /* Exported functions ---------------------------------------------------------*/

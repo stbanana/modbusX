@@ -52,9 +52,19 @@ typedef struct
     uint16_t                  Puzzles[4];      // 最多4个16位碎片，用于处理32位、64位等数据类型
     uint8_t                   PendingFlag;     // 是否有未完成的写入请求 1具有(写下方16位碎片时产生写入请求) 0无(处理函数调用后清除写入请求)
     _MBX_MAP_PUZZLES_COMPLETE PuzzlesComplete; // 16位碎片的填充完成标识
+#if MBX_EXTEN_REG_HANDLE_ENABLE
+    _MBX_REG_HANDLE_PARA *Para; // 写时传入协参
+#endif
 } _MBX_MAP_WRITE_DATA_CO;
 
 /* Private macros ------------------------------------------------------------*/
+
+#if MBX_EXTEN_REG_HANDLE_ENABLE
+_MBX_REG_HANDLE_PARA DefaultPara;
+#define __MBX_HANDLE_(p, d) p->Handle((void *)(p->Puzzles d), (p->Para))
+#else
+#define __MBX_HANDLE_(p, d) p->Handle((void *)(p->Puzzles d))
+#endif
 /* Private variables ---------------------------------------------------------*/
 
 /* 
@@ -429,7 +439,7 @@ uint32_t MBx_utility_map_w_cooperate_review(void)
         }
 
         if(MPxMapwriteCo.Handle != NULL)
-            state = MPxMapwriteCo.Handle((void *)MPxMapwriteCo.Puzzles);
+            state = __MBX_HANDLE_((&MPxMapwriteCo), +0);
 
 #else
         switch(MPxMapwriteCo.Type)
@@ -480,10 +490,10 @@ uint32_t MBx_utility_map_w_cooperate_review(void)
             switch(MPxMapwriteCo->Type)
             {
             case MBX_REG_TYPE_U8:
-                state = MPxMapwriteCo.Handle((void *)MPxMapwriteCo.Puzzles + 1);
+                state = __MBX_HANDLE_((&MPxMapwriteCo), +1);
                 break;
             default:
-                state = MPxMapwriteCo.Handle((void *)MPxMapwriteCo.Puzzles);
+                state = __MBX_HANDLE_((&MPxMapwriteCo), +0);
                 break;
             }
 #endif
@@ -720,7 +730,7 @@ static uint32_t MBX_utility_map_entry_data_set(const _MBX_MAP_LIST_ENTRY *entry,
         co->PendingFlag = 0;
 
         if(co->Handle != NULL)
-            state = co->Handle((void *)co->Puzzles);
+            state = __MBX_HANDLE_((co), +0);
     }
 #else /* 大端拼图 */
     switch(entry->Type)
@@ -794,10 +804,10 @@ static uint32_t MBX_utility_map_entry_data_set(const _MBX_MAP_LIST_ENTRY *entry,
             switch(co->Type)
             {
             case MBX_REG_TYPE_U8:
-                state = co->Handle((void *)co->Puzzles + 1);
+                state = __MBX_HANDLE_((co), +1);
                 break;
             default:
-                state = co->Handle((void *)co->Puzzles);
+                state = __MBX_HANDLE_((co), +0);
                 break;
             }
     }
@@ -881,3 +891,5 @@ static uint32_t MBX_utility_map_entry_data_set_cast(const _MBX_MAP_LIST_ENTRY *e
 #endif
     return state;
 }
+
+#undef __MBX_HANDLE_
