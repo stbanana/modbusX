@@ -92,9 +92,9 @@ extern "C"
 
 /* 寄存器地址表的结尾 */
 #if MBX_EXTEN_REG_HANDLE_ENABLE
-#define MBX_MAP_LIST_END {.Addr = 0, .Memory = NULL, .Type = 0, .Handle = NULL}
-#else
 #define MBX_MAP_LIST_END {.Addr = 0, .Memory = NULL, .Type = 0, .Handle = NULL, .Para = &DefaultPara}
+#else
+#define MBX_MAP_LIST_END {.Addr = 0, .Memory = NULL, .Type = 0, .Handle = NULL}
 #endif
 
 /* MBX空参数定义 */
