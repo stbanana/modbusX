@@ -1,42 +1,29 @@
 
 /**
  * @file    RTU_Mmain.c
- * windows使用虚拟串口与modbus测试软件进行通信
+ * windows使用 TCP client 与modbus测试软件进行通信
  * 测试主机功能
- * 其中大部分代码来自百度, 且懒得格式化
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include <stdio.h>
-#include <string.h>
 
-#include <windows.h>
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <winsock2.h>
+#include <ws2tcpip.h> // 包含 inet_pton 函数
 
 #include <MBx_api.h>
 
 /* Private types -------------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
-#if 1 //开启DEBUG打印
-#define LOGD(...) printf(__VA_ARGS__)
-#else //关闭DEBUG打印
-#define LOGD(...)
-#endif
-
-#if 1 //开启ERROR打印
-#define LOGE(...) printf(__VA_ARGS__)
-#else //关闭ERROR打印
-#define LOGE(...)
-#endif
-
-/* 测试使用的串口号定义 */
-#define COM_PORT_NAME "COM2"
-/* 测试使用的串口缓冲区大小 */
-#define BUF_SIZE 2048
+#define IP   "127.0.0.1"
+#define PORT 502
 
 /* Private variables ---------------------------------------------------------*/
 
-/* 串口句柄 */
-HANDLE comHandle = INVALID_HANDLE_VALUE;
+SOCKET clientSocket;
 
 /* modbusx Master对象 */
 _MBX_MASTER MBxMaster;
@@ -73,12 +60,12 @@ static void TestErrorConsume(void);
 static void TestMemUpdate(uint32_t Cycle);
 
 /* 用于绑定的port函数 */
-uint32_t SerialSendPort(const void *Data, size_t Len);
-uint32_t SerialGetcPort(uint8_t *Data);
+uint32_t TCPClientSendPort(const void *Data, size_t Len);
+uint32_t TCPClientGetcPort(uint8_t *Data);
 
-/* 包装的win32串口驱动 */
-static HANDLE  SerialOpen(const char *com, int baud, int byteSize, int parity, int stopBits);
-static WINBOOL SerialClose(HANDLE hObject);
+/* 包装的win32 TCP Client驱动 */
+static void TCP_Client_Open(void);
+static void TCP_Client_Close(void);
 
 /* 分立测试系列 */
 void MyRTUMasterTest(void);
@@ -89,21 +76,14 @@ int main(int argc, char *argv[])
 {
     MBX_UNUSED_PARAM(argc)
     MBX_UNUSED_PARAM(argv)
-    /* 打开串口 */
-    const char *com = COM_PORT_NAME;
-    comHandle       = SerialOpen(com, CBR_9600, 8, NOPARITY, ONESTOPBIT);
-    if(INVALID_HANDLE_VALUE == comHandle)
-    {
-        LOGE("OpenSerial %s fail!\r\n", COM_PORT_NAME);
-        return -1;
-    }
-    LOGD("Open %s Successfully!\r\n", COM_PORT_NAME);
+    /* 打开TCP Client*/
+    TCP_Client_Open( );
 
     /* RTU主机测试 */
     MyRTUMasterTest( );
 
-    //关闭串口
-    SerialClose(comHandle);
+    /* 关闭TCP Client*/
+    TCP_Client_Close( );
 
     return 0;
 }
@@ -119,13 +99,13 @@ void MyRTUMasterTest(void)
     uint8_t *STxBuffer = (uint8_t *)malloc(84 * sizeof(uint8_t));
 
     /* 初始化modbus主机1 */
-    if(MBx_Master_TCP_Init(&MBxMaster,     // 主机对象
-                           SerialSendPort, // 发送函数
-                           SerialGetcPort, // 接收函数
-                           SRxBuffer,      // 库内接收buffer分配
-                           84,             // 接收buffer最大长度
-                           STxBuffer,      // 库内发送buffer分配
-                           84)             // 发送buffer最大长度
+    if(MBx_Master_TCP_Init(&MBxMaster,        // 主机对象
+                           TCPClientSendPort, // 发送函数
+                           TCPClientGetcPort, // 接收函数
+                           SRxBuffer,         // 库内接收buffer分配
+                           84,                // 接收buffer最大长度
+                           STxBuffer,         // 库内发送buffer分配
+                           84)                // 发送buffer最大长度
        != MBX_API_RETURN_DEFAULT)
     {
         /* 初始化错误 自行判断返回值差错 */
@@ -361,23 +341,27 @@ static uint32_t fWriteTest1(void *value)
     return MBX_API_RETURN_DEFAULT;
 }
 
-/******************利用windows串口驱动编写的mbx port函数******************/
+/******************利用TCP客户端驱动编写的mbx port函数******************/
 /**
  * @brief 将 MBX_SEND_MODE_BYTES 宏置1后, 可用多字节发送port
  * @param Data 发送buffer指针
  * @param Len 期望发送的长度
  * @return port标准返回
  */
-uint32_t SerialSendPort(const void *Data, size_t Len)
+uint32_t TCPClientSendPort(const void *Data, size_t Len)
 {
-    WINBOOL b     = FALSE; // 发送操作标识
-    DWORD   wWLen = 0;     // 实际发送数据长度
+    int wWLen = 0; // 实际发送数据长度
     /* 尝试发送 */
-    b = WriteFile(comHandle, Data, Len, &wWLen, NULL);
-    if(b && wWLen == Len)
-        return MBX_PORT_RETURN_DEFAULT;
-    else
+    wWLen = send(clientSocket, Data, Len, 0);
+    if(wWLen == SOCKET_ERROR || // 失败
+       wWLen != (int)Len)
+    {
         return MBX_PORT_RETURNT_ERR_INDEFINITE;
+    }
+    else
+    {
+        return MBX_PORT_RETURN_DEFAULT;
+    }
 }
 
 /**
@@ -385,13 +369,11 @@ uint32_t SerialSendPort(const void *Data, size_t Len)
  * @param Data 字节指针, 取到的字节
  * @return port标准返回
  */
-uint32_t SerialGetcPort(uint8_t *Data)
+uint32_t TCPClientGetcPort(uint8_t *Data)
 {
-    WINBOOL b     = FALSE; // 接收操作标识
-    DWORD   wRLen = 0;     // 实际接收数据长度
     /* 尝试接收 */
-    b = ReadFile(comHandle, Data, 1, &wRLen, NULL);
-    if(b == TRUE && wRLen == 1)
+    int bytesReceived = recv(clientSocket, Data, 1, 0);
+    if(bytesReceived == 1)
     {
         return MBX_PORT_RETURN_DEFAULT;
     }
@@ -401,87 +383,50 @@ uint32_t SerialGetcPort(uint8_t *Data)
     }
 }
 
-/******************以下为串口驱动, 应当分离为port文件, 示例就算了******************/
-/**
- * @brief 打开串口
- * @param com 串口名称, 如COM1, COM2
- * @param baud 波特率：常用取值：CBR_9600、CBR_19200、CBR_38400、CBR_115200、CBR_230400、CBR_460800
- * @param byteSize 数位大小：可取值7、8；
- * @param parity 校验方式：可取值NOPARITY、ODDPARITY、EVENPARITY、MARKPARITY、SPACEPARITY
- * @param stopBits 停止位：ONESTOPBIT、ONE5STOPBITS、TWOSTOPBITS；
- * @return 返回生成的串口对象
- */
-HANDLE SerialOpen(const char *com, int baud, int byteSize, int parity, int stopBits)
+/******************以下为TCP客户端驱动, 应当分离为port文件, 示例就算了******************/
+static void TCP_Client_Open(void)
 {
-    DCB          dcb;
-    BOOL         b = FALSE;
-    COMMTIMEOUTS CommTimeouts;
-    HANDLE       comHandle = INVALID_HANDLE_VALUE;
+    WSADATA wsaData;
 
-    //打开串口
-    comHandle = CreateFile(com,                          //串口名称
-                           GENERIC_READ | GENERIC_WRITE, //可读、可写
-                           0,                            // No Sharing
-                           NULL,                         // No Security
-                           OPEN_EXISTING,                // Open existing port only
-                           FILE_ATTRIBUTE_NORMAL,        // Non Overlapped I/O
-                           NULL);                        // Null for Comm Devices
-
-    if(INVALID_HANDLE_VALUE == comHandle)
+    // 初始化 Winsock
+    if(WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
     {
-        LOGE("CreateFile fail\r\n");
-        return comHandle;
+        printf("WSAStartup failed. Error Code: %d\n", WSAGetLastError( ));
+        return;
     }
 
-    // 设置读写缓存大小
-    b = SetupComm(comHandle, BUF_SIZE, BUF_SIZE);
-    if(!b)
+    // 创建 socket
+    clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if(clientSocket == INVALID_SOCKET)
     {
-        LOGE("SetupComm fail\r\n");
+        printf("Socket creation failed. Error Code: %d\n", WSAGetLastError( ));
+        WSACleanup( );
+        return;
     }
 
-    //设定读写超时
-    CommTimeouts.ReadIntervalTimeout         = MAXDWORD;                                  //读间隔超时
-    CommTimeouts.ReadTotalTimeoutMultiplier  = 0;                                         //读时间系数
-    CommTimeouts.ReadTotalTimeoutConstant    = 0;                                         //读时间常量
-    CommTimeouts.WriteTotalTimeoutMultiplier = 1;                                         //写时间系数
-    CommTimeouts.WriteTotalTimeoutConstant   = 1;                                         //写时间常量
-    b                                        = SetCommTimeouts(comHandle, &CommTimeouts); //设置超时
-    if(!b)
+    // 设置服务器地址
+    struct sockaddr_in serverAddr;
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port   = htons(PORT);
+    inet_pton(AF_INET, IP, &serverAddr.sin_addr);
+
+    // 连接到服务器
+    while(connect(clientSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
     {
-        LOGE("SetCommTimeouts fail\r\n");
+        printf("Connection failed. Error Code: %d. Retrying...\n", WSAGetLastError( ));
+        Sleep(1000); // 等待1秒后重试连接
     }
 
-    //设置串口状态属性
-    GetCommState(comHandle, &dcb);                //获取当前
-    dcb.BaudRate = baud;                          //波特率
-    dcb.ByteSize = byteSize;                      //每个字节有位数
-    dcb.Parity   = parity;                        //无奇偶校验位
-    dcb.StopBits = stopBits;                      //一个停止位
-    b            = SetCommState(comHandle, &dcb); //设置
-    if(!b)
-    {
-        LOGE("SetCommState fail\r\n");
-    }
+    // 设置套接字为非阻塞模式
+    u_long mode = 1;
+    ioctlsocket(clientSocket, FIONBIO, &mode); // 设置为非阻塞模式
 
-    return comHandle;
+    printf("Connected to server %s:%d\n", IP, PORT);
 }
 
-/**
- * @brief 关闭串口
- * @param hObject
- * @return
- */
-WINBOOL SerialClose(HANDLE hObject)
+static void TCP_Client_Close(void)
 {
-    WINBOOL b = FALSE;
-    /* 尝试关闭串口 */
-    b = CloseHandle(hObject);
-    if(!b)
-    {
-        LOGE("CloseHandle fail\r\n");
-    }
-
-    LOGD("Program Exit.\r\n");
-    return b;
+    // 关闭 sockets
+    closesocket(clientSocket); // 关闭客户端套接字
+    WSACleanup( );
 }

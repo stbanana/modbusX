@@ -66,6 +66,7 @@ extern "C"
 #define MBX_EXCEPTION_SAFE    (32)  /*!< 32 0x20错误码, 保护报警错误, 正在报警时对控制类及在线调节命令返回该代码. */
 #define MBX_EXCEPTION_CRC     (64)  /*!< 64 0x40错误码, CRC校验错误. */
 #define MBX_EXCEPTION_TIMEOUT (128) /*!< 128 0x80错误码, 超时错误. */
+#define MBX_EXCEPTION_SENDERR (129) /*!< 129 0x81错误码, 发送失败错误. */
 
 /* 寄存器映射的数据类型 */
 #define MBX_REG_TYPE_U8           (1)   /*!< 类型定义, 该地址映射的数据是8位的. */
@@ -90,7 +91,6 @@ extern "C"
 #define MBX_STATE_READ  (4) /*!< 4 0x04状态定义, 接收状态. */
 
 /* 寄存器地址表的结尾 */
-#define MBX_MAP_LIST_END {.Addr = 0, .Memory = NULL, .Type = 0, .Handle = NULL}
 
 /* MBX空参数定义 */
 #define MBX_PARA_NULL 0
@@ -173,8 +173,7 @@ typedef struct
     uint32_t StatePast:4; // 运行时状态机前一态寄存, 状态流转时可以处理数据
     uint32_t StateFlow:1; // 状态机立即流转动作 1立即流转 0按流程流转
     // uint32_t StateWait:1; // 状态机保持等待标识 1保持等待 0流转出去
-    uint32_t TransID:16; // modbusTCP专用, 当前累计的事务号
-    uint32_t reg    :3;  // 补位
+    uint32_t reg:19; // 补位
 } _MBX_COMMON_RUNTIME;
 
 /***********提供从机对象使用的定义***********/
@@ -213,6 +212,9 @@ typedef struct
  */
 typedef struct _MBX_MASTER_TEAM_MEMBER
 {
+#if MBX_MODULE_TCP_MASTER_ENABLE
+    uint16_t TransID; // modbusTCP专用, 当前累计的事务号
+#endif
     uint8_t                         SlaveID; // 从机号绑定
     const _MBX_MAP_LIST_ENTRY      *Map;     // 地址映射表头
     uint16_t                        MapNum;  // 地址映射数量，自动遍历map产生

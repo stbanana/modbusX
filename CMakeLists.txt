@@ -28,71 +28,42 @@ enable_language(C)
 # 使用本地文件不进行拉取
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/common)     # 添加子目录
 
-set(BUILD_PROJECT_NAME RTU_Mmain)   # 控制编译RTU主机测试
-add_executable(${BUILD_PROJECT_NAME})
-
-target_compile_definitions(${BUILD_PROJECT_NAME} PRIVATE
-    MBX_INCLUDE_USER_DEFINE_FILE # 控制使用用户自定义的配置文件
-)
-target_include_directories(${BUILD_PROJECT_NAME} PRIVATE
+# 设置要包含和定义的参数
+set(MY_INCLUDE_DIR 
     ${CMAKE_CURRENT_LIST_DIR}/Example/win_test
 )
-target_sources(${BUILD_PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/Example/win_test/RTU_Mmain.c
+set(MY_DEFINITIONS 
+    MBX_INCLUDE_USER_DEFINE_FILE
 )
 
-target_link_libraries(${BUILD_PROJECT_NAME} # 没有修饰词默认为 PRIVATE 
-    modbusx 
-)
-# 添加链接器选项以生成 map 文件
-target_link_options(${BUILD_PROJECT_NAME} PRIVATE
-    -Wl,-Map=${BUILD_PROJECT_NAME}.map
-    -Wl,--gc-sections
-)
 
-set(BUILD_PROJECT_NAME RTU_Smain) # 控制编译RTU从机测试
-add_executable(${BUILD_PROJECT_NAME})
+# 配置目标和链接属性
+function(configure_target target_name source_file)
+    add_executable(${target_name} ${source_file})
 
-target_compile_definitions(${BUILD_PROJECT_NAME} PRIVATE 
-    MBX_INCLUDE_USER_DEFINE_FILE # 控制使用用户自定义的配置文件
-)
-target_include_directories(${BUILD_PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/Example/win_test
-)
-target_sources(${BUILD_PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/Example/win_test/RTU_Smain.c
-)
-target_link_libraries(${BUILD_PROJECT_NAME} # 没有修饰词默认为 PRIVATE 
-    modbusx 
-)
-# 添加链接器选项以生成 map 文件
-target_link_options(${BUILD_PROJECT_NAME} PRIVATE
-    -Wl,-Map=${BUILD_PROJECT_NAME}.map
-    -Wl,--gc-sections
-)
+    target_compile_definitions(${target_name} PUBLIC  ${MY_DEFINITIONS})
+    target_include_directories(${target_name} PUBLIC ${MY_INCLUDE_DIR})
+    target_link_libraries(${target_name} PUBLIC modbusx)
 
-# set(BUILD_PROJECT_NAME TCP_Smain) # 控制编译TCP从机测试
-# add_executable(${BUILD_PROJECT_NAME})
+    # 添加链接器选项
+    target_link_options(${target_name} PRIVATE
+        -Wl,-Map=${target_name}.map
+        -Wl,--gc-sections
+    )
+endfunction()
 
-# target_compile_definitions(${BUILD_PROJECT_NAME} PRIVATE 
-#     MBX_INCLUDE_USER_DEFINE_FILE # 控制使用用户自定义的配置文件
-# )
-# target_include_directories(${BUILD_PROJECT_NAME} PRIVATE
-#     ${CMAKE_CURRENT_LIST_DIR}/Example/win_test
-# )
-# target_sources(${BUILD_PROJECT_NAME} PRIVATE
-#     ${CMAKE_CURRENT_LIST_DIR}/Example/win_test/TCP_Smain.c
-# )
-# target_link_libraries(${BUILD_PROJECT_NAME} # 没有修饰词默认为 PRIVATE 
-#     modbusx 
-#     wsock32 ws2_32
-# )
-# # 添加链接器选项以生成 map 文件
-# target_link_options(${BUILD_PROJECT_NAME} PRIVATE
-#     -Wl,-Map=${BUILD_PROJECT_NAME}.map
-#     -Wl,--gc-sections
-# )
+# 配置每个可执行文件
+configure_target(RTU_Mmain ${CMAKE_CURRENT_LIST_DIR}/Example/win_test/RTU_Mmain.c)
+configure_target(RTU_Smain ${CMAKE_CURRENT_LIST_DIR}/Example/win_test/RTU_Smain.c)
 
+configure_target(TCP_Smain ${CMAKE_CURRENT_LIST_DIR}/Example/win_test/TCP_Smain.c)
+target_link_libraries(TCP_Smain PUBLIC wsock32 ws2_32)
+
+configure_target(TCP_Mmain ${CMAKE_CURRENT_LIST_DIR}/Example/win_test/TCP_Mmain.c)
+target_link_libraries(TCP_Mmain PUBLIC wsock32 ws2_32)
+
+# 启用测试
+enable_testing()
 
 # 启用测试
 enable_testing()

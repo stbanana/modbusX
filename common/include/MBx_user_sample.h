@@ -26,6 +26,12 @@
 // <i> Default: 主机启用
 #define MBX_MASTER_ENABLE 1
 
+// <o> TCP主机功能是否开启
+//   <0=> 裁剪掉TCP主机功能
+//   <1=> TCP主机功能启用
+// <i> Default: 裁剪掉TCP主机功能
+#define MBX_MODULE_TCP_MASTER_ENABLE 0
+
 //   <o> 主机请求队列的最大深度 <32-255>
 //   <i> 是队列中的最大寄存条数，用于连续读写请求，寄存并自动发送处理。是8位存储故而不超过255
 //   <i> Default: 40
@@ -60,6 +66,11 @@
 //   <i> Default: 20
 #define MBX_ERR_TRACE_MAX_NUM 20
 // </e>
+
+//   <o> 发送失败的时间判定阈值[us] <1000-5000000>
+//   <i> 若连续这段时间都无法正常发送帧，则判定为通信不良
+//   <i> Default: 10000
+#define MBX_SENDERR_TIMEOUT_US 10000
 
 // </h>
 

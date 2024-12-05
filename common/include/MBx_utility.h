@@ -232,6 +232,9 @@ extern "C"
 /* 未使用参数标识 去警告 */
 #define MBX_UNUSED_PARAM(x) ((void)(x));
 
+/* 映射表定义结尾 */
+#define MBX_MAP_LIST_END {.Addr = 0, .Memory = NULL, .Type = 0, .Handle = NULL}
+
 /* Exported types ------------------------------------------------------------*/
 /**
  * @brief 一个方便的CRC16结构

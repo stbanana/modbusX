@@ -39,6 +39,12 @@ void MBx_Master_Engine_WRITE(_MBX_MASTER *pMaster)
     }
     else
     {
+        if(pMaster->Runtime.TimeCnt > MBX_SENDERR_TIMEOUT_US)
+        {
+            pMaster->TxExist.Len = 0;
+            MBxMasterErrortAdd(pMaster, pMaster->Parse.SendFunc, MBX_EXCEPTION_SENDERR, pMaster->Parse.SendAddrStart, pMaster->Parse.SendRegNum);
+            pMaster->Runtime.State = MBX_STATE_IDLE; // 未成功发送且超时, 流转空闲态
+        }
         // 发送失败, 下次轮询继续发送态
     }
 #else
