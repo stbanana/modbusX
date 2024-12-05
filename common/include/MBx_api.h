@@ -91,7 +91,11 @@ extern "C"
 #define MBX_STATE_READ  (4) /*!< 4 0x04状态定义, 接收状态. */
 
 /* 寄存器地址表的结尾 */
+#if MBX_EXTEN_REG_HANDLE_ENABLE
+#define MBX_MAP_LIST_END {.Addr = 0, .Memory = NULL, .Type = 0, .Handle = NULL}
+#else
 #define MBX_MAP_LIST_END {.Addr = 0, .Memory = NULL, .Type = 0, .Handle = NULL, .Para = &DefaultPara}
+#endif
 
 /* MBX空参数定义 */
 #define MBX_PARA_NULL 0
