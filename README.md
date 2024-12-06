@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-    <a href="https://stbanana.github.io/ModbusX-Doc/zh-hans/">文档</a>
+    <a href="https://wiki.yono233.cn/modbusX/zh_hans/">文档</a>
 </p>
 
 <p align="center">
