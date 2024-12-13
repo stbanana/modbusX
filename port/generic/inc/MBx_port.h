@@ -87,7 +87,7 @@ extern "C"
 #endif
 
 #ifndef MBX_BUILT_UTILTY_CRC_ENABLE
-#define MBX_BUILT_UTILTY_CRC_ENABLE 1
+#define MBX_BUILT_UTILTY_CRC_ENABLE 0
 #endif
 
 #ifndef MBX_ENDIAN_MODE_BIG
@@ -104,6 +104,22 @@ extern "C"
 #define MBX_PORT_RETURN_BUFFER_EMPTY    0x21 // BUFFER空
 #define MBX_PORT_RETURN_CABLE_BUSY      0x41 // 线路繁忙
 #define MBX_PORT_RETURN_CABLE_LOST      0x41 // 线路掉线
+
+#if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050) /* ARM Compiler V6 */
+#ifndef __weak
+#define __weak __attribute__((weak))
+#endif
+#ifndef __packed
+#define __packed __attribute__((packed))
+#endif
+#elif defined(__GNUC__) && !defined(__CC_ARM) /* GNU Compiler */
+#ifndef __weak
+#define __weak __attribute__((weak))
+#endif /* __weak */
+#ifndef __packed
+#define __packed __attribute__((__packed__))
+#endif /* __packed */
+#endif /* __GNUC__ */
 
 /* Exported types ------------------------------------------------------------*/
 

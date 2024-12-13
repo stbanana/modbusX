@@ -93,8 +93,8 @@
 //   <1=> 使用外部挂载
 // <i> 若使用外部挂载则需 自行实现 uint16_t MBx_utility_crc16(uint8_t* data, uint16_t len); 用于实现CRC计算
 // <i> MBx_utility_crc16.c 中有库内CRC生成算法及其传参定义
-// <i> Default: 多字节发送port
-#define MBX_BUILT_UTILTY_CRC_ENABLE 1
+// <i> Default: 使用库内工具
+#define MBX_BUILT_UTILTY_CRC_ENABLE 0
 
 // <o> CPU的大小端
 //   <0=> 小端
