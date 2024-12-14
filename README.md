@@ -25,6 +25,8 @@
 
 另外想了解 modbus 协议有 [modbus协议介绍](https://www.yono233.cn/posts/shoot/24_7_26_modbus协议介绍(未完成))
 
+另外有本库的轻量化报告 [资源占用测试报告](https://wiki.yono233.cn/modbusX/zh_hans/apidoc/tools/资源占用测试报告.html)
+
 我希望有这样的 modbus 实现，是硬性需求，同时也是这个库最终的特性。
 
 > 1. ⚡**不阻塞**：使用库 tick，禁止阻塞
