@@ -72,14 +72,13 @@ __weak uint16_t MBx_utility_crc16(uint8_t *data, uint16_t len)
         crc ^= data[i]; // 将数据字节与CRC进行异或
         for(j = 0; j < 8; j++)
         {
-            // 检查最低有效位
             if(crc & 0x0001)
             {
-                crc = (crc >> 1) ^ 0xA001; // 右移并异或多项式
+                crc = (crc >> 1) ^ 0xA001;
             }
             else
             {
-                crc >>= 1; // 仅右移
+                crc >>= 1;
             }
         }
     }
