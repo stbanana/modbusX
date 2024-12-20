@@ -27,19 +27,16 @@
 
 /**
  * @brief 初始化MBX从机配置的各个参数
- * @param MBxSlaveConfig 指向MBX从机解析栈的指针
+ * @param MBxSlaveConfig 指向MBX从机配置结构体的指针
  * @param ID 期望配置成的从机ID
  * @param MAP 指向地址映射表头的指针
  * @return 标准返回
  */
 uint32_t MBx_Init_Slave_Config(_MBX_SLAVE_CONFIG *MBxSlaveConfig, uint8_t ID, const _MBX_MAP_LIST_ENTRY *MAP)
 {
-    uint32_t state = MBX_API_RETURN_DEFAULT;
-    uint16_t i; // 遍历map并审查
-#if MBX_MODULE_ERR_TRACE_ENABLE
-    uint32_t AddrNow; // 当前审查的条目 mb寄存器地址
-    AddrNow = 0;
-#endif
+    uint32_t state   = MBX_API_RETURN_DEFAULT;
+    uint16_t i       = 0; // 遍历map并审查
+    uint32_t AddrNow = 0; // 当前审查的条目 mb寄存器地址
 
     /* 基础配置 */
     MBxSlaveConfig->SlaveID = ID;
@@ -51,13 +48,14 @@ uint32_t MBx_Init_Slave_Config(_MBX_SLAVE_CONFIG *MBxSlaveConfig, uint8_t ID, co
         (MAP[i].Memory != NULL); // 条件2 映射内存为空，认为不可读，即无效条
         i++)                     // 推进
     {
-#if MBX_MODULE_ERR_TRACE_ENABLE
         if(AddrNow > MAP[i].Addr)
         {
             state = MBX_API_RETURN_MAP_UNFORMAT;
+#if MBX_MODULE_ERR_TRACE_ENABLE
+            MBxErrTraceAdd(ID, MBX_MODE_SLAVE, 0, MBX_API_RETURN_MAP_UNFORMAT);
+#endif
         }
         AddrNow = MAP[i].Addr;
-#endif
     }
     MBxSlaveConfig->MapNum = i; // 记录条目总数量
 
