@@ -145,8 +145,8 @@ void MyRTUMasterTest(void)
     /* 添加主机1管理的从机2(如果真的有，把传参填写正常) */
     if(MBx_Master_Member_Add(&MBxMaster,        // 主机对象
                              &MBxMasterMember2, // 从机成员对象
-                             MBX_PARA_NULL,     // 从机ID
-                             MBX_PARA_NULL)     // 该从机对象的映射表
+                             2,                 // 从机ID
+                             MapList)           // 该从机对象的映射表
        != MBX_API_RETURN_DEFAULT)
     {
         /* 表明映射表或ID等传参异常 */
@@ -184,10 +184,12 @@ static void TestMemUpdate(uint32_t Cycle)
     static uint32_t ftest_cpy = 0;
     static uint32_t i;
     i += Cycle;
-    if((i % 500) == 0) // 分频到500ms
+    if((i % 100) == 0) // 分频到500ms
     {
         MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0, 4);           // 请求读取1号从机的0地址的4个寄存器
+        MBx_Master_Read_Reg_Request(&MBxMaster, 2, 0, 4);           // 请求读取2号从机的0地址的4个寄存器
         MBx_Master_Read_Input_Reg_Request(&MBxMaster, 1, 0x100, 2); // 请求读取1号从机的0x100地址的2个寄存器 (作为输入寄存器只读)
+        MBx_Master_Read_Input_Reg_Request(&MBxMaster, 2, 0x100, 2); // 请求读取2号从机的0x100地址的2个寄存器 (作为输入寄存器只读)
         MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x200, 2);       // 请求读取1号从机的0x200地址的2个寄存器 拼凑为32位数据
         MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x300, 2);       // 请求读取1号从机的0x300地址的2个寄存器 拼凑为32位浮点
     }

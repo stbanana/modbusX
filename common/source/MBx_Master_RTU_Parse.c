@@ -82,18 +82,18 @@ void MBx_Master_RTU_Parse(_MBX_MASTER *pMaster)
         break;
     }
 
-    /* 审查从机ID号是否符合请求 */
-    if(MASTER_PARSE_SLAVEID(pMaster) != pMaster->RxExist.Buffer[0])
-    {
-        MBxRxBufferRemove(pMaster, FrameLen);
-        return;
-    }
-
     /* 审查是否符合帧长 */
     if(pMaster->RxExist.Len < FrameLen)
     {
         MBxRxBufferEmpty(pMaster);
         return; // 帧不完整, 弃帧
+    }
+
+    /* 审查从机ID号是否符合请求 */
+    if(MASTER_PARSE_SLAVEID(pMaster) != pMaster->RxExist.Buffer[0])
+    {
+        MBxRxBufferRemove(pMaster, FrameLen);
+        return;
     }
 
     /* 检测CRC (一个丑陋的写法，但能稍微节省性能)*/

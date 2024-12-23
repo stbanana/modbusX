@@ -328,4 +328,5 @@ MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0, 4, (uint8_t *)&u16buffer[0], 
 # 可优化
 
 > 禁止多线程，驱动 tick 函数入口唯一，逐一驱动链上对象。事实上的多线程大概率是负优化，如需支持多线程，可改为单独驱动每个对象，此时需要将映射表处理工具 MBx_utility_map_list.c 中的中间变量包装进对象。
+>
 > 对线圈和离散输入这样的单 bit 映射性能较差

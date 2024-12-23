@@ -7,8 +7,6 @@
  * @file MBx_api.h
  *     MBx Component
  *     Application Interface (API)
- * 一个功能并不齐全的modbus主从库, 但以如下特性为目标
- * 不阻塞不占线程不占中断、多主多从、寄存器地址表任意映射。是一个纯粹的协议栈, 只需要修改数据流入流出即可驱动。
  */
 
 #ifndef _MBX_API_H_
