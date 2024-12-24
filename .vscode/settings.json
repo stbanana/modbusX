@@ -1,10 +1,13 @@
 {
     "files.associations": {
+        "*.sct": "arm",
         "*.c": "c",
         "mbx_api.h": "c",
         "mbx_port.h": "c",
         "random": "cpp",
-        "mbx_utility.h": "c"
+        "mbx_utility.h": "c",
+        "compare": "c",
+        "cstdint": "c"
     },
     "makefile.makePath": "cmake",
     "makefile.makefilePath": "${workspaceRoot}\\\\build"

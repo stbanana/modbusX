@@ -88,6 +88,12 @@
 // <i> Default: 多字节发送port
 #define MBX_SEND_MODE_BYTES 1
 
+// <o> 拓展的API支持
+//   <0=> 关闭
+//   <1=> 启用
+// <i> Default: 关闭
+#define MBX_EXTEN_API_ENABLE 0
+
 // <o> CRC使用库内工具还是外部挂载函数生成
 //   <0=> 使用库内工具
 //   <1=> 使用外部挂载

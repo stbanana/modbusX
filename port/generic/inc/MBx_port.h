@@ -86,6 +86,10 @@ extern "C"
 #define MBX_SEND_MODE_BYTES 1
 #endif
 
+#ifndef MBX_EXTEN_API_ENABLE
+#define MBX_EXTEN_API_ENABLE 0
+#endif
+
 #ifndef MBX_BUILT_UTILTY_CRC_ENABLE
 #define MBX_BUILT_UTILTY_CRC_ENABLE 0
 #endif
