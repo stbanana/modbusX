@@ -27,6 +27,8 @@
 
 另外有本库的轻量化报告 [资源占用测试报告](https://wiki.yono233.cn/modbusX/zh_hans/apidoc/tools/资源占用测试报告.html)
 
+另外有帮助建立 DMA 以及半双工驱动的简单实例 [Dataflow-驱动中间件](https://github.com/stbanana/Dataflow)
+
 我希望有这样的 modbus 实现，是硬性需求，同时也是这个库最终的特性。
 
 > 1. ⚡**不阻塞**：使用库 tick，禁止阻塞
