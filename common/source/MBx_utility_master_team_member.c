@@ -36,19 +36,13 @@
 _MBX_MASTER_TEAM_MEMBER *MBx_Master_Member_Find(_MBX_MASTER *pMaster, uint8_t SlaveID)
 {
     _MBX_MASTER_TEAM_MEMBER *pMember = pMaster->SlaveChainRoot;
-    while((pMember != NULL)) // 未遍历到链尾
+    while((pMember != NULL) &&         // 未遍历到链尾
+          pMember->SlaveID != SlaveID) // 未找到成员
     {
-        if(pMember->SlaveID == SlaveID)
-        {
-            return pMember;
-        }
-        else
-        {
-            pMember = pMember->Next;
-        }
+        pMember = pMember->Next;
     }
 
-    return NULL;
+    return pMember;
 }
 
 #endif /* MBX_MASTER_ENABLE */
