@@ -32,22 +32,22 @@
 // <i> Default: 裁剪掉TCP主机功能
 #define MBX_MODULE_TCP_MASTER_ENABLE 0
 
-//   <o> 主机请求队列的最大深度 <32-255>
+//   <o> 主机请求队列的最大深度 <32-255> <f.d>
 //   <i> 是队列中的最大寄存条数，用于连续读写请求，寄存并自动发送处理。是8位存储故而不超过255
 //   <i> Default: 40
 #define MBX_MASTER_REQUEST_QUEUE_MAX 40
 
-//   <o> 主机错误响应队列的最大深度 <1-255>
+//   <o> 主机错误响应队列的最大深度 <1-255> <f.d>
 //   <i> 是队列中的最大寄存条数，用于寄存从机的错误响应，并在主应用中取出处理。是8位存储故而不超过255
 //   <i> Default: 10
 #define MBX_MASTER_ERROR_QUEUE_MAX 10
 
-//   <o> 主机读写多个寄存器的最大个数 <1-127>
+//   <o> 主机读写多个寄存器的最大个数 <1-127> <f.d>
 //   <i> 由于从机回复"字节数"段是一个字节，所以配置最大值为0x7F
 //   <i> Default: 127
 #define MBX_MASTER_MULTI_REG_MAX 127
 
-//   <o> 主机响应超时的判定阈值[us] <10000-1000000000>
+//   <o> 主机响应超时的判定阈值[us] <10000-1000000000> <f.d>
 //   <i> 若主机在设定时间内未收到从机响应，则判定为超时
 //   <i> Default: 100000
 #define MBX_MASTER_RESPONSE_TIMEOUT_US 100000
@@ -61,7 +61,7 @@
 // <i> Default: 错误追踪模组启用
 #define MBX_MODULE_ERR_TRACE_ENABLE 1
 
-//   <o> 错误追踪记录的条目数 <5-255>
+//   <o> 错误追踪记录的条目数 <5-255> <f.d>
 //   <i> 整个系统追踪栈的最大深度。是8位存储故而不超过255
 //   <i> Default: 20
 #define MBX_ERR_TRACE_MAX_NUM 20
@@ -73,7 +73,7 @@
 // <i> Default: 关闭
 #define MBX_EXTEN_REG_HANDLE_ENABLE 0
 
-//   <o> 发送失败的时间判定阈值[us] <1000-5000000>
+//   <o> 发送失败的时间判定阈值[us] <1000-5000000> <f.d>
 //   <i> 若连续这段时间都无法正常发送帧，则判定为通信不良
 //   <i> Default: 10000
 #define MBX_SENDERR_TIMEOUT_US 10000

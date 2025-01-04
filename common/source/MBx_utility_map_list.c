@@ -487,7 +487,7 @@ uint32_t MBx_utility_map_w_cooperate_review(void)
         }
 
         if(MPxMapwriteCo.Handle != NULL)
-            switch(MPxMapwriteCo->Type)
+            switch(MPxMapwriteCo.Type)
             {
             case MBX_REG_TYPE_U8:
                 state = __MBX_HANDLE_((&MPxMapwriteCo), +1);
