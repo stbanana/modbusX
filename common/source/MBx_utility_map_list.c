@@ -798,7 +798,7 @@ static uint32_t MBX_utility_map_entry_data_set(const _MBX_MAP_LIST_ENTRY *entry,
     /* 检查请求处理完毕，触发写处理 */
     if(co->PuzzlesComplete.all == 0xFF && co->PendingFlag == 1)
     {
-        co->PendingFlag == 0;
+        co->PendingFlag = 0;
 
         if(co->Handle != NULL)
             switch(co->Type)
