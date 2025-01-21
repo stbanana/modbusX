@@ -658,6 +658,9 @@ static uint32_t MBX_utility_map_entry_data_set(const _MBX_MAP_LIST_ENTRY *entry,
             }
             break;
         }
+#if MBX_EXTEN_REG_HANDLE_ENABLE /* 注册协参 */
+        co->Para = entry->Para;
+#endif
     }
 
 #if !MBX_ENDIAN_MODE_BIG /* 小端拼图，大小端在碎片拼图中的填充不同 */
