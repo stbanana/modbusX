@@ -97,7 +97,7 @@
 // <i> 多寄存器组合拼凑依赖此设置
 // <i> 暂不支持完全依据大小端自动处理, 仍采用手动定义每个寄存器地址的属性
 // <i> Default: 小端
-#define MBX_ENDIAN_MODE_BIG 1
+#define MBX_ENDIAN_MODE_BIG 0
 
 // </h>
 
