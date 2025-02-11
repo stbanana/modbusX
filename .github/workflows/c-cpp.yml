@@ -107,7 +107,7 @@ jobs:
         msystem: MINGW64
 
     - name: Download build artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4.1.8
       with:
         name: build
         path: build
