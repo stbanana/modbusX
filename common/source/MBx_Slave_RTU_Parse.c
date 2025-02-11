@@ -87,7 +87,8 @@ void MBx_Slave_RTU_Parse(_MBX_SLAVE *pSlave)
         }
         break;
     default:
-        break;
+        MBxRxBufferEmpty(pSlave);
+        return; // 未知指令，通常是错误帧
     }
 
     /* 审查从机ID号是否符合本机 */
