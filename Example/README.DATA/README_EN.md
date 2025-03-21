@@ -1,6 +1,6 @@
 <p align="center">
- <h1 align="center">modbusX(待翻译)</h1>
- <p align="center">一个物理驱动层解耦的 modbus 协议解析栈</p>
+ <h1 align="center">modbusX (Translated from GPT)</h1>
+ <p align="center">A decoupled Modbus protocol parsing stack at the physical drive layer</p>
 </p>
 
 <p align="center">
@@ -10,68 +10,71 @@
 </p>
 
 <p align="center">
-    <a href="https://wiki.yono233.cn/modbusX/zh_hans/">文档</a>
+    <a href="https://wiki.yono233.cn/modbusX/zh_hans/">Documentation</a>
 </p>
 
 <p align="center">
-    <a href="/README.md">简体中文</a>
+    <a href="/README.md">Simplified Chinese</a>
     ·
     <a href="/Example/README.DATA/README_EN.md">English</a>
 </p>
 
-## ✨特性
+## ✨Features
 
-我对协议库的理解是：只需要另外实现数据的流入和流出 port，并最多另外定时调用一个时基函数，就可以驱动起整个库(轮询)。
+My understanding of the protocol library is that you just need to implement the input and output ports for data, and possibly call a timing function at intervals, to drive the entire library (polling).
 
-另外想了解 modbus 协议有 [modbus协议介绍](https://www.yono233.cn/posts/shoot/24_7_26_modbus协议介绍(未完成))
+If you would like to learn more about the Modbus protocol, visit the [Introduction to Modbus Protocol](https://www.yono233.cn/posts/shoot/24_7_26_modbus%20protocol%20introduction%20(not%20completed)).)
 
-另外有本库的轻量化报告 [资源占用测试报告](https://wiki.yono233.cn/modbusX/zh_hans/apidoc/tools/资源占用测试报告.html)
+Additionally, there is a lightweight report on the library [Resource Usage Test Report](https://wiki.yono233.cn/modbusX/zh_hans/apidoc/tools/资源占用测试报告.html).
 
-我希望有这样的 modbus 实现，是硬性需求，同时也是这个库最终的特性。
+I hope to have this kind of Modbus implementation; it is a hard requirement and also the final feature of this library.
 
-> 1. ⚡**不阻塞**：使用库 tick，禁止阻塞
-> 2. 🪶**不占线程**：单 tick 驱动整个主从链，以任何方式周期运行 tick
-> 3. 🌠**不占中断**：自由的 port 绑定，以任意方式管理数据流
-> 4. 💪**多主多从**：任何主机或从机都是独立对象，可在程序中开启任意多个主从机
-> 5. 🗽**寄存器地址表与内存地址任意映射**：本库的重要特性，解决 modbus 虚拟地址与实际变量之间的映射关系，使得开发更为简单且自由，整个库的使用完全围绕这个映射表展开，未来的维护同样只需维护映射表。
-> 6. ⚖️**不同的地址映射查找时间，相差应当不超过 500 个时钟周期**：很难说是实现了，由于 modbus 最多也就 0xFFFF 个虚拟地址，所以采用了二分法查找，但这样还是不够自由便利，未来会找到更好的表查找结构(或许)。这是库升级的难点，有方案的请与我联系，非常感谢😘！
-> 7. 🏃‍♀️**克制的事件回调**：少量的回调机制。尽可能使用栈轮询，尽可能少地影响系统时序。
+> 1. ⚡ **Non-blocking**: Use the library's tick, and disable blocking.
+> 2. 🪶 **Non-threaded**: A single tick drives the entire master-slave chain, allowing tick to operate periodically in any manner.
+> 3. 🌠 **No interrupt usage**: Free port binding to manage data flow in any way.
+> 4. 💪 **Multiple masters and slaves**: Any master or slave is an independent object, allowing for any number of masters and slaves to be initiated in the program.
+> 5. 🗽 **Arbitrary mapping between register address tables and memory addresses**: This is a crucial feature of the library that addresses the mapping relationship between Modbus virtual addresses and actual variables, making development simpler and more flexible. The entire library's usage revolves around this mapping table, and future maintenance will only require updating this table.
+> 6. ⚖️ **The lookup time for different address mappings should not exceed 500 clock cycles**: It is hard to declare this as fully implemented. Since Modbus has at most 0xFFFF virtual addresses, a binary search method is used, but this is still not flexible enough. In the future, better table lookup structures may be found (perhaps). This is a challenge for library upgrades; if anyone has solutions, please contact me, thank you very much! 😘
+> 7. 🏃‍♀️ **Restrained event callbacks**: A small number of callback mechanisms. Maximize the use of stack polling to minimize impact on system timing.
 
-# 📚功能计划(按优先级排序)
+# 📚 Function Plan (sorted by priority)
 
-- [x] RTU 主从机的输入和保持寄存器读写
-- [x] 主机写入成功的同步机制
-- [x] 主机写入失败的回调处理机制
-- [x] TCP 主从机的输入和保持寄存器读写
-- [ ] RTU 主从机的线圈和离散输入读写
-- [ ] TCP 主从机的线圈和离散输入读写
-- [ ] 动态地址映射表的支持
+- [x] Reading and writing input and holding registers for RTU master-slave.
+- [x] Synchronous mechanism for successful host writes.
+- [x] Callback handling mechanism for failed host writes.
+- [x] Reading and writing input and holding registers for TCP master-slave.
+- [ ] Reading and writing coils and discrete inputs for RTU master-slave.
+- [ ] Reading and writing coils and discrete inputs for TCP master-slave.
+- [ ] Support for dynamic address mapping tables.
 
-
-
-# 🤔如何使用
+# 🤔 How to Use
 
 > [!NOTE]
 >
-> 需要注意的是，由于部分工具函数采用了`__weak`定义，所以需要使用 c11 及以上标准。
-> 如果现有工程是 C99 ，需要修改库以进行兼容，搜索所有`__weak`函数并删除这个关键词即可，其他代码符合 C99 。
+> It is important to note that since some utility functions are defined as `__weak`, it is necessary to use the C11 standard or higher. 
+> If the existing project is in C99, modifications are needed for compatibility; search for all `__weak` functions and simply remove this keyword. The other code is compliant with C99.
 
-## RTU 从机
+## RTU Slave
 
-首先实现通信端口的 port 函数类似如下
+First, implement the port function for the communication port as follows:
 
 ```C
 /**
- * @brief 将 MBX_SEND_MODE_BYTES 宏置1后, 可用多字节发送port
- * @param Data 发送buffer指针
- * @param Len 期望发送的长度
- * @return port标准返回
- */
+ * @brief Set the MBX_SEND_MODE_BYTES macro to 1, allowing for multi-byte sending via port.
+ * @parHere's the translation of your blog post:
+
+---
+
+**Sending Buffer Pointer via Serial Port**
+* @param Data Pointer to the data to be sent
+* @param Len The expected length of data to send
+* @return Standard return for port
+*/
 uint32_t SerialSendPort(const void *Data, size_t Len)
 {
-    WINBOOL b     = FALSE; // 发送操作标识
-    DWORD   wWLen = 0;     // 实际发送数据长度
-    /* 尝试发送 */
+    WINBOOL b     = FALSE; // Sending operation flag
+    DWORD   wWLen = 0;     // Actual length of data sent
+    /* Try to send */
     b = WriteFile(comHandle, Data, Len, &wWLen, NULL);
     if(b && wWLen == Len)
         return MBX_PORT_RETURN_DEFAULT;
@@ -80,15 +83,15 @@ uint32_t SerialSendPort(const void *Data, size_t Len)
 }
 
 /**
- * @brief 数据接收port, 实现功能为取单字节, 返回值表示是否取接收成功
- * @param Data 字节指针, 取到的字节
- * @return port标准返回
+ * @brief Data receiving port, functionality to read a single byte, return value indicates success of reception
+ * @param Data Pointer to a byte to receive
+ * @return Standard return for port
  */
 uint32_t SerialGetcPort(uint8_t *Data)
 {
-    WINBOOL b     = FALSE; // 接收操作标识
-    DWORD   wRLen = 0;     // 实际接收数据长度
-    /* 尝试接收 */
+    WINBOOL b     = FALSE; // Receiving operation flag
+    DWORD   wRLen = 0;     // Actual length of data received
+    /* Try to receive */
     b = ReadFile(comHandle, Data, 1, &wRLen, NULL);
     if(b == TRUE && wRLen == 1)
     {
@@ -99,233 +102,217 @@ uint32_t SerialGetcPort(uint8_t *Data)
         return MBX_PORT_RETURNT_ERR_INDEFINITE;
     }
 }
-```
 
+/* 
+Next, create a mapping table similar to the one below, taking note of the following two points:
 
+1. The **register addresses of the data model must be in increasing order**; the library uses binary search to improve lookup efficiency.
+2. **If mapped internal memory variables are the same, the callback handling should also be the same**, as the library will ultimately pass the expected modified value of the entire variable in a void* format to the write callback. The write callback should then translate it back to the corresponding data, as detailed in the example on w... 
 
-然后制作一张类似如下的地址映射表，注意以下两点，
+--- 
 
-> 1. 数据模型的**寄存器地址必须递增**，库内使用二分法查找以提高查找效率
-> 2. **如果映射到的内部内存变量相同，那么回调处理也应该相同**，因为库会最终将整个变量期望修改的值以 void* 形式传入写时回调，写时回调应当再翻译为对应的数据，详见例程 [在 windows 平台的 RTU 从机例子](Example/win_test/RTU_Smain.c)
+Feel free to modify any specific technical terms to fit your context.**RTU Slave Example on Windows Platform**
 
 ```c
-/* 供映射的内存区域 */
+/* Memory areas for mapping */
 uint8_t  u8MapMem[64];
 uint16_t u16MapMem[64];
-uint32_t u36MapMem[64];
+uint32_t u32MapMem[64];
 uint64_t u64MapMem[64];
-float    fMapMem[64]; // 32位数据模型
-double   dMapMem[64]; // 64位数据模型
+float    fMapMem[64]; // 32-bit data model
+double   dMapMem[64]; // 64-bit data model
 
-/* 为了实现更快速的查找，库内采用二分法查询地址表
-    地址表必须手动以升序排列，由于C11标准不支持动态宏，暂时无法在编译阶段自动检查 */
+/* To achieve faster lookups, the library uses a binary search method for the address table.
+   The address table must be manually sorted in ascending order. Since the C11 standard does not support dynamic macros,
+   automatic checks at compile time are temporarily not available. */
 static const _MBX_MAP_LIST_ENTRY MapList[] = {
-    /*  寄存器地址        映射到的内部内存              内部内存数据属性         写时回调(NULL为只读寄存器)  */
+    /*  Register Address     Mapped Internal Memory         Internal Memory Data Type     Write Callback (NULL means read-only register) */
     {.Addr = 0x0000, .Memory = &u8MapMem[0],  .Type = MBX_REG_TYPE_U8,    .Handle = u8WriteTest1 },
     {.Addr = 0x0001, .Memory = &u8MapMem[1],  .Type = MBX_REG_TYPE_U8,    .Handle = u8WriteTest2 },
     {.Addr = 0x0002, .Memory = &u8MapMem[2],  .Type = MBX_REG_TYPE_U8,    .Handle = NULL         },
     {.Addr = 0x0003, .Memory = &u8MapMem[3],  .Type = MBX_REG_TYPE_U8,    .Handle = NULL         },
     
     {.Addr = 0x0100, .Memory = &u16MapMem[0], .Type = MBX_REG_TYPE_U16,   .Handle = u16WriteTest1},
-    {.Addr = 0x0101, .Memory = &u16MapMem[1], .Type = MBX_REG_TYPE_U16,   .Handle = u16WriteTest2},
-    
-    {.Addr = 0x0200, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_H, .Handle = u32WriteTest1},
-    {.Addr = 0x0201, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_L, .Handle = u32WriteTest1},
-    
-    {.Addr = 0x0300, .Memory = &u64MapMem[0], .Type = MBX_REG_TYPE_U64_3, .Handle = u64WriteTest1},
-    {.Addr = 0x0301, .Memory = &u64MapMem[0], .Type = MBX_REG_TYPE_U64_2, .Handle = u64WriteTest1},
-    {.Addr = 0x0302, .Memory = &u64MapMem[0], .Type = MBX_REG_TYPE_U64_1, .Handle = u64WriteTest1},
-    {.Addr = 0x0303, .Memory = &u64MapMem[0], .Type = MBX_REG_TYPE_U64_0, .Handle = u64WriteTest1},
-    
-    {.Addr = 0x0400, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U32_H, .Handle = fWriteTest1  }, 
-    {.Addr = 0x0401, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U32_L, .Handle = fWriteTest1  },
-    
-    {.Addr = 0x0500, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U64_3, .Handle = dWriteTest1  }, 
-    {.Addr = 0x0501, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U64_2, .Handle = dWriteTest1  },
-    {.Addr = 0x0502, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U64_1, .Handle = dWriteTest1  }, 
-    {.Addr = 0x0503, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U64_0, .Handle = dWriteTest1  },
-
-    MBX_MAP_LIST_END
+    {.Addr = 0x0101, .Memory = &u16MapMem[1], .Type = MBX_REG_TYPE_U16,   .Handle = NULL         },
+    // Additional entries can be added as needed
 };
-```
-
-
-
-在主程序中进行初始化
+```This code snippet appears to be a part of a configuration for memory mapping and handling write operations for different types of registers. Below is the translated content retaining its original meaning:
 
 ```c
-/* 申请从机对象发送及接收buffer */
+REG_TYPE_U16,   .Handle = u16WriteTest2},
+    
+{.Addr = 0x0200, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_H, .Handle = u32WriteTest1},
+{.Addr = 0x0201, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_L, .Handle = u32WriteTest1},
+    
+{.Addr = 0x0300, .Memory = &u64MapMem[0], .Type = MBX_REG_TYPE_U64_3, .Handle = u64WriteTest1},
+{.Addr = 0x0301, .Memory = &u64MapMem[0], .Type = MBX_REG_TYPE_U64_2, .Handle = u64WriteTest1},
+{.Addr = 0x0302, .Memory = &u64MapMem[0], .Type = MBX_REG_TYPE_U64_1, .Handle = u64WriteTest1},
+{.Addr = 0x0303, .Memory = &u64MapMem[0], .Type = MBX_REG_TYPE_U64_0, .Handle = u64WriteTest1},
+    
+{.Addr = 0x0400, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U32_H, .Handle = fWriteTest1  }, 
+{.Addr = 0x0401, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U32_L, .Handle = fWriteTest1  },
+    
+{.Addr = 0x0500, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U64_3, .Handle = dWriteTest1  }, 
+{.Addr = 0x0501, .Memory = &fMapMem[0],
+```
+
+Please note that the snippet is still incomplete, and the last line should be finalized in the complete code context.Initialization in the main program
+
+```c
+/* Allocate buffers for sending and receiving slave objects */
 uint8_t *SRxBuffer = (uint8_t *)malloc(84 * sizeof(uint8_t));
 uint8_t *STxBuffer = (uint8_t *)malloc(84 * sizeof(uint8_t));
 
-/* 初始化RTU从机1 */
-MBx_Slave_RTU_Init(&MBxSlave,      // 从机对象
-                   1,              // 从机ID
-                   MapList,        // 地址映射表
-                   SerialSendPort, // 发送函数
-                   SerialGetcPort, // 接收函数
-                   9600,           // 波特率
-                   SRxBuffer,      // 库内接收buffer分配
-                   84,             // 接收buffer最大长度
-                   STxBuffer,      // 库内发送buffer分配
-                   84);            // 发送buffer最大长度
+/* Initialize RTU Slave 1 */
+MBx_Slave_RTU_Init(&MBxSlave,      // Slave object
+                   1,              // Slave ID
+                   MapList,        // Address mapping table
+                   SerialSendPort, // Send function
+                   SerialGetcPort, // Receive function
+                   9600,           // Baud rate
+                   SRxBuffer,      // Allocated internal receive buffer
+                   84,             // Maximum length of receive buffer
+                   STxBuffer,      // Allocated internal send buffer
+                   84);            // Maximum length of send buffer
 
-/* 假装初始化从机2(如果真的有，把传参填写正常) */
-MBx_Slave_RTU_Init(&MBxSlave2,     // 从机对象
-                    2,              // 从机ID
-                    MapList,        // 地址映射表
-                    MBX_PARA_NULL,  // 发送函数
-                    MBX_PARA_NULL,  // 接收函数
-                    MBX_PARA_NULL,  // 波特率
-                    MBX_PARA_NULL,  // 库内接收buffer分配
-                    MBX_PARA_NULL,  // 接收buffer最大长度
-                    MBX_PARA_NULL,  // 库内发送buffer分配
-                    MBX_PARA_NULL); // 发送buffer最大长度
-```
-
-
-
-周期调用驱动函数即可
+/* Pretend to initialize Slave 2 (if it really exists, fill in the parameters correctly) */
+MBx_Slave_RTU_Init(&MBxSlave
+```2,     // Slave object
+                    2,              // Slave ID
+                    MapList,        // Address mapping table
+                    MBX_PARA_NULL,  // Send function
+                    MBX_PARA_NULL,  // Receive function
+                    MBX_PARA_NULL,  // Baud rate
+                    MBX_PARA_NULL,  // Internal allocation for receive buffer
+                    MBX_PARA_NULL,  // Maximum length of receive buffer
+                    MBX_PARA_NULL,  // Internal allocation for send buffer
+                    MBX_PARA_NULL); // Maximum length of send buffer
 
 ```c
-    while(1)
-    {
-        MBx_Ticks(1000);  // 换算为微秒传入MBx驱动 链表自动驱动
-        Sleep(1);          // 周期1ms
-    }
+// Periodically call the driver function
+while(1)
+{
+    MBx_Ticks(1000);  // Convert to microseconds and pass to MBx driver for automatic linked list driving
+    Sleep(1);          // 1ms period
+}
 ```
 
-## RTU 主机
+## RTU Master
 
-首先实现类似从机的 port 函数，不赘述。
+First, implement a port function similar to the slave; no further explanation needed.
 
+Then, create an address mapping table similar to the one below. Note the following two points:
 
-
-然后制作一张类似如下的地址映射表，注意以下两点，
-
-> 1. 数据模型的**寄存器地址必须递增**，库内使用二分法查找以提高查找效率
-> 2. **如果映射到的内部内存变量相同，那么回调处理也应该相同**，因为库会最终将整个变量期望修改的值以 void* 形式传入写时回调，写时回调应当再翻译为对应的数据，详见例程 [在 windows 平台的 RTU 主机例子](Example/win_test/RTU_Mmain.c)
+> 1. The **register addresses of the data model must be incremental**. Use binary search within the library to improve lookup efficiency.
+> 2. **If the internal memory variables mapped are the same, the callback handling should also be the same** because the library will ultimately pass the expected modified value of the entire variable as void* in the write callback. The write callback should then translate this back to the corresponding data type. For details, see the example [RTU Master Example on Windows Platform](Example/win_test/RTU_Mmain.c).
 
 ```c
-/* 供映射的内存区域 */
+/* Memory region for mapping */
 uint8_t  u8MapMem[64];
 uint16_t u16MapMem[64];
-uint32_t u36MapMem[64];
+uint32_t u32MapMem[64];
 uint64_t u64MapMem[64];
-float    fMapMem[64]; // 32位数据模型
-double   dMapMem[64]; // 64位数据模型
+float    fMapMem[64]; // 32-bit data model
+double   dMapMem[64]; // 64-bit data model
+```]; // 64-bit data model
 
-/* 为了实现更快速的查找，库内采用二分法查询地址表
-    地址表必须手动以升序排列，由于C11标准不支持动态宏，暂时无法在编译阶段自动检查 */
+/* To achieve faster lookups, a binary search method is used for the address table within the library.
+    The address table must be manually sorted in ascending order. Due to the C11 standard not supporting dynamic macros, 
+    it's currently impossible to automatically check at compile time. */
 static const _MBX_MAP_LIST_ENTRY MapList[] = {
-    /*  寄存器地址        映射到的内部内存              内部内存数据属性            写时异常立即回调(NULL为忽略写异常)  */
+    /*  Register Address     Mapped Internal Memory           Internal Memory Data Attribute        Immediate Callback on Write Exception (NULL to ignore write exceptions)  */
     {.Addr = 0x0000, .Memory = &u8MapMem[10],  .Type = MBX_REG_TYPE_U8,    .Handle = u8WriteTest1 },
     {.Addr = 0x0001, .Memory = &u8MapMem[11],  .Type = MBX_REG_TYPE_U8,    .Handle = u8WriteTest2 },
     {.Addr = 0x0002, .Memory = &u8MapMem[12],  .Type = MBX_REG_TYPE_U8,    .Handle = NULL         },
     {.Addr = 0x0003, .Memory = &u8MapMem[13],  .Type = MBX_REG_TYPE_U8,    .Handle = NULL         },
     {.Addr = 0x0100, .Memory = &u16MapMem[10], .Type = MBX_REG_TYPE_U16,   .Handle = u16WriteTest1},
     {.Addr = 0x0101, .Memory = &u16MapMem[11], .Type = MBX_REG_TYPE_U16,   .Handle = u16WriteTest2},
-    {.Addr = 0x0200, .Memory = &u36MapMem[10], .Type = MBX_REG_TYPE_U32_H, .Handle = u32WriteTest1}, /* 多寄存器组合映射同一个内存变量，写入异常回调应该是同一个(硬性要求) 模拟大端内存(ABCD排列 基于传输协议，这是最合适的) */
-    {.Addr = 0x0201, .Memory = &u36MapMem[10], .Type = MBX_REG_TYPE_U32_L, .Handle = u32WriteTest1},
-    {.Addr = 0x0300, .Memory = &fMapMem[10],   .Type = MBX_REG_TYPE_U32_H, .Handle = fWriteTest1  }, /* 浮点映射测试 模拟大端内存(ABCD排列 基于传输协议，这是最合适的)*/
-    {.Addr = 0x0301, .Memory = &fMapMem[10],   .Type = MBX_REG_TYPE_U32_L, .Handle = fWriteTest1  },
-
-    MBX_MAP_LIST_END
-};
-```
-
-
-在主程序中进行初始化，主机管理的从机也采用链式结构，所以需要分别注册
+    {.Addr = 0x0200, .Memory = &u36MapMem[10], .Type = MBX_REG_TYPE_U32_H, .Handle = u32WriteTest1}, /* Multiple register combinations map to the same memory variable, write exception callbacks should be the same (hard requirement). Simulates big-endian memory (ABCD arrangement based on the transfer protocol, which is most suitable). */In the main program, initialization is performed, and the slave managed by the host also adopts a linked structure, so it needs to be registered separately.
 
 ```c
-    /* 申请主机对象发送及接收buffer */
+    /* Allocate buffers for the host object to send and receive */
     uint8_t *SRxBuffer = (uint8_t *)malloc(84 * sizeof(uint8_t));
     uint8_t *STxBuffer = (uint8_t *)malloc(84 * sizeof(uint8_t));
 
-    /* 初始化modbus主机1 */
-    MBx_Master_RTU_Init(&MBxMaster,     // 主机对象
-                        SerialSendPort, // 发送函数
-                        SerialGetcPort, // 接收函数
-                        9600,           // 波特率
-                        SRxBuffer,      // 库内接收buffer分配
-                        84,             // 接收buffer最大长度
-                        STxBuffer,      // 库内发送buffer分配
-                        84);            // 发送buffer最大长度
+    /* Initialize Modbus master 1 */
+    MBx_Master_RTU_Init(&MBxMaster,     // Host object
+                        SerialSendPort, // Send function
+                        SerialGetcPort, // Receive function
+                        9600,           // Baud rate
+                        SRxBuffer,      // Library internal receive buffer allocation
+                        84,             // Maximum length of receive buffer
+                        STxBuffer,      // Library internal send buffer allocation
+                        84);            // // Maximum length of the send buffer
 
-    /* 添加主机1管理的从机1 */
-    if(MBx_Master_Member_Add(&MBxMaster,        // 主机对象
-                             &MBxMasterMember1, // 从机成员对象
-                             1,                 // 从机ID
-                             MapList)           // 该从机对象的映射表
-       != MBX_API_RETURN_DEFAULT)
-    {
-        /* 表明映射表或ID等传参异常 */
-    }
+/* Add Slave 1 managed by Host 1 */
+if (MBx_Master_Member_Add(&MBxMaster,        // Host object
+                          &MBxMasterMember1, // Slave member object
+                          1,                 // Slave ID
+                          MapList)           // Mapping table for this slave object
+    != MBX_API_RETURN_DEFAULT)
+{
+    /* Indicates that there is an abnormality in the parameters such as the mapping table or ID */
+}
 
-    /* 假装添加主机1管理的从机2(如果真的有，把传参填写正常) */
-    if(MBx_Master_Member_Add(&MBxMaster,        // 主机对象
-                             &MBxMasterMember2, // 从机成员对象
-                             MBX_PARA_NULL,     // 从机ID
-                             MBX_PARA_NULL)     // 该从机对象的映射表
-       != MBX_API_RETURN_DEFAULT)
-    {
-        /* 表明映射表或ID等传参异常 */
-    }
+/* Pretend to add Slave 2 managed by Host 1 (if it exists, fill in the parameters correctly) */
+if (MBx_Master_Member_Add(&MBxMaster,        // Host object
+                          &MBxMasterMember2, // Slave member object
+                          MBX_PARA_NULL,     // Slave ID
+                          MBX_PARA_NULL)     // Mapping table for this slave object
+    != MBX_API_RETURN_DEFAULT)
+{
+    /* Indicates that there is an abnormality in the parameters such as the mapping table or ID */
+}
 
-    /* 假装初始化主机2(如果真的有，把传参填写正常) */
-    MBx_Master_RTU_Init(&MBxMaster2,    // 主机对象
-                        MBX_PARA_NULL,  // 发送函数
-                        MBX_PARA_NULL,  // 接收函数
-                        MBX_PARA_NULL,  // 波特率
-                        MBX_PARA_NULL,  // 库内接收buffer分配
-                        MBX_PARA_NULL,  // 接收buffer最大长度
-                        MBX_PARA_NULL,  // 库内发送buffer分配
-                        MBX_PARA_NULL); // 发送buffer最大长度
-```
+/* Pretend to initialize Host 2 (if it exists, fill in the parameters correctly) */
+MBx_Master_RTU_Init(&MBxMaster2,    // Host object
+                    MBX_PARA_NULL,  // Send function
+                    MBX_PARA_NULL,  // Receive function
+                    MBX_PARA_NULL,  // Baud rate
+                    MBX_PARA_NULL,  // Internal buffer allocation for reception
+                    MBX_### PARA_NULL,  // Maximum length of receiving buffer
+### MBX_PARA_NULL,  // Library allocation for sending buffer
+### MBX_PARA_NULL); // Maximum length of sending buffer
 
-
-周期调用驱动函数即可
+You can simply call the driver function at regular intervals. Note that, as the host, a single Tick can consume at most one request, so the frequency at which requests are generated must be lower than the frequency of calling Ticks.
 
 ```c
     while(1)
     {
-        MBx_Ticks(1000);  // 换算为微秒传入MBx驱动 链表自动驱动
-        Sleep(1);          // 周期1ms
+        MBx_Ticks(1000);  // Convert to microseconds and pass to MBx driver; the linked list is driven automatically
+        Sleep(1);          // Cycle of 1ms
     }
 ```
 
-在期望读取或者写入从机时直接调用API，请求会推入队列，并在驱动中自动进行发送和处理回复，读取或写入成功时，会将期望写入或真实读取到的数据同步进映射表的内存区域。失败时则推入错误队列，如果映射表有失败处理则会自动触发。
+When you want to read from or write to a slave, simply call the API. The request will be pushed into a queue and will be automatically sent and processed within the driver. When a read or write operation succeeds, the intended data to be written or actually read will be synchronized into the memory area of the mapping table. In case of failure, the request will be pushed into an error queue, which will automatically trigger if there is a failure handling mechanism in the mapping table.
 
 ```c
-MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0, 4);           // 请求读取1号从机的0地址的4个寄存器
-MBx_Master_Read_Input_Reg_Request(&MBxMaster, 1, 0x100, 2); // 请求读取1号从机的0x100地址的2个寄存器 (作为输入寄存器只读)
-MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0, 4, (uint8_t *)&u16buffer[0], 8); // 请求写入1号从机的0地址的4个寄存器，写成功时自动同步进映射内存区
+MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0, 4);           // Request to read 4 registers at address 0 from slave 1
+MBx_Master_Read_Input_Reg_Request(&MBxMaster, 1, 0x100, 2); // Request to read 2 registers at address 0x100 from slave 1 (as input registers are read-only)
+MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0, 4, (uint8_t *)&u16buffer[0], 8); // Request to write to 4 registers at address 0 from slave 1; on successful write, it will automatically synchronize into the mapped memory area
 ```
 
-另外可以实现一个错误处理的部分，取出错误队列中存在的东西，对事实存在的错误进行统一的自定义处理。详见例程 [在 windows 平台的 RTU 主机例子](Example/win_test/RTU_Mmain.c)
+Additionally, you can implement an error handling section to retrieve items from the error queue and perform unified custom handling on actual errors. For more details, see the example [RTU Host Example on Windows Platform](Example/win_test/RTU_Mmain.c)
 
-## TCP 从机
+## TCP Slave
 
-与 RTU 从机几乎完全相同，将初始化时的 API 从`MBx_Slave_RTU_Init()`替换为`MBx_Slave_TCP_Init()`即可。
+The TCP slave is almost identical to the RTU slave; simply replace the API `MBx_Slave_RTU_Init()` at initialization with `MBx_Slave_TCP_Init()`.
 
-详见例程 [在 windows 平台的 TCP 从机例子](Example/win_test/TCP_Smain.c)
+For more details, refer to the example [TCP Slave Example on Windows Platform](Example/win_test/TCP_S).## TCP Master
 
-## TCP 主机
+It is almost identical to the RTU master; you can simply replace the initialization API from `MBx_Master_RTU_Init()` to `MBx_Master_TCP_Init()`.
 
-与 RTU 主机几乎完全相同，将初始化时的 API 从`MBx_Master_RTU_Init()`替换为`MBx_Master_TCP_Init()`即可。
+For details, see the example [TCP Master example on Windows platform](Example/win_test/TCP_Mmain.c).
 
-详见例程 [在 windows 平台的 TCP 主机例子](Example/win_test/TCP_Mmain.c)
+# ✏️ Program State Machine
 
+![Master-Slave State Machine Flow](Example/README.DATA/MBX状态机.svg)
 
-# ✏️程序状态机
+# Program Model
 
-![主从状态机流转](Example/README.DATA/MBX状态机.svg)
+![Master-Slave Model](Example/README.DATA/MBX模型.svg)
 
-# 程序模型
+# Optimizations
 
-![主从模型](Example/README.DATA/MBX模型.svg)
-
-# 可优化
-
-> 禁止多线程，驱动 tick 函数入口唯一，逐一驱动链上对象。事实上的多线程大概率是负优化，如需支持多线程，可改为单独驱动每个对象，此时需要将映射表处理工具 MBx_utility_map_list.c 中的中间变量包装进对象。
-> 对线圈和离散输入这样的单 bit 映射性能较差
+> Multi-threading is discouraged; the tick function should have a single entry point, driving each object in the chain sequentially. In practice, multi-threading is likely to be a negative optimization. If multi-threading is required, consider driving each object separately, at which point you will need to wrap intermediate variables in the mapping tool MBx_utility_map_list.c into objects.
+> Performance for mappings of single bits, such as coils and discrete inputs, is relatively poor.

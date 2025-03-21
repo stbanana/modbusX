@@ -286,7 +286,7 @@ static const _MBX_MAP_LIST_ENTRY MapList[] = {
 ```
 
 
-周期调用驱动函数即可
+周期调用驱动函数即可。注意的是，作为主机，一次Tick最多消费一条请求，所以请求产生的频率必须小于调用Tick的频率。
 
 ```c
     while(1)

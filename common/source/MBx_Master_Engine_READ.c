@@ -40,8 +40,9 @@ void MBx_Master_Engine_READ(_MBX_MASTER *pMaster)
     }
     if(pMaster->Runtime.TimeCnt > pMaster->Attr.T1_5_Cycs)
     {
-        MBx_Master_Parse(pMaster);               // 流转此态条件是收到数据, 无需判接收长度, 解析接收即可
-        pMaster->Runtime.State = MBX_STATE_IDLE; // 流转回等待态
+        MBx_Master_Parse(pMaster);                   // 流转此态条件是收到数据, 无需判接收长度, 解析接收即可
+        pMaster->Runtime.State     = MBX_STATE_IDLE; // 流转回等待态
+        pMaster->Runtime.StateFlow = 1;
     }
 }
 #endif /* MBX_MASTER_ENABLE */

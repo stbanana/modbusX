@@ -47,8 +47,9 @@ void MBx_Master_Engine_WRITE(_MBX_MASTER *pMaster)
 #if MBX_SEND_MODE_BYTES
     if(pMaster->Func.Send(pMaster->TxExist.Buffer, pMaster->TxExist.Len) == MBX_PORT_RETURN_DEFAULT)
     {
-        pMaster->TxExist.Len   = 0;
-        pMaster->Runtime.State = MBX_STATE_WAIT; // 成功发送, 流转等待态
+        pMaster->TxExist.Len       = 0;
+        pMaster->Runtime.State     = MBX_STATE_WAIT; // 成功发送, 流转等待态
+        pMaster->Runtime.StateFlow = 1;
     }
     else
     {

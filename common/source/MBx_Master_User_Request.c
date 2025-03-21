@@ -190,8 +190,8 @@ uint32_t MBx_Master_Write_Reg_Request(_MBX_MASTER *pMaster, //
         return MBX_API_RETURN_MAP_UNFIND;
     }
 
-    StandardData[0] = (Value & 0xFF00) >> 8;
-    StandardData[1] = Value & 0x00FF;
+    StandardData[0] = Value & 0x00FF;
+    StandardData[1] = (Value & 0xFF00) >> 8;
 
     /* 填充一条请求 */
     return MBxMasterRequestAdd(pMaster, SlaveID, MBX_FUNC_WRITE_REG, Addr, MBX_PARA_NULL, StandardData, 2);
@@ -199,7 +199,7 @@ uint32_t MBx_Master_Write_Reg_Request(_MBX_MASTER *pMaster, //
 
 /**
  * @brief modbusX主机发出一条写多个线圈请求 
- *              Data、DataLen传参需要自行格式化 见其中关于(0x0F)写多个线圈的格式 https://www.yono233.cn/posts/shoot/24_7_26_modbus%E5%8D%8F%E8%AE%AE%E4%BB%8B%E7%BB%8D(%E6%9C%AA%E5%AE%8C%E6%88%90)
+ *              Data、DataLen传参需要自行格式化 见其中关于(0x0F)写多个线圈的格式 https://www.yono233.cn/posts/shoot/24_7_26_modbus)
  * @param pMaster mbx主机对象
  * @param SlaveID 期望请求的从机号
  * @param StartAddr 写入起始地址
