@@ -87,7 +87,7 @@ extern "C"
 #endif
 
 #ifndef MBX_EXTEN_API_ENABLE
-#define MBX_EXTEN_API_ENABLE 1
+#define MBX_EXTEN_API_ENABLE 0
 #endif
 
 #ifndef MBX_BUILT_UTILTY_CRC_ENABLE
