@@ -10,8 +10,17 @@ file(GLOB_RECURSE SRC ${CMAKE_CURRENT_LIST_DIR}/source/*.c)
 
 target_include_directories(modbusx INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/include
-    ${CMAKE_CURRENT_LIST_DIR}/../port/generic/inc
 )
+
+if(WIN32)
+    target_include_directories(modbusx INTERFACE
+        ${CMAKE_CURRENT_LIST_DIR}/../port/win32/inc
+    )
+else()
+    target_include_directories(modbusx INTERFACE
+        ${CMAKE_CURRENT_LIST_DIR}/../port/generic/inc
+    )
+endif()
 
 target_sources(modbusx INTERFACE
      ${SRC}
