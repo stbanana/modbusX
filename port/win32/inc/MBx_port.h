@@ -109,7 +109,21 @@ extern "C"
 #define MBX_PORT_RETURN_CABLE_BUSY      0x41 // 线路繁忙
 #define MBX_PORT_RETURN_CABLE_LOST      0x41 // 线路掉线
 
-#define MBX_API                         extern
+#ifndef MBX_API
+#ifdef _WIN32
+#ifdef MBX_BUILD_SHARED
+#define MBX_API __declspec(dllexport)
+#else
+#define MBX_API extern
+#endif /* MBX_BUILD_SHARED */
+#else
+#ifdef MBX_BUILD_SHARED
+#define MBX_API __attribute__((visibility("default")))
+#else
+#define MBX_API extern
+#endif /* MBX_BUILD_SHARED */
+#endif /* _WIN32 */
+#endif /* MBX_API */
 
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050) /* ARM Compiler V6 */
 #ifndef __weak
