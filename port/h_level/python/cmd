@@ -1,0 +1,3 @@
+
+# python 兼容层生成指令
+ctypesgen -I . -I ../../../common/include -o MBx_bindings.py MBx_api.h MBx_port.h MBx_utility.h MBx_ExHeader_py.h
