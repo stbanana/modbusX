@@ -51,11 +51,11 @@ uint32_t MBx_Master_RTU_Init(_MBX_MASTER *MBxMaster, //
 {
     uint32_t State = MBX_API_RETURN_DEFAULT;
     /* 传参审查 */
-    if(MBxSend == NULL || MBxGetc == NULL)
+    if((MBxSend == NULL) || (MBxGetc == NULL))
         return MBX_API_RETURN_ERR_PARAM;
-    if(RxBuffer == NULL || RxBuffer == NULL)
+    if((RxBuffer == NULL) || (RxBuffer == NULL))
         return MBX_API_RETURN_ERR_PARAM;
-    if(RxBufferSize < 30 || TxBufferSize < 30) // buffer收发空间至少为30字节(随便写的值)
+    if((RxBufferSize < 30U) || (TxBufferSize < 30U)) // buffer收发空间至少为30字节(随便写的值)
         return MBX_API_RETURN_ERR_PARAM;
 
     /* 加入主机链表 */
@@ -111,11 +111,11 @@ uint32_t MBx_Master_TCP_Init(_MBX_MASTER *MBxMaster, //
 {
     uint32_t State = MBX_API_RETURN_DEFAULT;
     /* 传参审查 */
-    if(MBxSend == NULL || MBxGetc == NULL)
+    if((MBxSend == NULL) || (MBxGetc == NULL))
         return MBX_API_RETURN_ERR_PARAM;
-    if(RxBuffer == NULL || RxBuffer == NULL)
+    if((RxBuffer == NULL) || (RxBuffer == NULL))
         return MBX_API_RETURN_ERR_PARAM;
-    if(RxBufferSize < 30 || TxBufferSize < 30) // buffer收发空间至少为30字节(随便写的值)
+    if((RxBufferSize < 30U) || (TxBufferSize < 30U)) // buffer收发空间至少为30字节(随便写的值)
         return MBX_API_RETURN_ERR_PARAM;
 
     /* 加入主机链表 */

@@ -39,7 +39,7 @@ void MBx_Master_Engine(_MBX_MASTER *pMaster, uint32_t Cycle)
     pMaster->Runtime.TimeCnt += Cycle;
     pMaster->Runtime.StateFlow = 1;
 
-    while(pMaster->Runtime.StateFlow == 1)
+    while(pMaster->Runtime.StateFlow == 1U)
     {
         pMaster->Runtime.StateFlow = 0; // 清除流转动作标识
         if(pMaster->Runtime.StatePast != pMaster->Runtime.State)

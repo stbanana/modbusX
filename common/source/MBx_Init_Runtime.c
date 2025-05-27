@@ -26,14 +26,14 @@
 /* Private functions ---------------------------------------------------------*/
 
 /**
- * @brief 初始化MBX运行时的各个参数 
+ * @brief 初始化MBX运行时的各个参数
  * @param MBxRuntime 指向MBX运行时结构体的指针
  */
 void MBx_Init_Runtime(_MBX_COMMON_RUNTIME *MBxRuntime)
 {
-    MBxRuntime->TimeCnt   = 0;
-    MBxRuntime->NoComNum  = 0;
+    MBxRuntime->TimeCnt   = 0U;
+    MBxRuntime->NoComNum  = 0U;
     MBxRuntime->State     = MBX_STATE_IDLE;
     MBxRuntime->StatePast = MBX_STATE_IDLE;
-    MBxRuntime->StateFlow = 0;
+    MBxRuntime->StateFlow = 0U;
 }

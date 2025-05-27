@@ -44,7 +44,7 @@ uint32_t MBx_Init_Slave_Config(_MBX_SLAVE_CONFIG *MBxSlaveConfig, uint8_t ID, co
 
     /* 审查定义的映射表*/
     for(i = 0;                   // 从0开始遍历
-        (i < 0xFFFE) &&          // 条件1 防止意外无限循环卡死
+        (i < 0xFFFEU) &&          // 条件1 防止意外无限循环卡死
         (MAP[i].Memory != NULL); // 条件2 映射内存为空，认为不可读，即无效条
         i++)                     // 推进
     {
@@ -59,5 +59,5 @@ uint32_t MBx_Init_Slave_Config(_MBX_SLAVE_CONFIG *MBxSlaveConfig, uint8_t ID, co
     }
     MBxSlaveConfig->MapNum = i; // 记录条目总数量
 
-    return state;
+    return (state);
 }

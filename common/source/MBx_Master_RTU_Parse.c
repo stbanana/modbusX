@@ -69,7 +69,7 @@ void MBx_Master_RTU_Parse(_MBX_MASTER *pMaster)
     case MBX_FUNC_READ_DISC_INPUT:
     case MBX_FUNC_READ_REG:
     case MBX_FUNC_READ_INPUT_REG:
-        FrameLen = 5 + pMaster->RxExist.Buffer[2];
+        FrameLen = 5U + pMaster->RxExist.Buffer[2];
         break;
     case MBX_FUNC_WRITE_COIL:
     case MBX_FUNC_WRITE_REG:

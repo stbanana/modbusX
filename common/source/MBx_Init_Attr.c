@@ -46,15 +46,15 @@ void MBx_Init_Attr(_MBX_COMMON_CONFIG *MBxAttr, uint8_t Model, uint8_t Mode, uin
         /* 设置模型 */
         MBxAttr->ModbusModel = MBX_MODEL_RTU;
         /* 计算1.5字符时间 us ,时间计算均以8数据位、无校验位、1停止位为配置 */
-        MBxAttr->T1_5_Cycs = (15 * 1000000) / para1;
+        MBxAttr->T1_5_Cycs = (15U * 1000000U) / para1;
         /* 计算3.5字符时间 us ,时间计算均以8数据位、无校验位、1停止位为配置 */
-        if(para1 >= 19200)
+        if(para1 >= 19200U)
         {
             MBxAttr->T3_5_Cycs = 1750;
         }
         else
         {
-            MBxAttr->T3_5_Cycs = (35 * 1000000) / para1;
+            MBxAttr->T3_5_Cycs = (35U * 1000000U) / para1;
         }
         break;
 

@@ -31,10 +31,10 @@
  */
 void MBx_Master_Engine_IDLE(_MBX_MASTER *pMaster)
 {
-    uint8_t getc;
-    while(pMaster->Func.Getc(&getc) == MBX_PORT_RETURN_DEFAULT)
+    uint8_t getchar;
+    while(pMaster->Func.Getc(&getchar) == MBX_PORT_RETURN_DEFAULT)
     {
-        MBxRxBufferPutc(pMaster, getc);
+        MBxRxBufferPutc(pMaster, getchar);
     }
     if(pMaster->Runtime.TimeCnt >= pMaster->Attr.T3_5_Cycs) // 达成3.5字符间隔, 立即流转
     {
@@ -44,7 +44,7 @@ void MBx_Master_Engine_IDLE(_MBX_MASTER *pMaster)
             pMaster->Runtime.State     = MBX_STATE_WRITE; // 流转至发送态
             pMaster->Runtime.StateFlow = 1;
         }
-        else if(pMaster->RxExist.Len > 0)
+        else if(pMaster->RxExist.Len > 0U)
         {
             MBxRxBufferEmpty(pMaster); // 空闲态接收数据非法，清空接收buffer
         }

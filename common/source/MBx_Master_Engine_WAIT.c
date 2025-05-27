@@ -57,7 +57,7 @@ void MBx_Master_Engine_WAIT(_MBX_MASTER *pMaster)
     {
         MBxRxBufferPutc(pMaster, getc);
     }
-    if(pMaster->RxExist.Len > 0)
+    if(pMaster->RxExist.Len > 0U)
     {
         pMaster->Runtime.State     = MBX_STATE_READ; // 接收数据, 流转接收态
         pMaster->Runtime.StateFlow = 1;

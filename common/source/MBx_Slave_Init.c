@@ -55,13 +55,13 @@ uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE                *MBxSlave, //
 {
     uint32_t State = MBX_API_RETURN_DEFAULT;
     /* 传参审查 */
-    if(SlaveID < 1 || SlaveID > 247)
+    if((SlaveID < 1) || (SlaveID > 247))
         return MBX_API_RETURN_ERR_PARAM;
-    if(MBxSend == NULL || MBxGetc == NULL)
+    if((MBxSend == NULL) || (MBxGetc == NULL))
         return MBX_API_RETURN_ERR_PARAM;
-    if(RxBuffer == NULL || RxBuffer == NULL)
+    if((RxBuffer == NULL) || (RxBuffer == NULL))
         return MBX_API_RETURN_ERR_PARAM;
-    if(RxBufferSize < 30 || TxBufferSize < 30) // buffer收发空间至少为30字节(随便写的值)
+    if((RxBufferSize < 30) || (TxBufferSize < 30)) // buffer收发空间至少为30字节(随便写的值)
         return MBX_API_RETURN_ERR_PARAM;
 
     /* 加入从机链表 */
@@ -89,7 +89,7 @@ uint32_t MBx_Slave_RTU_Init(_MBX_SLAVE                *MBxSlave, //
     if(State != MBX_API_RETURN_DEFAULT)
         MBx_MODULE_TRACE_ADD_ERR(MBxSlave, State);
 
-    return State;
+    return (State);
 }
 
 /**
@@ -117,13 +117,13 @@ uint32_t MBx_Slave_TCP_Init(_MBX_SLAVE                *MBxSlave, //
 {
     uint32_t State = MBX_API_RETURN_DEFAULT;
     /* 传参审查 */
-    if(SlaveID < 1 || SlaveID > 247)
+    if((SlaveID < 1) || (SlaveID > 247))
         return MBX_API_RETURN_ERR_PARAM;
-    if(MBxSend == NULL || MBxGetc == NULL)
+    if((MBxSend == NULL) || (MBxGetc == NULL))
         return MBX_API_RETURN_ERR_PARAM;
-    if(RxBuffer == NULL || RxBuffer == NULL)
+    if((RxBuffer == NULL) || (RxBuffer == NULL))
         return MBX_API_RETURN_ERR_PARAM;
-    if(RxBufferSize < 30 || TxBufferSize < 30) // buffer收发空间至少为30字节(随便写的值)
+    if((RxBufferSize < 30) || (TxBufferSize < 30)) // buffer收发空间至少为30字节(随便写的值)
         return MBX_API_RETURN_ERR_PARAM;
 
     /* 加入从机链表 */
@@ -151,7 +151,7 @@ uint32_t MBx_Slave_TCP_Init(_MBX_SLAVE                *MBxSlave, //
     if(State != MBX_API_RETURN_DEFAULT)
         MBx_MODULE_TRACE_ADD_ERR(MBxSlave, State);
 
-    return State;
+    return (State);
 }
 
 #endif /* MBX_SLAVE_ENABLE */

@@ -29,32 +29,32 @@ extern "C"
  * @param rootNode 根节点指针 _MBX_SLAVE*类型
  * @param newNode 期望新链接的节点指针 _MBX_SLAVE*类型
  */
-#define NewSlaveChainNode(rootNode, newNode)                  \
-    do                                                        \
-    {                                                         \
-        _MBX_SLAVE *ChainNow = rootNode;                      \
-        uint8_t     isFound  = 0;                             \
-        if(ChainNow == NULL)                                  \
-        {                                                     \
-            rootNode = newNode;                               \
-        }                                                     \
-        else                                                  \
-        {                                                     \
-            while((ChainNow->Next != NULL) && (isFound == 0)) \
-            {                                                 \
-                if(ChainNow == newNode)                       \
-                {                                             \
-                    isFound = 1;                              \
-                }                                             \
-                ChainNow = ChainNow->Next;                    \
-            }                                                 \
-            if(isFound == 0)                                  \
-            {                                                 \
-                memset(newNode, 0, sizeof(_MBX_SLAVE));       \
-                ChainNow->Next = newNode;                     \
-            }                                                 \
-        }                                                     \
-    }                                                         \
+#define NewSlaveChainNode(rootNode, newNode)                   \
+    do                                                         \
+    {                                                          \
+        _MBX_SLAVE *ChainNow = (rootNode);                     \
+        uint8_t     isFound  = 0;                              \
+        if(ChainNow == NULL)                                   \
+        {                                                      \
+            (rootNode) = (newNode);                            \
+        }                                                      \
+        else                                                   \
+        {                                                      \
+            while((ChainNow->Next != NULL) && (isFound == 0U)) \
+            {                                                  \
+                if(ChainNow == (newNode))                      \
+                {                                              \
+                    isFound = 1;                               \
+                }                                              \
+                ChainNow = ChainNow->Next;                     \
+            }                                                  \
+            if(isFound == 0)                                   \
+            {                                                  \
+                memset((newNode), 0, sizeof(_MBX_SLAVE));      \
+                ChainNow->Next = (newNode);                    \
+            }                                                  \
+        }                                                      \
+    }                                                          \
     while(0)
 
 /**
@@ -67,26 +67,26 @@ extern "C"
 #define NewMasterChainNode(rootNode, newNode)                 \
     do                                                        \
     {                                                         \
-        _MBX_MASTER *ChainNow = rootNode;                     \
+        _MBX_MASTER *ChainNow = (rootNode);                   \
         uint8_t      isFound  = 0;                            \
         if(ChainNow == NULL)                                  \
         {                                                     \
-            rootNode = newNode;                               \
+            (rootNode) = (newNode);                           \
         }                                                     \
         else                                                  \
         {                                                     \
-            while((ChainNow->Next != NULL) && (isFound == 0)) \
+            while((ChainNow->Next != NULL) && (isFound == 0U)) \
             {                                                 \
-                if(ChainNow == newNode)                       \
+                if(ChainNow == (newNode))                     \
                 {                                             \
                     isFound = 1;                              \
                 }                                             \
                 ChainNow = ChainNow->Next;                    \
             }                                                 \
-            if(isFound == 0)                                  \
+            if(isFound == 0U)                                  \
             {                                                 \
-                memset(newNode, 0, sizeof(_MBX_MASTER));      \
-                ChainNow->Next = newNode;                     \
+                memset((newNode), 0, sizeof(_MBX_MASTER));    \
+                ChainNow->Next = (newNode);                   \
             }                                                 \
         }                                                     \
     }                                                         \
@@ -97,19 +97,19 @@ extern "C"
  * @param pMBX  MBX对象指针
  * @param c 期望推入的 字节数据
  */
-#define MBxRxBufferPutc(pMBX, c)                                        \
-    do                                                                  \
-    {                                                                   \
-        if((pMBX->RxExist.Len + 1) < pMBX->RxExist.LenMAX)              \
-        {                                                               \
-            pMBX->RxExist.Buffer[pMBX->RxExist.Len] = c;                \
-            pMBX->RxExist.Len++;                                        \
-        }                                                               \
-        else                                                            \
-        {                                                               \
-            MBx_MODULE_TRACE_ADD_ERR(pMBX, MBX_API_RETURN_BUFFER_FULL); \
-        }                                                               \
-    }                                                                   \
+#define MBxRxBufferPutc(pMBX, c)                                          \
+    do                                                                    \
+    {                                                                     \
+        if(((pMBX)->RxExist.Len + 1U) < (pMBX)->RxExist.LenMAX)            \
+        {                                                                 \
+            (pMBX)->RxExist.Buffer[(pMBX)->RxExist.Len] = (c);            \
+            (pMBX)->RxExist.Len++;                                        \
+        }                                                                 \
+        else                                                              \
+        {                                                                 \
+            MBx_MODULE_TRACE_ADD_ERR((pMBX), MBX_API_RETURN_BUFFER_FULL); \
+        }                                                                 \
+    }                                                                     \
     while(0)
 
 /**
@@ -117,15 +117,15 @@ extern "C"
  * @param pMBX  MBX对象指针
  * @param rLen 期望删除的 字节长度
  */
-#define MBxRxBufferRemove(pMBX, rLen)                                                                  \
-    do                                                                                                 \
-    {                                                                                                  \
-        pMBX->RxExist.Len -= rLen;                                                                     \
-        if(pMBX->RxExist.Len > 0)                                                                      \
-        {                                                                                              \
-            MBx_utility_MemMove(pMBX->RxExist.Buffer, pMBX->RxExist.Buffer + rLen, pMBX->RxExist.Len); \
-        }                                                                                              \
-    }                                                                                                  \
+#define MBxRxBufferRemove(pMBX, rLen)                                                                          \
+    do                                                                                                         \
+    {                                                                                                          \
+        (pMBX)->RxExist.Len -= (rLen);                                                                         \
+        if((pMBX)->RxExist.Len > 0U)                                                                            \
+        {                                                                                                      \
+            MBx_utility_MemMove((pMBX)->RxExist.Buffer, (pMBX)->RxExist.Buffer + (rLen), (pMBX)->RxExist.Len); \
+        }                                                                                                      \
+    }                                                                                                          \
     while(0)
 
 /**
@@ -133,19 +133,19 @@ extern "C"
  * @param pMBX  MBX对象指针
  * @param c 期望推入的 字节数据
  */
-#define MBxTxBufferPutc(pMBX, c)                                        \
-    do                                                                  \
-    {                                                                   \
-        if((pMBX->TxExist.Len + 1) < pMBX->TxExist.LenMAX)              \
-        {                                                               \
-            pMBX->TxExist.Buffer[pMBX->TxExist.Len] = c;                \
-            pMBX->TxExist.Len++;                                        \
-        }                                                               \
-        else                                                            \
-        {                                                               \
-            MBx_MODULE_TRACE_ADD_ERR(pMBX, MBX_API_RETURN_BUFFER_FULL); \
-        }                                                               \
-    }                                                                   \
+#define MBxTxBufferPutc(pMBX, c)                                          \
+    do                                                                    \
+    {                                                                     \
+        if(((pMBX)->TxExist.Len + 1) < (pMBX)->TxExist.LenMAX)            \
+        {                                                                 \
+            (pMBX)->TxExist.Buffer[(pMBX)->TxExist.Len] = (c);            \
+            (pMBX)->TxExist.Len++;                                        \
+        }                                                                 \
+        else                                                              \
+        {                                                                 \
+            MBx_MODULE_TRACE_ADD_ERR((pMBX), MBX_API_RETURN_BUFFER_FULL); \
+        }                                                                 \
+    }                                                                     \
     while(0)
 
 /**
@@ -153,74 +153,74 @@ extern "C"
  * @param pMBX  MBX对象指针
  * @param reg 期望推入的 寄存器的数据(16位)
  */
-#define MBxTxBufferPutReg(pMBX, reg)                                                      \
-    do                                                                                    \
-    {                                                                                     \
-        if((pMBX->TxExist.Len + 2) < pMBX->TxExist.LenMAX)                                \
-        {                                                                                 \
-            pMBX->TxExist.Buffer[pMBX->TxExist.Len]     = (uint8_t)((reg >> 8) & 0x00FF); \
-            pMBX->TxExist.Buffer[pMBX->TxExist.Len + 1] = (uint8_t)(reg & 0x00FF);        \
-            pMBX->TxExist.Len += 2;                                                       \
-        }                                                                                 \
-        else                                                                              \
-        {                                                                                 \
-            MBx_MODULE_TRACE_ADD_ERR(pMBX, MBX_API_RETURN_BUFFER_FULL);                   \
-        }                                                                                 \
-    }                                                                                     \
+#define MBxTxBufferPutReg(pMBX, reg)                                                            \
+    do                                                                                          \
+    {                                                                                           \
+        if(((pMBX)->TxExist.Len + 2) < (pMBX)->TxExist.LenMAX)                                  \
+        {                                                                                       \
+            (pMBX)->TxExist.Buffer[(pMBX)->TxExist.Len]     = (uint8_t)(((reg) >> 8) & 0x00FF); \
+            (pMBX)->TxExist.Buffer[(pMBX)->TxExist.Len + 1] = (uint8_t)((reg)&0x00FF);          \
+            (pMBX)->TxExist.Len += 2;                                                           \
+        }                                                                                       \
+        else                                                                                    \
+        {                                                                                       \
+            MBx_MODULE_TRACE_ADD_ERR((pMBX), MBX_API_RETURN_BUFFER_FULL);                       \
+        }                                                                                       \
+    }                                                                                           \
     while(0)
 
 /**
  * @brief 清空MBX对象的RXbuffer
  * @param pMBX  MBX对象指针
  */
-#define MBxRxBufferEmpty(pMBX) \
-    do                         \
-    {                          \
-        pMBX->RxExist.Len = 0; \
-    }                          \
+#define MBxRxBufferEmpty(pMBX)   \
+    do                           \
+    {                            \
+        (pMBX)->RxExist.Len = 0; \
+    }                            \
     while(0)
 
 /**
  * @brief 清空MBX对象的TXbuffer
  * @param pMBX  MBX对象指针
  */
-#define MBxTxBufferEmpty(pMBX) \
-    do                         \
-    {                          \
-        pMBX->TxExist.Len = 0; \
-    }                          \
+#define MBxTxBufferEmpty(pMBX)   \
+    do                           \
+    {                            \
+        (pMBX)->TxExist.Len = 0; \
+    }                            \
     while(0)
 
 /**
  * @brief 查询MBX主机错误栈是否为空
  * @param pMBX  MBX对象指针
  */
-#define MBxMasterErrorEmptyQ(pMBX) (pMBX->Error.Head == pMBX->Error.Tail)
+#define MBxMasterErrorEmptyQ(pMBX) ((pMBX)->Error.Head == (pMBX)->Error.Tail)
 
 /**
  * @brief 查询MBX主机错误栈是否为满
  * @param pMBX  MBX对象指针
  */
-#define MBxMasterErrorFullQ(pMBX) (((pMBX->Error.Head + 1) % MBX_MASTER_ERROR_QUEUE_MAX) == pMBX->Error.Tail)
+#define MBxMasterErrorFullQ(pMBX) ((((pMBX)->Error.Head + 1) % MBX_MASTER_ERROR_QUEUE_MAX) == (pMBX)->Error.Tail)
 
 /**
  * @brief 查询MBX主机请求栈是否为空
  * @param pMBX  MBX对象指针
  */
-#define MBxMasterRequestEmptyQ(pMBX) (pMBX->Request.Head == pMBX->Request.Tail)
+#define MBxMasterRequestEmptyQ(pMBX) ((pMBX)->Request.Head == (pMBX)->Request.Tail)
 
 /**
  * @brief 查询MBX主机请求栈是否为满
  * @param pMBX  MBX对象指针
  */
-#define MBxMasterRequestFullQ(pMBX) (((pMBX->Request.Head + 1) % MBX_MASTER_REQUEST_QUEUE_MAX) == pMBX->Request.Tail)
+#define MBxMasterRequestFullQ(pMBX) ((((pMBX)->Request.Head + 1) % MBX_MASTER_REQUEST_QUEUE_MAX) == (pMBX)->Request.Tail)
 
 /* 错误追踪处理添加 */
 #if MBX_MODULE_ERR_TRACE_ENABLE
 #ifdef MBx_MODULE_TRACE_ADD_ERR
 #error "MBx_MODULE_TRACE_ADD_ERR is already defined"
 #endif
-#define MBx_MODULE_TRACE_ADD_ERR(pMB, err) MBxErrTraceAdd(pMB->Config.SlaveID, pMB->Attr.ModbusMode, pMB->Runtime.State, err)
+#define MBx_MODULE_TRACE_ADD_ERR(pMB, err) MBxErrTraceAdd((pMBX)->Config.SlaveID, (pMBX)->Attr.ModbusMode, (pMBX)->Runtime.State, (err))
 #else
 #define MBx_MODULE_TRACE_ADD_ERR(pMB, err)
 #endif

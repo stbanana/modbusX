@@ -56,7 +56,7 @@ uint32_t MBx_Master_READ_COIL_Handle(_MBX_MASTER *pMaster)
         return MBX_API_RETURN_MAP_UNFIND;
     }
 
-    if(pMaster->RxExist.Buffer[3] & 0x01)
+    if(pMaster->RxExist.Buffer[3] & 0x01U)
     {
         pMaster->Parse.RegData = 0xFFFF;
     }
@@ -67,7 +67,7 @@ uint32_t MBx_Master_READ_COIL_Handle(_MBX_MASTER *pMaster)
     MBx_utility_map_addr_data_write_cast(pMember->Map, pMember->MapNum, MASTER_PARSE_SENDADDRSTART(pMaster), pMaster->Parse.RegData, MBX_MAP_FIND_MODE_FIRST);
     for(i = 1; i < MASTER_PARSE_SENDREGNUM(pMaster); i++)
     {
-        if(pMaster->RxExist.Buffer[3 + (i >> 3)] & (0x01 << (i % 8)))
+        if(pMaster->RxExist.Buffer[3 + (i >> 3)] & (0x01 << (i % 8U)))
         {
             pMaster->Parse.RegData = 0xFFFF;
         }
@@ -98,7 +98,7 @@ uint32_t MBx_Master_READ_DISC_INPUTL_Handle(_MBX_MASTER *pMaster)
         return MBX_API_RETURN_MAP_UNFIND;
     }
 
-    if(pMaster->RxExist.Buffer[3] & 0x01)
+    if(pMaster->RxExist.Buffer[3] & 0x01U)
     {
         pMaster->Parse.RegData = 0xFFFF;
     }
@@ -109,7 +109,7 @@ uint32_t MBx_Master_READ_DISC_INPUTL_Handle(_MBX_MASTER *pMaster)
     MBx_utility_map_addr_data_write_cast(pMember->Map, pMember->MapNum, MASTER_PARSE_SENDADDRSTART(pMaster), pMaster->Parse.RegData, MBX_MAP_FIND_MODE_FIRST);
     for(i = 1; i < MASTER_PARSE_SENDREGNUM(pMaster); i++)
     {
-        if(pMaster->RxExist.Buffer[3 + (i >> 3)] & (0x01 << (i % 8)))
+        if(pMaster->RxExist.Buffer[3 + (i >> 3)] & (0x01 << (i % 8U)))
         {
             pMaster->Parse.RegData = 0xFFFF;
         }
@@ -192,7 +192,7 @@ uint32_t MBx_Master_WRITE_COIL_Handle(_MBX_MASTER *pMaster)
         return MBX_API_RETURN_MAP_UNFIND;
     }
 
-    if(MASTER_PARSE_SENDVALUE(pMaster)[0] & 0x01)
+    if(MASTER_PARSE_SENDVALUE(pMaster)[0] & 0x01U)
     {
         pMaster->Parse.RegData = 0xFFFF;
     }
@@ -245,7 +245,7 @@ uint32_t MBx_Master_WRITE_COIL_MUL_Handle(_MBX_MASTER *pMaster)
         return MBX_API_RETURN_MAP_UNFIND;
     }
 
-    if(MASTER_PARSE_SENDVALUE(pMaster)[0] & 0x01)
+    if(MASTER_PARSE_SENDVALUE(pMaster)[0] & 0x01U)
     {
         pMaster->Parse.RegData = 0xFFFF;
     }
@@ -256,7 +256,7 @@ uint32_t MBx_Master_WRITE_COIL_MUL_Handle(_MBX_MASTER *pMaster)
     MBx_utility_map_addr_data_write_cast(pMember->Map, pMember->MapNum, MASTER_PARSE_SENDADDRSTART(pMaster), pMaster->Parse.RegData, MBX_MAP_FIND_MODE_FIRST);
     for(i = 1; i < MASTER_PARSE_SENDREGNUM(pMaster); i++)
     {
-        if(MASTER_PARSE_SENDVALUE(pMaster)[i >> 3] & (0x01 << (i % 8)))
+        if(MASTER_PARSE_SENDVALUE(pMaster)[i >> 3] & (0x01 << (i % 8U)))
         {
             pMaster->Parse.RegData = 0xFFFF;
         }
@@ -345,7 +345,7 @@ uint32_t MBx_Master_Error_Handle(_MBX_MASTER *pMaster)
         break;
     case MBX_FUNC_WRITE_COIL_MUL: /* 复杂的多线圈提取 */
         i = 0;
-        if(MASTER_PARSE_SENDVALUE(pMaster)[0] & 0x01)
+        if(MASTER_PARSE_SENDVALUE(pMaster)[0] & 0x01U)
         {
             pMaster->Parse.RegData = 0xFFFF;
         }
@@ -356,7 +356,7 @@ uint32_t MBx_Master_Error_Handle(_MBX_MASTER *pMaster)
         MBx_utility_map_addr_data_write(pMember->Map, pMember->MapNum, MASTER_PARSE_SENDADDRSTART(pMaster), pMaster->Parse.RegData, MBX_MAP_FIND_MODE_FIRST);
         for(i = 1; i < MASTER_PARSE_SENDREGNUM(pMaster); i++)
         {
-            if(MASTER_PARSE_SENDVALUE(pMaster)[i >> 3] & (0x01 << (i % 8)))
+            if(MASTER_PARSE_SENDVALUE(pMaster)[i >> 3] & (0x01U << (i % 8U)))
             {
                 pMaster->Parse.RegData = 0xFFFF;
             }

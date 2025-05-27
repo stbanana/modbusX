@@ -48,7 +48,7 @@ void MBx_Slave_TCP_Parse(_MBX_SLAVE *pSlave)
     uint16_t ReplyLen  = 0;                  // 回复帧长度
 
     /* 审查是否符合最小帧长 */
-    if(pSlave->RxExist.Len < 12)
+    if(pSlave->RxExist.Len < 12U)
     {
         MBxRxBufferEmpty(pSlave);
         return; // 帧不完整, 弃帧
