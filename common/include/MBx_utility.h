@@ -64,32 +64,32 @@ extern "C"
  * @param rootNode 根节点指针 _MBX_MASTER*类型
  * @param newNode 期望新链接的节点指针 _MBX_MASTER*类型
  */
-#define NewMasterChainNode(rootNode, newNode)                 \
-    do                                                        \
-    {                                                         \
-        _MBX_MASTER *ChainNow = (rootNode);                   \
-        uint8_t      isFound  = 0;                            \
-        if(ChainNow == NULL)                                  \
-        {                                                     \
-            (rootNode) = (newNode);                           \
-        }                                                     \
-        else                                                  \
-        {                                                     \
+#define NewMasterChainNode(rootNode, newNode)                  \
+    do                                                         \
+    {                                                          \
+        _MBX_MASTER *ChainNow = (rootNode);                    \
+        uint8_t      isFound  = 0;                             \
+        if(ChainNow == NULL)                                   \
+        {                                                      \
+            (rootNode) = (newNode);                            \
+        }                                                      \
+        else                                                   \
+        {                                                      \
             while((ChainNow->Next != NULL) && (isFound == 0U)) \
-            {                                                 \
-                if(ChainNow == (newNode))                     \
-                {                                             \
-                    isFound = 1;                              \
-                }                                             \
-                ChainNow = ChainNow->Next;                    \
-            }                                                 \
+            {                                                  \
+                if(ChainNow == (newNode))                      \
+                {                                              \
+                    isFound = 1;                               \
+                }                                              \
+                ChainNow = ChainNow->Next;                     \
+            }                                                  \
             if(isFound == 0U)                                  \
-            {                                                 \
-                memset((newNode), 0, sizeof(_MBX_MASTER));    \
-                ChainNow->Next = (newNode);                   \
-            }                                                 \
-        }                                                     \
-    }                                                         \
+            {                                                  \
+                memset((newNode), 0, sizeof(_MBX_MASTER));     \
+                ChainNow->Next = (newNode);                    \
+            }                                                  \
+        }                                                      \
+    }                                                          \
     while(0)
 
 /**
@@ -100,7 +100,7 @@ extern "C"
 #define MBxRxBufferPutc(pMBX, c)                                          \
     do                                                                    \
     {                                                                     \
-        if(((pMBX)->RxExist.Len + 1U) < (pMBX)->RxExist.LenMAX)            \
+        if(((pMBX)->RxExist.Len + 1U) < (pMBX)->RxExist.LenMAX)           \
         {                                                                 \
             (pMBX)->RxExist.Buffer[(pMBX)->RxExist.Len] = (c);            \
             (pMBX)->RxExist.Len++;                                        \
@@ -121,7 +121,7 @@ extern "C"
     do                                                                                                         \
     {                                                                                                          \
         (pMBX)->RxExist.Len -= (rLen);                                                                         \
-        if((pMBX)->RxExist.Len > 0U)                                                                            \
+        if((pMBX)->RxExist.Len > 0U)                                                                           \
         {                                                                                                      \
             MBx_utility_MemMove((pMBX)->RxExist.Buffer, (pMBX)->RxExist.Buffer + (rLen), (pMBX)->RxExist.Len); \
         }                                                                                                      \
@@ -220,7 +220,7 @@ extern "C"
 #ifdef MBx_MODULE_TRACE_ADD_ERR
 #error "MBx_MODULE_TRACE_ADD_ERR is already defined"
 #endif
-#define MBx_MODULE_TRACE_ADD_ERR(pMB, err) MBxErrTraceAdd((pMBX)->Config.SlaveID, (pMBX)->Attr.ModbusMode, (pMBX)->Runtime.State, (err))
+#define MBx_MODULE_TRACE_ADD_ERR(pMB, err) MBxErrTraceAdd((pMB)->Config.SlaveID, (pMB)->Attr.ModbusMode, (pMB)->Runtime.State, (err))
 #else
 #define MBx_MODULE_TRACE_ADD_ERR(pMB, err)
 #endif

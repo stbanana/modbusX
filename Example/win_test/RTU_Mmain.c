@@ -54,6 +54,9 @@ uint64_t u64MapMem[64];
 float    fMapMem[64]; // 32位数据模型
 double   dMapMem[64]; // 64位数据模型
 
+/* 申请从机对象发送及接收buffer */
+uint8_t SRxBuffer[84];
+uint8_t STxBuffer[84];
 /* Private Constants ---------------------------------------------------------*/
 static const _MBX_MAP_LIST_ENTRY MapList[];
 /* Private function prototypes -----------------------------------------------*/
@@ -114,10 +117,6 @@ int main(int argc, char *argv[])
  */
 void MyRTUMasterTest(void)
 {
-    /* 申请主机对象发送及接收buffer */
-    uint8_t *SRxBuffer = (uint8_t *)malloc(84 * sizeof(uint8_t));
-    uint8_t *STxBuffer = (uint8_t *)malloc(84 * sizeof(uint8_t));
-
     /* 初始化modbus主机1 */
     if(MBx_Master_RTU_Init(&MBxMaster,     // 主机对象
                            SerialSendPort, // 发送函数
@@ -271,7 +270,7 @@ static void TestErrorConsume(void)
 /* 为了实现更快速的查找，库内采用二分法查询地址表
     地址表必须手动以升序排列，由于C11标准不支持动态宏，暂时无法在编译阶段自动检查 */
 static const _MBX_MAP_LIST_ENTRY MapList[] = {
-    /*  寄存器地址        映射到的内部内存              内部内存数据属性            写时异常立即回调(NULL为忽略写异常)  */
+  /*  寄存器地址        映射到的内部内存              内部内存数据属性            写时异常立即回调(NULL为忽略写异常)  */
     {.Addr = 0x0000, .Memory = &u8MapMem[10],  .Type = MBX_REG_TYPE_U8,    .Handle = u8WriteTest1 },
     {.Addr = 0x0001, .Memory = &u8MapMem[11],  .Type = MBX_REG_TYPE_U8,    .Handle = u8WriteTest2 },
     {.Addr = 0x0002, .Memory = &u8MapMem[12],  .Type = MBX_REG_TYPE_U8,    .Handle = NULL         },
