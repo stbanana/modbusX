@@ -162,7 +162,10 @@ void MBx_Slave_RTU_Parse(_MBX_SLAVE *pSlave)
     MBxRxBufferRemove(pSlave, FrameLen);
 
     /* 广播时不回复，TODO:此为临时解决方案 */
-    pSlave->TxExist.Len = 0;
+    if(pSlave->Config.SlaveID == 0)
+    {
+        pSlave->TxExist.Len = 0;
+    }
 }
 
 /**
