@@ -111,7 +111,7 @@ uint32_t SerialGetcPort(uint8_t *Data)
 > 2. **如果映射到的内部内存变量相同，那么回调处理也应该相同**，因为库会最终将整个变量期望修改的值以 void* 形式传入写时回调，写时回调应当再翻译为对应的数据，详见例程 [在 windows 平台的 RTU 从机例子](Example/win_test/RTU_Smain.c)
 
 ```c
-/* 供映射的内存区域 */
+/* 假设供映射的内存区域，也可以是任意变量或任意地址 */
 uint8_t  u8MapMem[64];
 uint16_t u16MapMem[64];
 uint32_t u36MapMem[64];
@@ -209,7 +209,7 @@ MBx_Slave_RTU_Init(&MBxSlave2,     // 从机对象
 > 2. **如果映射到的内部内存变量相同，那么回调处理也应该相同**，因为库会最终将整个变量期望修改的值以 void* 形式传入写时回调，写时回调应当再翻译为对应的数据，详见例程 [在 windows 平台的 RTU 主机例子](Example/win_test/RTU_Mmain.c)
 
 ```c
-/* 供映射的内存区域 */
+/* 假设供映射的内存区域，也可以是任意变量或任意地址 */
 uint8_t  u8MapMem[64];
 uint16_t u16MapMem[64];
 uint32_t u36MapMem[64];
