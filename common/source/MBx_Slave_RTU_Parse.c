@@ -160,6 +160,9 @@ void MBx_Slave_RTU_Parse(_MBX_SLAVE *pSlave)
 
     /* 删除已处理消息 */
     MBxRxBufferRemove(pSlave, FrameLen);
+
+    /* 广播时不回复，TODO:此为临时解决方案 */
+    pSlave->TxExist.Len = 0;
 }
 
 /**
