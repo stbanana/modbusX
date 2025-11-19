@@ -19,36 +19,6 @@
     <a href="/Example/README.DATA/README_EN.md">English</a>
 </p>
 
-## ✨特性
-
-我对协议库的理解是：只需要另外实现数据的流入和流出 port，并最多另外定时调用一个时基函数，就可以驱动起整个库(轮询)。
-
-另外想了解 modbus 协议有 [modbus协议介绍](https://www.yono233.cn/posts/shoot/24_7_26_modbus协议介绍(未完成))
-
-另外有本库的轻量化报告 [资源占用测试报告](https://wiki.yono233.cn/modbusX/zh_hans/apidoc/tools/资源占用测试报告.html)
-
-另外有帮助建立 DMA 以及半双工驱动的简单实例 [Dataflow-驱动中间件](https://github.com/stbanana/Dataflow)
-
-我希望有这样的 modbus 实现，是硬性需求，同时也是这个库最终的特性。
-
-> 1. ⚡**不阻塞**：使用库 tick，禁止阻塞
-> 2. 🪶**不占线程**：单 tick 驱动整个主从链，以任何方式周期运行 tick
-> 3. 🌠**不占中断**：自由的 port 绑定，以任意方式管理数据流
-> 4. 💪**多主多从**：任何主机或从机都是独立对象，可在程序中开启任意多个主从机
-> 5. 🗽**寄存器地址表与内存地址任意映射**：本库的重要特性，解决 modbus 虚拟地址与实际变量之间的映射关系，使得开发更为简单且自由，整个库的使用完全围绕这个映射表展开，未来的维护同样只需维护映射表。
-> 6. ⚖️**不同的地址映射查找时间，相差应当不超过 500 个时钟周期**：很难说是实现了，由于 modbus 最多也就 0xFFFF 个虚拟地址，所以采用了二分法查找，但这样还是不够自由便利，未来会找到更好的表查找结构(或许)。这是库升级的难点，有方案的请与我联系，非常感谢😘！
-> 7. 🏃‍♀️**克制的事件回调**：少量的回调机制。尽可能使用栈轮询，尽可能少地影响系统时序。
-
-# 📚功能计划(按优先级排序)
-
-- [x] RTU 主从机的输入和保持寄存器读写
-- [x] 主机写入成功的同步机制
-- [x] 主机写入失败的回调处理机制
-- [x] TCP 主从机的输入和保持寄存器读写
-- [ ] RTU 主从机的线圈和离散输入读写
-- [ ] TCP 主从机的线圈和离散输入读写
-- [ ] 动态地址映射表的支持
-
 <details>
 <summary><span style="font-size:1.25em; font-weight:500; line-height:1.25;">👉 点击查看</span><span style="font-size:1.25em; font-weight:800; line-height:1.25;">致谢名单</span></summary>
 
@@ -91,7 +61,7 @@
       <td>
         <a href="https://github.com/BlackCattleProgrammer996" target="_blank">
           <img src="https://github.com/BlackCattleProgrammer996.png?size=40" alt="@BlackCattleProgrammer996" width="24" height="24" style="border-radius:50%; vertical-align:middle; margin-right:8px;" />
-          <span>@BlackCattleProgrammer996</span>
+          <span></span>
         </a>
       </td>
       <td align="center">50</td>
@@ -102,7 +72,7 @@
       <td>
         <a href="https://github.com/BlackCattleProgrammer996" target="_blank">
           <img src="https://github.com/BlackCattleProgrammer996.png?size=40" alt="@BlackCattleProgrammer996" width="24" height="24" style="border-radius:50%; vertical-align:middle; margin-right:8px;" />
-          <span>@BlackCattleProgrammer996</span>
+          <span></span>
         </a>
       </td>
       <td align="center">30</td>
@@ -114,6 +84,36 @@
 </table>
 
 </details>
+
+## ✨特性
+
+我对协议库的理解是：只需要另外实现数据的流入和流出 port，并最多另外定时调用一个时基函数，就可以驱动起整个库(轮询)。
+
+另外想了解 modbus 协议有 [modbus协议介绍](https://www.yono233.cn/posts/shoot/24_7_26_modbus协议介绍(未完成))
+
+另外有本库的轻量化报告 [资源占用测试报告](https://wiki.yono233.cn/modbusX/zh_hans/apidoc/tools/资源占用测试报告.html)
+
+另外有帮助建立 DMA 以及半双工驱动的简单实例 [Dataflow-驱动中间件](https://github.com/stbanana/Dataflow)
+
+我希望有这样的 modbus 实现，是硬性需求，同时也是这个库最终的特性。
+
+> 1. ⚡**不阻塞**：使用库 tick，禁止阻塞
+> 2. 🪶**不占线程**：单 tick 驱动整个主从链，以任何方式周期运行 tick
+> 3. 🌠**不占中断**：自由的 port 绑定，以任意方式管理数据流
+> 4. 💪**多主多从**：任何主机或从机都是独立对象，可在程序中开启任意多个主从机
+> 5. 🗽**寄存器地址表与内存地址任意映射**：本库的重要特性，解决 modbus 虚拟地址与实际变量之间的映射关系，使得开发更为简单且自由，整个库的使用完全围绕这个映射表展开，未来的维护同样只需维护映射表。
+> 6. ⚖️**不同的地址映射查找时间，相差应当不超过 500 个时钟周期**：很难说是实现了，由于 modbus 最多也就 0xFFFF 个虚拟地址，所以采用了二分法查找，但这样还是不够自由便利，未来会找到更好的表查找结构(或许)。这是库升级的难点，有方案的请与我联系，非常感谢😘！
+> 7. 🏃‍♀️**克制的事件回调**：少量的回调机制。尽可能使用栈轮询，尽可能少地影响系统时序。
+
+# 📚功能计划(按优先级排序)
+
+- [x] RTU 主从机的输入和保持寄存器读写
+- [x] 主机写入成功的同步机制
+- [x] 主机写入失败的回调处理机制
+- [x] TCP 主从机的输入和保持寄存器读写
+- [ ] RTU 主从机的线圈和离散输入读写
+- [ ] TCP 主从机的线圈和离散输入读写
+- [ ] 动态地址映射表的支持
 
 # 🤔如何使用
 
