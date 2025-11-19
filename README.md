@@ -49,7 +49,71 @@
 - [ ] TCP 主从机的线圈和离散输入读写
 - [ ] 动态地址映射表的支持
 
+<details>
+<summary><span style="font-size:1.25em; font-weight:500; line-height:1.25;">👉 点击查看</span><span style="font-size:1.25em; font-weight:800; line-height:1.25;">致谢名单</span></summary>
 
+> 感谢 **给予资金支持** 的朋友们慷慨!!!
+>
+>你们捐赠的可乐已经被我贪污，并**没有用于**使项目变得更好。
+
+<table>
+  <thead>
+    <tr>
+      <th align="left">金主</th>
+      <th align="center">金额</th>
+      <th align="center">日期</th>
+      <th align="left">备注</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- 用户示例（复制此块并将 USERNAME 替换为实际用户名）：
+    <tr>
+      <td>
+        <a href="https://github.com/USERNAME" target="_blank">
+          <img src="https://github.com/USERNAME.png?size=40" alt="@USERNAME" width="24" height="24" style="border-radius:50%; vertical-align:middle; margin-right:8px;" />
+          <span>@USERNAME</span>
+        </a>
+      </td>
+      <td align="center">金额</td>
+      <td align="center">YYYY.MM.DD</td>
+      <td>备注</td>
+    </tr>
+    -->
+    <!-- 另一个仅有用户名的简易模板：未提供 GitHub 用户名时的回退展示
+    <tr>
+      <td>yono</td>
+      <td align="center">1</td>
+      <td align="center">2025.11.17</td>
+      <td>作者是世界上最懒的家伙</td>
+    </tr>
+    -->
+    <tr>
+      <td>
+        <a href="https://github.com/BlackCattleProgrammer996" target="_blank">
+          <img src="https://github.com/BlackCattleProgrammer996.png?size=40" alt="@BlackCattleProgrammer996" width="24" height="24" style="border-radius:50%; vertical-align:middle; margin-right:8px;" />
+          <span>@BlackCattleProgrammer996</span>
+        </a>
+      </td>
+      <td align="center">50</td>
+      <td align="center">2025.10.14</td>
+      <td>感谢 yono 哥</td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://github.com/BlackCattleProgrammer996" target="_blank">
+          <img src="https://github.com/BlackCattleProgrammer996.png?size=40" alt="@BlackCattleProgrammer996" width="24" height="24" style="border-radius:50%; vertical-align:middle; margin-right:8px;" />
+          <span>@BlackCattleProgrammer996</span>
+        </a>
+      </td>
+      <td align="center">30</td>
+      <td align="center">2025.11.17</td>
+      <td>yono 哥喝可乐</td>
+    </tr>
+
+  </tbody>
+</table>
+
+</details>
 
 # 🤔如何使用
 
@@ -281,7 +345,7 @@ static const _MBX_MAP_LIST_ENTRY MapList[] = {
                         MBX_PARA_NULL,  // 波特率
                         MBX_PARA_NULL,  // 库内接收buffer分配
                         MBX_PARA_NULL,  // 接收buffer最大长度
-                        MBX_PARA_NULL,  // 库内发送buffer分配
+                        MBx_PARA_NULL,  // 库内发送buffer分配
                         MBX_PARA_NULL); // 发送buffer最大长度
 ```
 
