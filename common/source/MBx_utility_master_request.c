@@ -124,8 +124,13 @@ void MBxMasterRequestToTx(_MBX_MASTER *pMaster)
     {
         /* 计算CRC填充 */
         crc.Val = MBx_utility_crc16((uint8_t *)(pMaster->TxExist.Buffer), pMaster->TxExist.Len); // 计算CRC校验码
-        MBxTxBufferPutc(pMaster, crc.H_L.L8);                                                    // CRC低8位
-        MBxTxBufferPutc(pMaster, crc.H_L.H8);                                                    // CRC高8位
+#ifdef _YOROOTA_16BIT_BYTE
+        MBxTxBufferPutc(pMaster, crc.Val & 0xFF);        // CRC低8位
+        MBxTxBufferPutc(pMaster, (crc.Val >> 8) & 0xFF); // CRC高8位
+#else
+        MBxTxBufferPutc(pMaster, crc.H_L.L8); // CRC低8位
+        MBxTxBufferPutc(pMaster, crc.H_L.H8); // CRC高8位
+#endif
     }
 
     pMaster->Request.Tail = (pMaster->Request.Tail + 1) % MBX_MASTER_REQUEST_QUEUE_MAX;
@@ -170,14 +175,22 @@ uint32_t MBxMasterRequestAdd(_MBX_MASTER *pMaster, uint8_t SlaveID, uint8_t Func
         pMaster->Request.Queue[pMaster->Request.Head].RegNum = RegNum;
         for(int i = 0; i < ValueLen; i++)
         {
+#ifdef _YOROOTA_16BIT_BYTE
+            pMaster->Request.Queue[pMaster->Request.Head].Value[i] = (i & 0x1) ? (Value[i >> 1] & 0xFF) : ((Value[i >> 1] >> 8) & 0xFF);
+#else
             pMaster->Request.Queue[pMaster->Request.Head].Value[i] = (i & 0x1) ? (Value[i - 1]) : (Value[i + 1]);
+#endif
         }
         break;
     case MBX_FUNC_WRITE_REG_MUL:
         pMaster->Request.Queue[pMaster->Request.Head].RegNum = RegNum;
         for(int i = 0; i < ValueLen; i++)
         {
+#ifdef _YOROOTA_16BIT_BYTE
+            pMaster->Request.Queue[pMaster->Request.Head].Value[i] = (i & 0x1) ? (Value[i >> 1] & 0xFF) : ((Value[i >> 1] >> 8) & 0xFF);
+#else
             pMaster->Request.Queue[pMaster->Request.Head].Value[i] = (i & 0x1) ? (Value[i - 1]) : (Value[i + 1]);
+#endif
         }
         break;
     default:

@@ -155,8 +155,13 @@ void MBx_Slave_RTU_Parse(_MBX_SLAVE *pSlave)
 
     _MBX_CRC16 crc;
     crc.Val = MBx_utility_crc16((uint8_t *)(pSlave->TxExist.Buffer), pSlave->TxExist.Len); // 计算CRC校验码
-    MBxTxBufferPutc(pSlave, crc.H_L.L8);                                                   // CRC低8位
-    MBxTxBufferPutc(pSlave, crc.H_L.H8);                                                   // CRC高8位
+#ifdef _YOROOTA_16BIT_BYTE
+    MBxTxBufferPutc(pSlave, crc.Val & 0xFF);        // CRC低8位
+    MBxTxBufferPutc(pSlave, (crc.Val >> 8) & 0xFF); // CRC高8位
+#else
+    MBxTxBufferPutc(pSlave, crc.H_L.L8); // CRC低8位
+    MBxTxBufferPutc(pSlave, crc.H_L.H8); // CRC高8位
+#endif
 
     /* 删除已处理消息 */
     MBxRxBufferRemove(pSlave, FrameLen);

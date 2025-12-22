@@ -127,6 +127,19 @@ extern "C"
 #endif /* __packed */
 #endif /* __GNUC__ */
 
+/* DSP 16位字节兼容层 */
+#if defined(__TI_COMPILER_VERSION__) && defined(__TMS320C2000__)
+#define _YOROOTA_16BIT_BYTE
+#endif
+
+#ifdef _YOROOTA_16BIT_BYTE
+#ifndef _UINT8_T_DECLARED
+#ifndef uint8_t
+typedef __uint16_t uint8_t;
+#endif
+#define _UINT8_T_DECLARED
+#endif
+#endif
 /* Exported types ------------------------------------------------------------*/
 
 /* 定义发送port函数的类型 */
