@@ -129,10 +129,10 @@ extern "C"
 
 /* DSP 16位字节兼容层 */
 #if defined(__TI_COMPILER_VERSION__) && defined(__TMS320C2000__)
-#define _YOROOTA_16BIT_BYTE
+#define _MBX_16BIT_BYTE
 #endif
 
-#ifdef _YOROOTA_16BIT_BYTE
+#ifdef _MBX_16BIT_BYTE
 #ifndef _UINT8_T_DECLARED
 #ifndef uint8_t
 typedef __uint16_t uint8_t;
