@@ -67,19 +67,23 @@ extern "C"
 #define MBX_EXCEPTION_SENDERR (129U) /*!< 129 0x81错误码, 发送失败错误. */
 
 /* 寄存器映射的数据类型 */
-#define MBX_REG_TYPE_U8           (1U)   /*!< 类型定义, 该地址映射的数据是8位的. */
-#define MBX_REG_TYPE_U16          (2U)   /*!< 类型定义, 该地址映射的数据是16位的. */
-#define MBX_REG_TYPE_U32_L        (3U)   /*!< 类型定义, 该地址映射的数据是32位的，映射低16位. */
-#define MBX_REG_TYPE_U32_H        (4U)   /*!< 类型定义, 该地址映射的数据是32位的，映射高16位. */
-#define MBX_REG_TYPE_U64_0        (5U)   /*!< 类型定义, 该地址映射的数据是64位的，映射最低的16位. */
-#define MBX_REG_TYPE_U64_1        (6U)   /*!< 类型定义, 该地址映射的数据是64位的，映射第1个16位. */
-#define MBX_REG_TYPE_U64_2        (7U)   /*!< 类型定义, 该地址映射的数据是64位的，映射第2个16位. */
-#define MBX_REG_TYPE_U64_3        (8U)   /*!< 类型定义, 该地址映射的数据是64位的，映射第3个16位. */
-#define MBX_REG_TYPE_BIT_ONLY     (15U)  /*!< 类型定义, 该地址映射的数据是独立的bit位 */
-#define MBX_REG_TYPE_BIT_U8_BASE  (16U)  /*!< 类型定义, 该地址映射的数据是8位的，映射最低第0个bit.若映射第1个bit，则使用类型 MBX_REG_TYPE_BIT_U8_BASE+1 */
-#define MBX_REG_TYPE_BIT_U16_BASE (32U)  /*!< 类型定义, 该地址映射的数据是16位的，映射最低第0个bit.若映射第1个bit，则使用类型 MBX_REG_TYPE_BIT_U16_BASE+1 */
-#define MBX_REG_TYPE_BIT_U32_BASE (64U)  /*!< 类型定义, 该地址映射的数据是32位的，映射最低第0个bit.若映射第1个bit，则使用类型 MBX_REG_TYPE_BIT_U32_BASE+1 */
-#define MBX_REG_TYPE_BIT_U64_BASE (128U) /*!< 类型定义, 该地址映射的数据是64位的，映射最低第0个bit.若映射第1个bit，则使用类型 MBX_REG_TYPE_BIT_U64_BASE+1 */
+#define MBX_REG_TYPE_U8           (1U)                 /*!< 类型定义, 该地址映射的数据是8位的. */
+#define MBX_REG_TYPE_U16          (2U)                 /*!< 类型定义, 该地址映射的数据是16位的. */
+#define MBX_REG_TYPE_U32_L        (3U)                 /*!< 类型定义, 该地址映射的数据是32位的，映射低16位. */
+#define MBX_REG_TYPE_U32_H        (4U)                 /*!< 类型定义, 该地址映射的数据是32位的，映射高16位. */
+#define MBX_REG_TYPE_U64_0        (5U)                 /*!< 类型定义, 该地址映射的数据是64位的，映射最低的16位. */
+#define MBX_REG_TYPE_U64_1        (6U)                 /*!< 类型定义, 该地址映射的数据是64位的，映射第1个16位. */
+#define MBX_REG_TYPE_U64_2        (7U)                 /*!< 类型定义, 该地址映射的数据是64位的，映射第2个16位. */
+#define MBX_REG_TYPE_U64_3        (8U)                 /*!< 类型定义, 该地址映射的数据是64位的，映射第3个16位. */
+#define MBX_REG_TYPE_BIT_ONLY     (15U)                /*!< 类型定义, 该地址映射的数据是独立的bit位 */
+#define MBX_REG_TYPE_BIT_U8_BASE  (16U)                /*!< 类型定义, 该地址映射的数据是8位的，映射最低第0个bit.若映射第1个bit，则使用类型 MBX_REG_TYPE_BIT_U8_BASE+1 */
+#define MBX_REG_TYPE_BIT_U16_BASE (32U)                /*!< 类型定义, 该地址映射的数据是16位的，映射最低第0个bit.若映射第1个bit，则使用类型 MBX_REG_TYPE_BIT_U16_BASE+1 */
+#define MBX_REG_TYPE_BIT_U32_BASE (64U)                /*!< 类型定义, 该地址映射的数据是32位的，映射最低第0个bit.若映射第1个bit，则使用类型 MBX_REG_TYPE_BIT_U32_BASE+1 */
+#define MBX_REG_TYPE_BIT_U64_BASE (128U)               /*!< 类型定义, 该地址映射的数据是64位的，映射最低第0个bit.若映射第1个bit，则使用类型 MBX_REG_TYPE_BIT_U64_BASE+1 */
+#define MBX_REG_TYPE_U32_AB       (MBX_REG_TYPE_U32_H) /*<! 类型定义, 该地址映射的数据是32位的，采用ABCD大端序传输和拼接，先高 */
+#define MBX_REG_TYPE_U32_CD       (MBX_REG_TYPE_U32_L) /*<! 类型定义, 该地址映射的数据是32位的，采用ABCD大端序传输和拼接，后低. */
+#define MBX_REG_TYPE_U32_DC       (192U)               /*<! 类型定义, 该地址映射的数据是32位的，采用DCBA小端序传输和拼接，先低. */
+#define MBX_REG_TYPE_U32_BA       (193U)               /*<! 类型定义, 该地址映射的数据是32位的，采用DCBA小端序传输和拼接，后高. */
 
 /* modbusx状态机常数 */
 #define MBX_STATE_IDLE  (0U) /*!< 0 0x00状态定义, 空闲状态. */
