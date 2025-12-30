@@ -66,6 +66,7 @@ static uint32_t u16WriteTest2(void *value);
 static uint32_t u32WriteTest1(void *value);
 static uint32_t u32WriteTest2(void *value);
 static uint32_t u32WriteTest3(void *value);
+static uint32_t u32WriteTest4(void *value);
 static uint32_t fWriteTest1(void *value);
 
 /* 测试数据弄一些值的操作 */
@@ -157,22 +158,26 @@ void MyRTUSlaveTest(void)
     地址表必须手动以升序排列，由于C11标准不支持动态宏，暂时无法在编译阶段自动检查 */
 static const _MBX_MAP_LIST_ENTRY MapList[] = {
   /*  寄存器地址        映射到的内部内存              内部内存数据属性            写时回调(NULL为只读寄存器)  */
-    {.Addr = 0x0000, .Memory = &u8MapMem[0],  .Type = MBX_REG_TYPE_U8,    .Handle = u8WriteTest1 },
-    {.Addr = 0x0001, .Memory = &u8MapMem[1],  .Type = MBX_REG_TYPE_U8,    .Handle = u8WriteTest2 },
-    {.Addr = 0x0002, .Memory = &u8MapMem[2],  .Type = MBX_REG_TYPE_U8,    .Handle = NULL         },
-    {.Addr = 0x0003, .Memory = &u8MapMem[3],  .Type = MBX_REG_TYPE_U8,    .Handle = NULL         },
-    {.Addr = 0x0100, .Memory = &u16MapMem[0], .Type = MBX_REG_TYPE_U16,   .Handle = u16WriteTest1},
-    {.Addr = 0x0101, .Memory = &u16MapMem[1], .Type = MBX_REG_TYPE_U16,   .Handle = u16WriteTest2},
-    {.Addr = 0x0200, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_H, .Handle = u32WriteTest1}, /* 多寄存器组合映射同一个内存变量，写入处理函数应该是同一个(硬性要求) 模拟大端内存(ABCD排列 基于传输协议，这是最合适的) */
-    {.Addr = 0x0201, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_L, .Handle = u32WriteTest1},
-    {.Addr = 0x0202, .Memory = &u36MapMem[1], .Type = MBX_REG_TYPE_U32_L, .Handle = u32WriteTest2}, /* 多寄存器拼接模仿小端16位字节交换映射 CDAB排列 因为传输协议要求每个寄存器高8位在前，不允许完全模拟小端(完全模拟将导致单寄存器操作混乱)*/
-    {.Addr = 0x0203, .Memory = &u36MapMem[1], .Type = MBX_REG_TYPE_U32_H, .Handle = u32WriteTest2},
-    {.Addr = 0x0204, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_H, .Handle = u32WriteTest1}, /* 多寄存器乱序插叙 瞎几把自由映射*/
-    {.Addr = 0x0205, .Memory = &u36MapMem[2], .Type = MBX_REG_TYPE_U32_L, .Handle = u32WriteTest3},
-    {.Addr = 0x0206, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_L, .Handle = u32WriteTest1},
-    {.Addr = 0x0207, .Memory = &u36MapMem[2], .Type = MBX_REG_TYPE_U32_H, .Handle = u32WriteTest3},
-    {.Addr = 0x0300, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U32_H, .Handle = fWriteTest1  }, /* 浮点映射测试 (模拟大端)*/
-    {.Addr = 0x0301, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U32_L, .Handle = fWriteTest1  },
+    {.Addr = 0x0000, .Memory = &u8MapMem[0],  .Type = MBX_REG_TYPE_U8,     .Handle = u8WriteTest1 },
+    {.Addr = 0x0001, .Memory = &u8MapMem[1],  .Type = MBX_REG_TYPE_U8,     .Handle = u8WriteTest2 },
+    {.Addr = 0x0002, .Memory = &u8MapMem[2],  .Type = MBX_REG_TYPE_U8,     .Handle = NULL         },
+    {.Addr = 0x0003, .Memory = &u8MapMem[3],  .Type = MBX_REG_TYPE_U8,     .Handle = NULL         },
+    {.Addr = 0x0100, .Memory = &u16MapMem[0], .Type = MBX_REG_TYPE_U16,    .Handle = u16WriteTest1},
+    {.Addr = 0x0101, .Memory = &u16MapMem[1], .Type = MBX_REG_TYPE_U16,    .Handle = u16WriteTest2},
+    {.Addr = 0x0200, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_H,  .Handle = u32WriteTest1}, /* 多寄存器组合映射同一个内存变量，写入处理函数应该是同一个(硬性要求) 模拟大端内存(ABCD排列 基于传输协议，这是最合适的) */
+    {.Addr = 0x0201, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_L,  .Handle = u32WriteTest1},
+    {.Addr = 0x0202, .Memory = &u36MapMem[1], .Type = MBX_REG_TYPE_U32_L,  .Handle = u32WriteTest2}, /* 多寄存器拼接模仿小端16位字节交换映射 CDAB排列 因为传输协议要求每个寄存器高8位在前，不允许完全模拟小端(完全模拟将导致单寄存器操作混乱)*/
+    {.Addr = 0x0203, .Memory = &u36MapMem[1], .Type = MBX_REG_TYPE_U32_H,  .Handle = u32WriteTest2},
+    {.Addr = 0x0204, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_H,  .Handle = u32WriteTest1}, /* 多寄存器乱序插叙 瞎几把自由映射 写时能够正确处理*/
+    {.Addr = 0x0205, .Memory = &u36MapMem[2], .Type = MBX_REG_TYPE_U32_L,  .Handle = u32WriteTest3},
+    {.Addr = 0x0206, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_L,  .Handle = u32WriteTest1},
+    {.Addr = 0x0207, .Memory = &u36MapMem[2], .Type = MBX_REG_TYPE_U32_H,  .Handle = u32WriteTest3},
+    {.Addr = 0x0208, .Memory = &u36MapMem[3], .Type = MBX_REG_TYPE_U32_DC, .Handle = u32WriteTest4}, /* 多寄存器拼接模仿小端映射 DCBA排列*/
+    {.Addr = 0x0209, .Memory = &u36MapMem[3], .Type = MBX_REG_TYPE_U32_BA, .Handle = u32WriteTest4},
+    {.Addr = 0x020A, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_AB, .Handle = u32WriteTest1}, /* 多寄存器拼接模仿大端映射 ABCD排列 与常用的H_L用法相同*/
+    {.Addr = 0x020B, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_CD, .Handle = u32WriteTest1},
+    {.Addr = 0x0300, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U32_H,  .Handle = fWriteTest1  }, /* 浮点映射测试 (模拟大端)*/
+    {.Addr = 0x0301, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U32_L,  .Handle = fWriteTest1  },
 
     MBX_MAP_LIST_END
 };
@@ -265,6 +270,18 @@ static uint32_t u32WriteTest3(void *value)
 {
     /* 可添加上下限检查及其他处理 */
     u36MapMem[2] = (*(uint32_t *)value);
+    return MBX_API_RETURN_DEFAULT;
+}
+
+/**
+ * @brief uint32_t 映射的写时处理，展示了如何无条件写值
+ * @param value 库内传参，对于 uint32_t 的映射将传入(uint32_t *)类型
+ * @return 标准返回，请依照 MBx_api.h 的 “API返回集” 部分编写
+*/
+static uint32_t u32WriteTest4(void *value)
+{
+    /* 可添加上下限检查及其他处理 */
+    u36MapMem[3] = (*(uint32_t *)value);
     return MBX_API_RETURN_DEFAULT;
 }
 

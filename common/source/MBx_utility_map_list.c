@@ -540,6 +540,14 @@ static uint16_t MBX_utility_map_entry_data_get(const _MBX_MAP_LIST_ENTRY *entry)
 #else
         return (*(uint16_t *)(entry->Memory + 2));
 #endif
+    case MBX_REG_TYPE_U32_DC:
+        return (((*(uint16_t *)(entry->Memory)) & 0xFF) << 8) | (((*(uint16_t *)(entry->Memory)) & 0xFF00) >> 8);
+    case MBX_REG_TYPE_U32_BA:
+#ifdef _MBX_16BIT_BYTE
+        return (((*(uint16_t *)(entry->Memory + 1)) & 0xFF) << 8) | (((*(uint16_t *)(entry->Memory + 1)) & 0xFF00) >> 8);
+#else
+        return (((*(uint16_t *)(entry->Memory + 2)) & 0xFF) << 8) | (((*(uint16_t *)(entry->Memory + 2)) & 0xFF00) >> 8);
+#endif
     case MBX_REG_TYPE_U64_0:
         return (*(uint64_t *)(entry->Memory));
     case MBX_REG_TYPE_U64_1:
@@ -654,7 +662,9 @@ static uint32_t MBX_utility_map_entry_data_set(const _MBX_MAP_LIST_ENTRY *entry,
             co->PuzzlesComplete.all = 0xFE;
             break;
         case MBX_REG_TYPE_U32_L:
-        case MBX_REG_TYPE_U32_H: // 需2个16位碎片
+        case MBX_REG_TYPE_U32_H:
+        case MBX_REG_TYPE_U32_DC:
+        case MBX_REG_TYPE_U32_BA: // 需2个16位碎片
             co->PuzzlesComplete.all = 0xFC;
             break;
         case MBX_REG_TYPE_U64_0:
@@ -712,6 +722,14 @@ static uint32_t MBX_utility_map_entry_data_set(const _MBX_MAP_LIST_ENTRY *entry,
         break;
     case MBX_REG_TYPE_U32_H:
         co->Puzzles[1]                   = value;
+        co->PuzzlesComplete.bit.PuzzleL1 = 1;
+        break;
+    case MBX_REG_TYPE_U32_DC:
+        co->Puzzles[0]                   = (value & 0xFF00) >> 8 | (value & 0x00FF) << 8;
+        co->PuzzlesComplete.bit.PuzzleL0 = 1;
+        break;
+    case MBX_REG_TYPE_U32_BA:
+        co->Puzzles[1]                   = (value & 0xFF00) >> 8 | (value & 0x00FF) << 8;
         co->PuzzlesComplete.bit.PuzzleL1 = 1;
         break;
     case MBX_REG_TYPE_U64_0:
