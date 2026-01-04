@@ -894,14 +894,18 @@ static uint32_t MBX_utility_map_entry_data_set_cast(const _MBX_MAP_LIST_ENTRY *e
 #ifdef _MBX_16BIT_BYTE
         *(uint16_t *)(entry->Memory + 1) = value;
 #else
-        *(uint16_t *)(entry->Memory + 2) = value;
+        *(uint16_t *)(entry->Memory + 2)            = value;
 #endif
         break;
     case MBX_REG_TYPE_U32_DC:
         *(uint16_t *)entry->Memory = ((value >> 8) & 0xFF) | ((value & 0xFF) << 8);
         break;
     case MBX_REG_TYPE_U32_BA:
+#ifdef _MBX_16BIT_BYTE
+        *(uint16_t *)((uint8_t *)entry->Memory + 1) = ((value >> 8) & 0xFF) | ((value & 0xFF) << 8);
+#else
         *(uint16_t *)((uint8_t *)entry->Memory + 2) = ((value >> 8) & 0xFF) | ((value & 0xFF) << 8);
+#endif
         break;
     case MBX_REG_TYPE_U64_0:
         *(uint16_t *)(entry->Memory) = value;
@@ -910,21 +914,21 @@ static uint32_t MBX_utility_map_entry_data_set_cast(const _MBX_MAP_LIST_ENTRY *e
 #ifdef _MBX_16BIT_BYTE
         *(uint16_t *)(entry->Memory + 1) = value;
 #else
-        *(uint16_t *)(entry->Memory + 2) = value;
+        *(uint16_t *)(entry->Memory + 2)            = value;
 #endif
         break;
     case MBX_REG_TYPE_U64_2:
 #ifdef _MBX_16BIT_BYTE
         *(uint16_t *)(entry->Memory + 2) = value;
 #else
-        *(uint16_t *)(entry->Memory + 4) = value;
+        *(uint16_t *)(entry->Memory + 4)            = value;
 #endif
         break;
     case MBX_REG_TYPE_U64_3:
 #ifdef _MBX_16BIT_BYTE
         *(uint16_t *)(entry->Memory + 3) = value;
 #else
-        *(uint16_t *)(entry->Memory + 6) = value;
+        *(uint16_t *)(entry->Memory + 6)            = value;
 #endif
         break;
     case MBX_REG_TYPE_BIT_ONLY:
