@@ -187,13 +187,13 @@ static void TestMemUpdate(uint32_t Cycle)
     i += Cycle;
     if((i % 100) == 0) // 分频到500ms
     {
-        // MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0, 4);           // 请求读取1号从机的0地址的4个寄存器
-        // MBx_Master_Read_Reg_Request(&MBxMaster, 2, 0, 4);           // 请求读取2号从机的0地址的4个寄存器
-        // MBx_Master_Read_Input_Reg_Request(&MBxMaster, 1, 0x100, 2); // 请求读取1号从机的0x100地址的2个寄存器 (作为输入寄存器只读)
-        // MBx_Master_Read_Input_Reg_Request(&MBxMaster, 2, 0x100, 2); // 请求读取2号从机的0x100地址的2个寄存器 (作为输入寄存器只读)
-        // MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x200, 2);       // 请求读取1号从机的0x200地址的2个寄存器 拼凑为32位数据
-        // MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x300, 2);       // 请求读取1号从机的0x300地址的2个寄存器 拼凑为32位浮点
-        MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x302, 2); // 请求读取1号从机的0x302地址的2个寄存器 拼凑为32位浮点
+        MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0, 4);           // 请求读取1号从机的0地址的4个寄存器
+        MBx_Master_Read_Reg_Request(&MBxMaster, 2, 0, 4);           // 请求读取2号从机的0地址的4个寄存器
+        MBx_Master_Read_Input_Reg_Request(&MBxMaster, 1, 0x100, 2); // 请求读取1号从机的0x100地址的2个寄存器 (作为输入寄存器只读)
+        MBx_Master_Read_Input_Reg_Request(&MBxMaster, 2, 0x100, 2); // 请求读取2号从机的0x100地址的2个寄存器 (作为输入寄存器只读)
+        MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x200, 2);       // 请求读取1号从机的0x200地址的2个寄存器 拼凑为32位数据
+        MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x300, 2);       // 请求读取1号从机的0x300地址的2个寄存器 拼凑为32位浮点
+        MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x302, 2);       // 请求读取1号从机的0x302地址的2个寄存器 拼凑为32位浮点
     }
     if(i >= 2000) // 分频到两秒
     {
