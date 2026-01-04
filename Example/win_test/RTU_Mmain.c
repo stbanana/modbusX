@@ -68,6 +68,7 @@ static uint32_t u16WriteTest1(void *value);
 static uint32_t u16WriteTest2(void *value);
 static uint32_t u32WriteTest1(void *value);
 static uint32_t fWriteTest1(void *value);
+static uint32_t fWriteTest2(void *value);
 
 /* 示例对指令错误的处理 */
 static void TestErrorConsume(void);
@@ -177,6 +178,7 @@ void MyRTUMasterTest(void)
 static void TestMemUpdate(uint32_t Cycle)
 {
     static uint16_t u16buffer[10]; // 测试数组
+    static uint8_t  u8buffer[10];  // 测试数组
     static uint16_t u16test   = 0;
     static uint32_t u32test   = 0;
     static float    ftest     = 0.0;
@@ -185,29 +187,33 @@ static void TestMemUpdate(uint32_t Cycle)
     i += Cycle;
     if((i % 100) == 0) // 分频到500ms
     {
-        MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0, 4);           // 请求读取1号从机的0地址的4个寄存器
-        MBx_Master_Read_Reg_Request(&MBxMaster, 2, 0, 4);           // 请求读取2号从机的0地址的4个寄存器
-        MBx_Master_Read_Input_Reg_Request(&MBxMaster, 1, 0x100, 2); // 请求读取1号从机的0x100地址的2个寄存器 (作为输入寄存器只读)
-        MBx_Master_Read_Input_Reg_Request(&MBxMaster, 2, 0x100, 2); // 请求读取2号从机的0x100地址的2个寄存器 (作为输入寄存器只读)
-        MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x200, 2);       // 请求读取1号从机的0x200地址的2个寄存器 拼凑为32位数据
-        MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x300, 2);       // 请求读取1号从机的0x300地址的2个寄存器 拼凑为32位浮点
+        // MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0, 4);           // 请求读取1号从机的0地址的4个寄存器
+        // MBx_Master_Read_Reg_Request(&MBxMaster, 2, 0, 4);           // 请求读取2号从机的0地址的4个寄存器
+        // MBx_Master_Read_Input_Reg_Request(&MBxMaster, 1, 0x100, 2); // 请求读取1号从机的0x100地址的2个寄存器 (作为输入寄存器只读)
+        // MBx_Master_Read_Input_Reg_Request(&MBxMaster, 2, 0x100, 2); // 请求读取2号从机的0x100地址的2个寄存器 (作为输入寄存器只读)
+        // MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x200, 2);       // 请求读取1号从机的0x200地址的2个寄存器 拼凑为32位数据
+        // MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x300, 2);       // 请求读取1号从机的0x300地址的2个寄存器 拼凑为32位浮点
+        MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x302, 2); // 请求读取1号从机的0x302地址的2个寄存器 拼凑为32位浮点
     }
     if(i >= 2000) // 分频到两秒
     {
-        u16test++;
-        u32test++;
+        // u16test++;
+        // u32test++;
         ftest += 1.1;
         u16buffer[0] = u16test;
         u16buffer[1] = u16test + 1;
         u16buffer[2] = u16test + 2;
         u16buffer[3] = u16test + 3;
         MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0, 4, (uint8_t *)&u16buffer[0], 8); // 请求写入1号从机的0地址的4个寄存器，写成功时自动同步进映射内存区
+
         u16buffer[0] = u16test;
         u16buffer[1] = u16test;
         MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0x100, 2, (uint8_t *)&u16buffer[0], 4); // 请求写入1号从机的0x100地址的2个寄存器 由于定义为输入寄存器，应当会产生失败写入
+
         u16buffer[0] = (u32test >> 16) & 0xFFFF;
         u16buffer[1] = u32test & 0xFFFF;
         MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0x200, 2, (uint8_t *)&u16buffer[0], 4); // 请求写入1号从机的0x200地址的2个寄存器 无符号32位拼凑
+
         /* 取真实内存值的原版写法，但会带来警告 */
         // u16buffer[0] = (*(uint32_t *)(&ftest) >> 16) & 0xFFFF;
         // u16buffer[1] = (*(uint32_t *)(&ftest)) & 0xFFFF;
@@ -216,6 +222,13 @@ static void TestMemUpdate(uint32_t Cycle)
         u16buffer[0] = (ftest_cpy >> 16) & 0xFFFF;
         u16buffer[1] = ftest_cpy & 0xFFFF;
         MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0x300, 2, (uint8_t *)&u16buffer[0], 4); // 请求写入1号从机的0x300地址的2个寄存器 浮点拼凑
+
+        memcpy(&ftest_cpy, &ftest, sizeof(float));
+        u8buffer[0] = (ftest_cpy >> 8) & 0xFF;
+        u8buffer[1] = ftest_cpy & 0xFF;
+        u8buffer[2] = (ftest_cpy >> 24) & 0xFF;
+        u8buffer[3] = (ftest_cpy >> 16) & 0xFF;
+        MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0x302, 2, (uint8_t *)&u8buffer[0], 4); // 请求写入1号从机的0x302地址的2个寄存器 浮点拼凑
         i = 0;
     }
 }
@@ -271,16 +284,18 @@ static void TestErrorConsume(void)
     地址表必须手动以升序排列，由于C11标准不支持动态宏，暂时无法在编译阶段自动检查 */
 static const _MBX_MAP_LIST_ENTRY MapList[] = {
   /*  寄存器地址        映射到的内部内存              内部内存数据属性            写时异常立即回调(NULL为忽略写异常)  */
-    {.Addr = 0x0000, .Memory = &u8MapMem[10],  .Type = MBX_REG_TYPE_U8,    .Handle = u8WriteTest1 },
-    {.Addr = 0x0001, .Memory = &u8MapMem[11],  .Type = MBX_REG_TYPE_U8,    .Handle = u8WriteTest2 },
-    {.Addr = 0x0002, .Memory = &u8MapMem[12],  .Type = MBX_REG_TYPE_U8,    .Handle = NULL         },
-    {.Addr = 0x0003, .Memory = &u8MapMem[13],  .Type = MBX_REG_TYPE_U8,    .Handle = NULL         },
-    {.Addr = 0x0100, .Memory = &u16MapMem[10], .Type = MBX_REG_TYPE_U16,   .Handle = u16WriteTest1},
-    {.Addr = 0x0101, .Memory = &u16MapMem[11], .Type = MBX_REG_TYPE_U16,   .Handle = u16WriteTest2},
-    {.Addr = 0x0200, .Memory = &u36MapMem[10], .Type = MBX_REG_TYPE_U32_H, .Handle = u32WriteTest1}, /* 多寄存器组合映射同一个内存变量，写入异常回调应该是同一个(硬性要求) 模拟大端内存(ABCD排列 基于传输协议，这是最合适的) */
-    {.Addr = 0x0201, .Memory = &u36MapMem[10], .Type = MBX_REG_TYPE_U32_L, .Handle = u32WriteTest1},
-    {.Addr = 0x0300, .Memory = &fMapMem[10],   .Type = MBX_REG_TYPE_U32_H, .Handle = fWriteTest1  }, /* 浮点映射测试 模拟大端内存(ABCD排列 基于传输协议，这是最合适的)*/
-    {.Addr = 0x0301, .Memory = &fMapMem[10],   .Type = MBX_REG_TYPE_U32_L, .Handle = fWriteTest1  },
+    {.Addr = 0x0000, .Memory = &u8MapMem[10],  .Type = MBX_REG_TYPE_U8,     .Handle = u8WriteTest1 },
+    {.Addr = 0x0001, .Memory = &u8MapMem[11],  .Type = MBX_REG_TYPE_U8,     .Handle = u8WriteTest2 },
+    {.Addr = 0x0002, .Memory = &u8MapMem[12],  .Type = MBX_REG_TYPE_U8,     .Handle = NULL         },
+    {.Addr = 0x0003, .Memory = &u8MapMem[13],  .Type = MBX_REG_TYPE_U8,     .Handle = NULL         },
+    {.Addr = 0x0100, .Memory = &u16MapMem[10], .Type = MBX_REG_TYPE_U16,    .Handle = u16WriteTest1},
+    {.Addr = 0x0101, .Memory = &u16MapMem[11], .Type = MBX_REG_TYPE_U16,    .Handle = u16WriteTest2},
+    {.Addr = 0x0200, .Memory = &u36MapMem[10], .Type = MBX_REG_TYPE_U32_H,  .Handle = u32WriteTest1}, /* 多寄存器组合映射同一个内存变量，写入异常回调应该是同一个(硬性要求) 模拟大端内存(ABCD排列 基于传输协议，这是最合适的) */
+    {.Addr = 0x0201, .Memory = &u36MapMem[10], .Type = MBX_REG_TYPE_U32_L,  .Handle = u32WriteTest1},
+    {.Addr = 0x0300, .Memory = &fMapMem[10],   .Type = MBX_REG_TYPE_U32_H,  .Handle = fWriteTest1  }, /* 浮点映射测试 模拟大端内存(ABCD排列 基于传输协议，这是最合适的)*/
+    {.Addr = 0x0301, .Memory = &fMapMem[10],   .Type = MBX_REG_TYPE_U32_L,  .Handle = fWriteTest1  },
+    {.Addr = 0x0302, .Memory = &fMapMem[11],   .Type = MBX_REG_TYPE_U32_DC, .Handle = fWriteTest2  }, /* 浮点映射测试 模拟小端内存(DCBA排列)*/
+    {.Addr = 0x0303, .Memory = &fMapMem[11],   .Type = MBX_REG_TYPE_U32_BA, .Handle = fWriteTest2  },
 
     MBX_MAP_LIST_END
 };
@@ -357,6 +372,19 @@ static uint32_t u32WriteTest1(void *value)
  * @return 标准返回，请依照 MBx_api.h 的 “API返回集” 部分编写
 */
 static uint32_t fWriteTest1(void *value)
+{
+    MBX_UNUSED_PARAM(value)
+    // (*(float *)value);
+    /* 期望写入ValueGet而没有成功写入 */
+    return MBX_API_RETURN_DEFAULT;
+}
+
+/**
+ * @brief float 映射的写失败时处理
+ * @param value 库内传参，对于 uint32_t 的映射将传入(uint32_t *)类型
+ * @return 标准返回，请依照 MBx_api.h 的 “API返回集” 部分编写
+*/
+static uint32_t fWriteTest2(void *value)
 {
     MBX_UNUSED_PARAM(value)
     // (*(float *)value);
