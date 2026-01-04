@@ -887,15 +887,21 @@ static uint32_t MBX_utility_map_entry_data_set_cast(const _MBX_MAP_LIST_ENTRY *e
     case MBX_REG_TYPE_U16:
         *(uint16_t *)(entry->Memory) = value;
         break;
-    case MBX_REG_TYPE_U32_L:
+    case MBX_REG_TYPE_U32_L: //MBX_REG_TYPE_U32_CD
         *(uint16_t *)(entry->Memory) = value;
         break;
-    case MBX_REG_TYPE_U32_H:
+    case MBX_REG_TYPE_U32_H: //MBX_REG_TYPE_U32_AB
 #ifdef _MBX_16BIT_BYTE
         *(uint16_t *)(entry->Memory + 1) = value;
 #else
         *(uint16_t *)(entry->Memory + 2) = value;
 #endif
+        break;
+    case MBX_REG_TYPE_U32_DC:
+        *(uint16_t *)entry->Memory = ((value >> 8) & 0xFF) | ((value & 0xFF) << 8);
+        break;
+    case MBX_REG_TYPE_U32_BA:
+        *(uint16_t *)((uint8_t *)entry->Memory + 2) = ((value >> 8) & 0xFF) | ((value & 0xFF) << 8);
         break;
     case MBX_REG_TYPE_U64_0:
         *(uint16_t *)(entry->Memory) = value;
