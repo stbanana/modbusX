@@ -118,6 +118,15 @@ extern "C"
 #ifndef __packed
 #define __packed __attribute__((packed))
 #endif
+
+#elif defined(__CC_ARM) /* ARM Compiler V5 */
+#ifndef __weak
+#define __weak __attribute__((weak))
+#endif
+#ifndef __packed
+#define __packed __packed
+#endif
+
 #elif defined(__GNUC__) && !defined(__CC_ARM) /* GNU Compiler */
 #ifndef __weak
 #define __weak __attribute__((weak))
@@ -125,7 +134,34 @@ extern "C"
 #ifndef __packed
 #define __packed __attribute__((__packed__))
 #endif /* __packed */
-#endif /* __GNUC__ */
+
+#elif defined(__TI_COMPILER_VERSION) /* TI Old version compiler, not support */
+#ifndef __weak
+#define __weak
+#endif
+#ifndef __packed
+#define __packed
+#endif
+
+#elif defined(__TI_COMPILER_VERSION__) /* TI Compiler (CCS: tiarmclang / armcl) */
+#ifndef __weak
+#define __weak __attribute__((weak))
+#endif
+#ifndef __packed
+#define __packed __attribute__((packed))
+#endif
+
+#elif defined(__ICCARM__) /* IAR */
+#ifndef __weak
+#define __weak __weak
+#endif
+#ifndef __packed
+#define __packed __packed
+#endif
+
+#endif /* Compiler */
+
+
 
 /* DSP 16位字节兼容层 */
 #if defined(__TI_COMPILER_VERSION__) && defined(__TMS320C2000__)
@@ -135,7 +171,7 @@ extern "C"
 #ifdef _MBX_16BIT_BYTE
 #ifndef _UINT8_T_DECLARED
 #ifndef uint8_t
-typedef __uint16_t uint8_t;
+#include "inc/hw_types.h"
 #endif
 #define _UINT8_T_DECLARED
 #endif
