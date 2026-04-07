@@ -1,4 +1,5 @@
 <p align="center">
+ <img src="https://cloudflare-imgbed-6qt.pages.dev/file/1775542628028_kawaiiLogo_1k.png" alt="modbusX logo"  />
  <h1 align="center">modbusX</h1>
  <p align="center">一个物理驱动层解耦的 modbus 协议解析栈</p>
 </p>
@@ -79,11 +80,11 @@
       <td align="center">2025.11.17</td>
       <td>yono 哥喝可乐</td>
     </tr>
-
   </tbody>
 </table>
 
 </details>
+
 
 ## ✨特性
 
