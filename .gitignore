@@ -53,3 +53,5 @@ dkms.conf
 
 # 常见build目录
 /build
+/build_d
+

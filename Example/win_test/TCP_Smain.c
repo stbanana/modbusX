@@ -43,6 +43,24 @@ uint64_t u64MapMem[64];
 float    fMapMem[64]; // 32位数据模型
 double   dMapMem[64]; // 64位数据模型
 
+struct
+{
+    uint16_t bit0:1;  // 最低
+    uint16_t bit1:1;  // 低1
+    uint16_t bit2:1;  // 低2
+    uint16_t bit3:1;  // 低3
+    uint16_t def :12; // 填位
+} Men_DISC_INPUT;     // 离散输入寄存器模型
+
+struct
+{
+    uint16_t bit0:1;  // 最低
+    uint16_t bit1:1;  // 低1
+    uint16_t bit2:1;  // 低2
+    uint16_t bit3:1;  // 低3
+    uint16_t def :12; // 填位
+} Men_COIL;           // 线圈模型
+
 /* 申请从机对象发送及接收buffer */
 uint8_t                          SRxBuffer[84];
 uint8_t                          STxBuffer[84];
@@ -60,6 +78,10 @@ static uint32_t u32WriteTest1(void *value);
 static uint32_t u32WriteTest2(void *value);
 static uint32_t u32WriteTest3(void *value);
 static uint32_t fWriteTest1(void *value);
+static uint32_t coilWrite0(void *value);
+static uint32_t coilWrite1(void *value);
+static uint32_t coilWrite2(void *value);
+static uint32_t coilWrite3(void *value);
 
 /* 测试数据弄一些值的操作 */
 static void TestMemInit(void);
@@ -176,6 +198,18 @@ static const _MBX_MAP_LIST_ENTRY MapList[] = {
     {.Addr = 0x0300, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U32_H, .Handle = fWriteTest1  }, /* 浮点映射测试 (模拟大端)*/
     {.Addr = 0x0301, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U32_L, .Handle = fWriteTest1  },
 
+    /* 线圈映射 0x1000段 映射到 Men_COIL 位域的 bit0-bit3 */
+    {.Addr = 0x1000, .Memory = &Men_COIL, .Type = MBX_REG_TYPE_BIT_U16_BASE + 0, .Handle = coilWrite0},
+    {.Addr = 0x1001, .Memory = &Men_COIL, .Type = MBX_REG_TYPE_BIT_U16_BASE + 1, .Handle = coilWrite1},
+    {.Addr = 0x1002, .Memory = &Men_COIL, .Type = MBX_REG_TYPE_BIT_U16_BASE + 2, .Handle = coilWrite2},
+    {.Addr = 0x1003, .Memory = &Men_COIL, .Type = MBX_REG_TYPE_BIT_U16_BASE + 3, .Handle = coilWrite3},
+
+    /* 离散输入映射 0x2000段 映射到 Men_DISC_INPUT 位域的 bit0-bit3 */
+    {.Addr = 0x2000, .Memory = &Men_DISC_INPUT, .Type = MBX_REG_TYPE_BIT_U16_BASE + 0, .Handle = NULL},
+    {.Addr = 0x2001, .Memory = &Men_DISC_INPUT, .Type = MBX_REG_TYPE_BIT_U16_BASE + 1, .Handle = NULL},
+    {.Addr = 0x2002, .Memory = &Men_DISC_INPUT, .Type = MBX_REG_TYPE_BIT_U16_BASE + 2, .Handle = NULL},
+    {.Addr = 0x2003, .Memory = &Men_DISC_INPUT, .Type = MBX_REG_TYPE_BIT_U16_BASE + 3, .Handle = NULL},
+
     MBX_MAP_LIST_END
 };
 
@@ -282,6 +316,35 @@ static uint32_t fWriteTest1(void *value)
     return MBX_API_RETURN_DEFAULT;
 }
 
+/**
+ * @brief uint16_t 位域映射的写时处理 线圈bit0-bit3
+ * @param value 库内传参，对于bit类型映射将传入(uint16_t *)类型, 值为0xFFFF(置位)或0x0000(清零)
+ * @return 标准返回，请依照 MBx_api.h 的 “API返回集” 部分编写
+*/
+static uint32_t coilWrite0(void *value)
+{
+    Men_COIL.bit0 = (*(uint16_t *)value) ? 1 : 0;
+    return MBX_API_RETURN_DEFAULT;
+}
+
+static uint32_t coilWrite1(void *value)
+{
+    Men_COIL.bit1 = (*(uint16_t *)value) ? 1 : 0;
+    return MBX_API_RETURN_DEFAULT;
+}
+
+static uint32_t coilWrite2(void *value)
+{
+    Men_COIL.bit2 = (*(uint16_t *)value) ? 1 : 0;
+    return MBX_API_RETURN_DEFAULT;
+}
+
+static uint32_t coilWrite3(void *value)
+{
+    Men_COIL.bit3 = (*(uint16_t *)value) ? 1 : 0;
+    return MBX_API_RETURN_DEFAULT;
+}
+
 /******************测试数据弄一些值的操作******************/
 
 /**
@@ -300,6 +363,16 @@ static void TestMemInit(void)
         fMapMem[i]   = i * 10.0 + (float)i / 10.0;
         dMapMem[i]   = i * 10.0 + (float)i / 100.0;
     }
+
+    /* 初始化线圈与离散输入 */
+    Men_COIL.bit0       = 1;
+    Men_COIL.bit1       = 0;
+    Men_COIL.bit2       = 1;
+    Men_COIL.bit3       = 0;
+    Men_DISC_INPUT.bit0 = 0;
+    Men_DISC_INPUT.bit1 = 1;
+    Men_DISC_INPUT.bit2 = 0;
+    Men_DISC_INPUT.bit3 = 1;
 }
 
 /**
@@ -321,6 +394,16 @@ static void TestMemUpdate(uint32_t Cycle)
             fMapMem[i]   = fMapMem[i] + ((float)1ULL * 10.0 + (float)1ULL / 10.0);
             dMapMem[i]   = dMapMem[i] + ((float)1ULL * 10.0 + (float)1ULL / 100.0);
         }
+
+        /* 翻转线圈与离散输入bit, 便于观察读线圈/离散输入的数据变化 */
+        Men_COIL.bit0       = !Men_COIL.bit0;
+        Men_COIL.bit1       = !Men_COIL.bit1;
+        Men_COIL.bit2       = !Men_COIL.bit2;
+        Men_COIL.bit3       = !Men_COIL.bit3;
+        Men_DISC_INPUT.bit0 = !Men_DISC_INPUT.bit0;
+        Men_DISC_INPUT.bit1 = !Men_DISC_INPUT.bit1;
+        Men_DISC_INPUT.bit2 = !Men_DISC_INPUT.bit2;
+        Men_DISC_INPUT.bit3 = !Men_DISC_INPUT.bit3;
         i = 0;
     }
 }

@@ -41,6 +41,24 @@ uint64_t u64MapMem[64];
 float    fMapMem[64]; // 32位数据模型
 double   dMapMem[64]; // 64位数据模型
 
+struct
+{
+    uint16_t bit0:1;  // 最低
+    uint16_t bit1:1;  // 低1
+    uint16_t bit2:1;  // 低2
+    uint16_t bit3:1;  // 低3
+    uint16_t def :12; // 填位
+} Men_DISC_INPUT;     // 离散输入寄存器模型
+
+struct
+{
+    uint16_t bit0:1;  // 最低
+    uint16_t bit1:1;  // 低1
+    uint16_t bit2:1;  // 低2
+    uint16_t bit3:1;  // 低3
+    uint16_t def :12; // 填位
+} Men_COIL;           // 线圈模型
+
 /* 申请从机对象发送及接收buffer */
 uint8_t SRxBuffer[84];
 uint8_t STxBuffer[84];
@@ -157,6 +175,7 @@ static void TestMemUpdate(uint32_t Cycle)
 {
     static uint16_t u16buffer[10]; // 测试数组
     static uint16_t u16test   = 0;
+    static uint8_t  coilCounter = 0; // 多线圈写入累加计数器 000,001,010,...
     static uint32_t u32test   = 0;
     static float    ftest     = 0.0;
     static uint32_t ftest_cpy = 0;
@@ -168,6 +187,8 @@ static void TestMemUpdate(uint32_t Cycle)
         MBx_Master_Read_Input_Reg_Request(&MBxMaster, 1, 0x100, 2); // 请求读取1号从机的0x100地址的2个寄存器 (作为输入寄存器只读)
         MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x200, 2);       // 请求读取1号从机的0x200地址的2个寄存器 拼凑为32位数据
         MBx_Master_Read_Reg_Request(&MBxMaster, 1, 0x300, 2);       // 请求读取1号从机的0x300地址的2个寄存器 拼凑为32位浮点
+        MBx_Master_Read_Coil_Request(&MBxMaster, 1, 0x1000, 4);       // 请求读取1号从机的0x1000地址的4个线圈
+        MBx_Master_Read_Disc_Input_Request(&MBxMaster, 1, 0x2000, 4); // 请求读取1号从机的0x2000地址的4个离散输入
     }
     if(i >= 2000) // 分频到两秒
     {
@@ -193,6 +214,14 @@ static void TestMemUpdate(uint32_t Cycle)
         u16buffer[0] = (ftest_cpy >> 16) & 0xFFFF;
         u16buffer[1] = ftest_cpy & 0xFFFF;
         MBx_Master_Write_Reg_Mul_Request(&MBxMaster, 1, 0x300, 2, (uint8_t *)&u16buffer[0], 4); // 请求写入1号从机的0x300地址的2个寄存器 浮点拼凑
+
+        MBx_Master_Write_Coil_Request(&MBxMaster, 1, 0x1000, !Men_COIL.bit0); // 单线圈写入: 0x1000 翻转
+
+        /* 多线圈写入: 0x1001~0x1003 以 000,001,010,... 累加
+           线圈数据为bit打包字节流, 顺序由协议定义, 直接传入即可 */
+        coilCounter++;
+        coilCounter = coilCounter & 0x07; // 有效字节: bit0=0x1001, bit1=0x1002, bit2=0x1003
+        MBx_Master_Write_Coil_Mul_Request(&MBxMaster, 1, 0x1001, 3, &coilCounter, 1);
         i = 0;
     }
 }
@@ -258,6 +287,18 @@ static const _MBX_MAP_LIST_ENTRY MapList[] = {
     {.Addr = 0x0201, .Memory = &u36MapMem[10], .Type = MBX_REG_TYPE_U32_L, .Handle = u32WriteTest1},
     {.Addr = 0x0300, .Memory = &fMapMem[10],   .Type = MBX_REG_TYPE_U32_H, .Handle = fWriteTest1  }, /* 浮点映射测试 模拟大端内存(ABCD排列 基于传输协议，这是最合适的)*/
     {.Addr = 0x0301, .Memory = &fMapMem[10],   .Type = MBX_REG_TYPE_U32_L, .Handle = fWriteTest1  },
+
+    /* 线圈映射 0x1000段 映射到 Men_COIL 位域的 bit0-bit3 */
+    {.Addr = 0x1000, .Memory = &Men_COIL, .Type = MBX_REG_TYPE_BIT_U16_BASE + 0, .Handle = NULL},
+    {.Addr = 0x1001, .Memory = &Men_COIL, .Type = MBX_REG_TYPE_BIT_U16_BASE + 1, .Handle = NULL},
+    {.Addr = 0x1002, .Memory = &Men_COIL, .Type = MBX_REG_TYPE_BIT_U16_BASE + 2, .Handle = NULL},
+    {.Addr = 0x1003, .Memory = &Men_COIL, .Type = MBX_REG_TYPE_BIT_U16_BASE + 3, .Handle = NULL},
+
+    /* 离散输入映射 0x2000段 映射到 Men_DISC_INPUT 位域的 bit0-bit3 */
+    {.Addr = 0x2000, .Memory = &Men_DISC_INPUT, .Type = MBX_REG_TYPE_BIT_U16_BASE + 0, .Handle = NULL},
+    {.Addr = 0x2001, .Memory = &Men_DISC_INPUT, .Type = MBX_REG_TYPE_BIT_U16_BASE + 1, .Handle = NULL},
+    {.Addr = 0x2002, .Memory = &Men_DISC_INPUT, .Type = MBX_REG_TYPE_BIT_U16_BASE + 2, .Handle = NULL},
+    {.Addr = 0x2003, .Memory = &Men_DISC_INPUT, .Type = MBX_REG_TYPE_BIT_U16_BASE + 3, .Handle = NULL},
 
     MBX_MAP_LIST_END
 };

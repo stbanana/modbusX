@@ -154,13 +154,13 @@ uint32_t MBx_Master_Write_Coil_Request(_MBX_MASTER *pMaster, //
 
     if(Value == 0)
     {
-        StandardData[0] = 0;
-        StandardData[1] = 0;
+        StandardData[0] = 0x00; // 低字节
+        StandardData[1] = 0x00; // 高字节
     }
     else
     {
-        StandardData[0] = 0xFF;
-        StandardData[1] = 0x00;
+        StandardData[0] = 0x00; // 低字节
+        StandardData[1] = 0xFF; // 高字节 0xFF00 表示置位
     }
 
     /* 填充一条请求 */

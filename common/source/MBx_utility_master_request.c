@@ -91,7 +91,7 @@ void MBxMasterRequestToTx(_MBX_MASTER *pMaster)
     case MBX_FUNC_WRITE_COIL_MUL:
         MBxTxBufferPutReg(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].RegNum);
         MASTER_PARSE_SENDREGNUM(pMaster) = pMaster->Request.Queue[pMaster->Request.Tail].RegNum;
-        MBxTxBufferPutReg(pMaster, ((pMaster->Request.Queue[pMaster->Request.Tail].RegNum >> 3) + (pMaster->Request.Queue[pMaster->Request.Tail].RegNum % 8 ? 1 : 0)));
+        MBxTxBufferPutc(pMaster, ((pMaster->Request.Queue[pMaster->Request.Tail].RegNum >> 3) + (pMaster->Request.Queue[pMaster->Request.Tail].RegNum % 8 ? 1 : 0)));
         for(crc.Val = 0; crc.Val < ((pMaster->Request.Queue[pMaster->Request.Tail].RegNum >> 3) + (pMaster->Request.Queue[pMaster->Request.Tail].RegNum % 8 ? 1 : 0)); crc.Val++) // 借助crc变量遍历，节省一个临时变量
         {
             MBxTxBufferPutc(pMaster, pMaster->Request.Queue[pMaster->Request.Tail].Value[crc.Val]);
@@ -172,15 +172,9 @@ uint32_t MBxMasterRequestAdd(_MBX_MASTER *pMaster, uint8_t SlaveID, uint8_t Func
         pMaster->Request.Queue[pMaster->Request.Head].Value[0] = Value[1];
         break;
     case MBX_FUNC_WRITE_COIL_MUL:
+        /* 线圈数据为bit打包的字节流, 顺序由协议定义, 与CPU字节序无关, 直接拷贝 */
         pMaster->Request.Queue[pMaster->Request.Head].RegNum = RegNum;
-        for(int i = 0; i < ValueLen; i++)
-        {
-#ifdef _MBX_16BIT_BYTE
-            pMaster->Request.Queue[pMaster->Request.Head].Value[i] = (i & 0x1) ? (Value[i >> 1] & 0xFF) : ((Value[i >> 1] >> 8) & 0xFF);
-#else
-            pMaster->Request.Queue[pMaster->Request.Head].Value[i] = (i & 0x1) ? (Value[i - 1]) : (Value[i + 1]);
-#endif
-        }
+        memcpy(pMaster->Request.Queue[pMaster->Request.Head].Value, Value, ValueLen);
         break;
     case MBX_FUNC_WRITE_REG_MUL:
         pMaster->Request.Queue[pMaster->Request.Head].RegNum = RegNum;

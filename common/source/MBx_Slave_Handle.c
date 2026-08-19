@@ -51,12 +51,14 @@ uint32_t MBx_Slave_READ_COIL_Handle(_MBX_SLAVE *pSlave)
         return MBX_EXCEPTION_UNADDR;
     }
 
-    /* 提取查询 */
+    /* 预填充回复流 */
+    MBxTxBufferPutc(pSlave, pSlave->Config.SlaveID);                     // 从机ID
+    MBxTxBufferPutc(pSlave, (pSlave->Parse.Func));                       // 功能码
+    MBxTxBufferPutc(pSlave, (uint8_t)((pSlave->Parse.RegNum + 7) >> 3)); // 字节数, 即ceil(RegNum/8)
+
+    /* 提取查询并打包 */
     for(i = 0; i < pSlave->Parse.RegNum; i++)
     {
-        if((i & 0x0007) == 0)
-            ComboBit = 0;
-
         if(MBx_utility_map_addr_data_read(pSlave->Config.Map, pSlave->Config.MapNum, pSlave->Parse.AddrStart + i, &pSlave->Parse.RegData, MBX_MAP_FIND_MODE_CONTINUOUS) != MBX_API_RETURN_DEFAULT)
         {
             return MBX_EXCEPTION_FAULT;
@@ -64,12 +66,17 @@ uint32_t MBx_Slave_READ_COIL_Handle(_MBX_SLAVE *pSlave)
 
         if(pSlave->Parse.RegData > 0)
             ComboBit |= (1 << (i & 0x0007));
-        else
-            ComboBit &= ~(1 << (i & 0x0007));
 
         if((i & 0x0007) == 0x0007)
+        {
             MBxTxBufferPutc(pSlave, ComboBit);
+            ComboBit = 0;
+        }
     }
+
+    /* 剩余不满一个字节的线圈 */
+    if((pSlave->Parse.RegNum & 0x0007) != 0)
+        MBxTxBufferPutc(pSlave, ComboBit);
 
     /* 验证长度 */
     if(pSlave->TxExist.Len + 2 > pSlave->TxExist.LenMAX)
@@ -105,12 +112,14 @@ uint32_t MBx_Slave_READ_DISC_INPUTL_Handle(_MBX_SLAVE *pSlave)
         return MBX_EXCEPTION_UNADDR;
     }
 
-    /* 提取查询 */
+    /* 预填充回复流 */
+    MBxTxBufferPutc(pSlave, pSlave->Config.SlaveID);                     // 从机ID
+    MBxTxBufferPutc(pSlave, (pSlave->Parse.Func));                       // 功能码
+    MBxTxBufferPutc(pSlave, (uint8_t)((pSlave->Parse.RegNum + 7) >> 3)); // 字节数, 即ceil(RegNum/8)
+
+    /* 提取查询并打包 */
     for(i = 0; i < pSlave->Parse.RegNum; i++)
     {
-        if((i & 0x0007) == 0)
-            ComboBit = 0;
-
         if(MBx_utility_map_addr_data_read(pSlave->Config.Map, pSlave->Config.MapNum, pSlave->Parse.AddrStart + i, &pSlave->Parse.RegData, MBX_MAP_FIND_MODE_CONTINUOUS) != MBX_API_RETURN_DEFAULT)
         {
             return MBX_EXCEPTION_FAULT;
@@ -118,12 +127,17 @@ uint32_t MBx_Slave_READ_DISC_INPUTL_Handle(_MBX_SLAVE *pSlave)
 
         if(pSlave->Parse.RegData > 0)
             ComboBit |= (1 << (i & 0x0007));
-        else
-            ComboBit &= ~(1 << (i & 0x0007));
 
         if((i & 0x0007) == 0x0007)
+        {
             MBxTxBufferPutc(pSlave, ComboBit);
+            ComboBit = 0;
+        }
     }
+
+    /* 剩余不满一个字节的线圈 */
+    if((pSlave->Parse.RegNum & 0x0007) != 0)
+        MBxTxBufferPutc(pSlave, ComboBit);
 
     /* 验证长度 */
     if(pSlave->TxExist.Len + 2 > pSlave->TxExist.LenMAX)
@@ -244,8 +258,8 @@ uint32_t MBx_Slave_WRITE_COIL_Handle(_MBX_SLAVE *pSlave)
     /* 获得期望写入值 */
     pSlave->Parse.RegData = ((uint16_t)pSlave->RxExist.Buffer[4] << 8) | (pSlave->RxExist.Buffer[5]);
 
-    /* 审查写入值是否符合标准 */
-    if((pSlave->Parse.RegData != 0xFF00) || (pSlave->Parse.RegData != 0x0000))
+    /* 审查写入值是否符合标准 仅允许 0xFF00 或 0x0000 */
+    if((pSlave->Parse.RegData != 0xFF00) && (pSlave->Parse.RegData != 0x0000))
         return MBX_EXCEPTION_DATA;
 
     if(MBx_utility_map_addr_data_write(pSlave->Config.Map, pSlave->Config.MapNum, pSlave->Parse.AddrStart, pSlave->Parse.RegData, MBX_MAP_FIND_MODE_FIRST) != MBX_API_RETURN_DEFAULT)
@@ -337,12 +351,11 @@ uint32_t MBx_Slave_WRITE_COIL_MUL_Handle(_MBX_SLAVE *pSlave)
     /* 提取写入 */
     for(i = 0; i < pSlave->Parse.RegNum; i++)
     {
-        /* 获得期望写入值 */
-        pSlave->Parse.RegData = ((uint16_t)pSlave->RxExist.Buffer[7 + ((i & 0x0007) == 0x0000 ? (i >> 3) : ((i >> 3) + 1))]);
-        if(pSlave->Parse.RegData == 0)
-            WriteData = 0x0000;
-        else
+        /* 获得期望写入值 每个线圈占用数据区的一个bit, 第i个线圈位于第 (i>>3) 个字节的第 (i&7) 位 */
+        if((pSlave->RxExist.Buffer[7 + (i >> 3)] >> (i & 0x0007)) & 0x01)
             WriteData = 0xFF00;
+        else
+            WriteData = 0x0000;
         if(MBx_utility_map_addr_data_write(pSlave->Config.Map, pSlave->Config.MapNum, pSlave->Parse.AddrStart + i, WriteData, MBX_MAP_FIND_MODE_CONTINUOUS) != MBX_API_RETURN_DEFAULT)
         {
             return MBX_EXCEPTION_FAULT;

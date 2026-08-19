@@ -29,7 +29,7 @@
 #endif
 
 /* 测试使用的串口号定义 */
-#define COM_PORT_NAME "COM2"
+#define COM_PORT_NAME "COM120"
 /* 测试使用的串口缓冲区大小 */
 #define BUF_SIZE 2048
 
@@ -50,6 +50,24 @@ uint64_t u64MapMem[64];
 float    fMapMem[64]; // 32位数据模型
 double   dMapMem[64]; // 64位数据模型
 
+struct
+{
+    uint16_t bit0:1;  // 最低
+    uint16_t bit1:1;  // 低1
+    uint16_t bit2:1;  // 低2
+    uint16_t bit3:1;  // 低3
+    uint16_t def :12; // 填位
+} Men_DISC_INPUT;     // 离散输入寄存器模型
+
+struct
+{
+    uint16_t bit0:1;  // 最低
+    uint16_t bit1:1;  // 低1
+    uint16_t bit2:1;  // 低2
+    uint16_t bit3:1;  // 低3
+    uint16_t def :12; // 填位
+} Men_COIL;           // 线圈模型
+
 /* 申请从机对象发送及接收buffer */
 uint8_t SRxBuffer[84];
 uint8_t STxBuffer[84];
@@ -68,6 +86,10 @@ static uint32_t u32WriteTest2(void *value);
 static uint32_t u32WriteTest3(void *value);
 static uint32_t u32WriteTest4(void *value);
 static uint32_t fWriteTest1(void *value);
+static uint32_t coilWrite0(void *value);
+static uint32_t coilWrite1(void *value);
+static uint32_t coilWrite2(void *value);
+static uint32_t coilWrite3(void *value);
 
 /* 测试数据弄一些值的操作 */
 static void TestMemInit(void);
@@ -158,26 +180,38 @@ void MyRTUSlaveTest(void)
     地址表必须手动以升序排列，由于C11标准不支持动态宏，暂时无法在编译阶段自动检查 */
 static const _MBX_MAP_LIST_ENTRY MapList[] = {
   /*  寄存器地址        映射到的内部内存              内部内存数据属性            写时回调(NULL为只读寄存器)  */
-    {.Addr = 0x0000, .Memory = &u8MapMem[0],  .Type = MBX_REG_TYPE_U8,     .Handle = u8WriteTest1 },
-    {.Addr = 0x0001, .Memory = &u8MapMem[1],  .Type = MBX_REG_TYPE_U8,     .Handle = u8WriteTest2 },
-    {.Addr = 0x0002, .Memory = &u8MapMem[2],  .Type = MBX_REG_TYPE_U8,     .Handle = NULL         },
-    {.Addr = 0x0003, .Memory = &u8MapMem[3],  .Type = MBX_REG_TYPE_U8,     .Handle = NULL         },
-    {.Addr = 0x0100, .Memory = &u16MapMem[0], .Type = MBX_REG_TYPE_U16,    .Handle = u16WriteTest1},
-    {.Addr = 0x0101, .Memory = &u16MapMem[1], .Type = MBX_REG_TYPE_U16,    .Handle = u16WriteTest2},
-    {.Addr = 0x0200, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_H,  .Handle = u32WriteTest1}, /* 多寄存器组合映射同一个内存变量，写入处理函数应该是同一个(硬性要求) 模拟大端内存(ABCD排列 基于传输协议，这是最合适的) */
-    {.Addr = 0x0201, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_L,  .Handle = u32WriteTest1},
-    {.Addr = 0x0202, .Memory = &u36MapMem[1], .Type = MBX_REG_TYPE_U32_L,  .Handle = u32WriteTest2}, /* 多寄存器拼接模仿小端16位字节交换映射 CDAB排列 因为传输协议要求每个寄存器高8位在前，不允许完全模拟小端(完全模拟将导致单寄存器操作混乱)*/
-    {.Addr = 0x0203, .Memory = &u36MapMem[1], .Type = MBX_REG_TYPE_U32_H,  .Handle = u32WriteTest2},
-    {.Addr = 0x0204, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_H,  .Handle = u32WriteTest1}, /* 多寄存器乱序插叙 瞎几把自由映射 写时能够正确处理*/
-    {.Addr = 0x0205, .Memory = &u36MapMem[2], .Type = MBX_REG_TYPE_U32_L,  .Handle = u32WriteTest3},
-    {.Addr = 0x0206, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_L,  .Handle = u32WriteTest1},
-    {.Addr = 0x0207, .Memory = &u36MapMem[2], .Type = MBX_REG_TYPE_U32_H,  .Handle = u32WriteTest3},
-    {.Addr = 0x0208, .Memory = &u36MapMem[3], .Type = MBX_REG_TYPE_U32_DC, .Handle = u32WriteTest4}, /* 多寄存器拼接模仿小端映射 DCBA排列*/
-    {.Addr = 0x0209, .Memory = &u36MapMem[3], .Type = MBX_REG_TYPE_U32_BA, .Handle = u32WriteTest4},
-    {.Addr = 0x020A, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_AB, .Handle = u32WriteTest1}, /* 多寄存器拼接模仿大端映射 ABCD排列 与常用的H_L用法相同*/
-    {.Addr = 0x020B, .Memory = &u36MapMem[0], .Type = MBX_REG_TYPE_U32_CD, .Handle = u32WriteTest1},
-    {.Addr = 0x0300, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U32_H,  .Handle = fWriteTest1  }, /* 浮点映射测试 (模拟大端)*/
-    {.Addr = 0x0301, .Memory = &fMapMem[0],   .Type = MBX_REG_TYPE_U32_L,  .Handle = fWriteTest1  },
+    {.Addr = 0x0000, .Memory = &u8MapMem[0],    .Type = MBX_REG_TYPE_U8,               .Handle = u8WriteTest1 },
+    {.Addr = 0x0001, .Memory = &u8MapMem[1],    .Type = MBX_REG_TYPE_U8,               .Handle = u8WriteTest2 },
+    {.Addr = 0x0002, .Memory = &u8MapMem[2],    .Type = MBX_REG_TYPE_U8,               .Handle = NULL         },
+    {.Addr = 0x0003, .Memory = &u8MapMem[3],    .Type = MBX_REG_TYPE_U8,               .Handle = NULL         },
+    {.Addr = 0x0100, .Memory = &u16MapMem[0],   .Type = MBX_REG_TYPE_U16,              .Handle = u16WriteTest1},
+    {.Addr = 0x0101, .Memory = &u16MapMem[1],   .Type = MBX_REG_TYPE_U16,              .Handle = u16WriteTest2},
+    {.Addr = 0x0200, .Memory = &u36MapMem[0],   .Type = MBX_REG_TYPE_U32_H,            .Handle = u32WriteTest1}, /* 多寄存器组合映射同一个内存变量，写入处理函数应该是同一个(硬性要求) 模拟大端内存(ABCD排列 基于传输协议，这是最合适的) */
+    {.Addr = 0x0201, .Memory = &u36MapMem[0],   .Type = MBX_REG_TYPE_U32_L,            .Handle = u32WriteTest1},
+    {.Addr = 0x0202, .Memory = &u36MapMem[1],   .Type = MBX_REG_TYPE_U32_L,            .Handle = u32WriteTest2}, /* 多寄存器拼接模仿小端16位字节交换映射 CDAB排列 因为传输协议要求每个寄存器高8位在前，不允许完全模拟小端(完全模拟将导致单寄存器操作混乱)*/
+    {.Addr = 0x0203, .Memory = &u36MapMem[1],   .Type = MBX_REG_TYPE_U32_H,            .Handle = u32WriteTest2},
+    {.Addr = 0x0204, .Memory = &u36MapMem[0],   .Type = MBX_REG_TYPE_U32_H,            .Handle = u32WriteTest1}, /* 多寄存器乱序插叙 瞎几把自由映射 写时能够正确处理*/
+    {.Addr = 0x0205, .Memory = &u36MapMem[2],   .Type = MBX_REG_TYPE_U32_L,            .Handle = u32WriteTest3},
+    {.Addr = 0x0206, .Memory = &u36MapMem[0],   .Type = MBX_REG_TYPE_U32_L,            .Handle = u32WriteTest1},
+    {.Addr = 0x0207, .Memory = &u36MapMem[2],   .Type = MBX_REG_TYPE_U32_H,            .Handle = u32WriteTest3},
+    {.Addr = 0x0208, .Memory = &u36MapMem[3],   .Type = MBX_REG_TYPE_U32_DC,           .Handle = u32WriteTest4}, /* 多寄存器拼接模仿小端映射 DCBA排列*/
+    {.Addr = 0x0209, .Memory = &u36MapMem[3],   .Type = MBX_REG_TYPE_U32_BA,           .Handle = u32WriteTest4},
+    {.Addr = 0x020A, .Memory = &u36MapMem[0],   .Type = MBX_REG_TYPE_U32_AB,           .Handle = u32WriteTest1}, /* 多寄存器拼接模仿大端映射 ABCD排列 与常用的H_L用法相同*/
+    {.Addr = 0x020B, .Memory = &u36MapMem[0],   .Type = MBX_REG_TYPE_U32_CD,           .Handle = u32WriteTest1},
+    {.Addr = 0x0300, .Memory = &fMapMem[0],     .Type = MBX_REG_TYPE_U32_H,            .Handle = fWriteTest1  }, /* 浮点映射测试 (模拟大端)*/
+    {.Addr = 0x0301, .Memory = &fMapMem[0],     .Type = MBX_REG_TYPE_U32_L,            .Handle = fWriteTest1  },
+
+ /* 线圈映射 0x1000段 映射到 Men_COIL 位域的 bit0-bit3 */
+    {.Addr = 0x1000, .Memory = &Men_COIL,       .Type = MBX_REG_TYPE_BIT_U16_BASE + 0, .Handle = coilWrite0   },
+    {.Addr = 0x1001, .Memory = &Men_COIL,       .Type = MBX_REG_TYPE_BIT_U16_BASE + 1, .Handle = coilWrite1   },
+    {.Addr = 0x1002, .Memory = &Men_COIL,       .Type = MBX_REG_TYPE_BIT_U16_BASE + 2, .Handle = coilWrite2   },
+    {.Addr = 0x1003, .Memory = &Men_COIL,       .Type = MBX_REG_TYPE_BIT_U16_BASE + 3, .Handle = coilWrite3   },
+
+ /* 离散输入映射 0x2000段 映射到 Men_DISC_INPUT 位域的 bit0-bit3 */
+    {.Addr = 0x2000, .Memory = &Men_DISC_INPUT, .Type = MBX_REG_TYPE_BIT_U16_BASE + 0, .Handle = NULL         },
+    {.Addr = 0x2001, .Memory = &Men_DISC_INPUT, .Type = MBX_REG_TYPE_BIT_U16_BASE + 1, .Handle = NULL         },
+    {.Addr = 0x2002, .Memory = &Men_DISC_INPUT, .Type = MBX_REG_TYPE_BIT_U16_BASE + 2, .Handle = NULL         },
+    {.Addr = 0x2003, .Memory = &Men_DISC_INPUT, .Type = MBX_REG_TYPE_BIT_U16_BASE + 3, .Handle = NULL         },
 
     MBX_MAP_LIST_END
 };
@@ -297,6 +331,50 @@ static uint32_t fWriteTest1(void *value)
     return MBX_API_RETURN_DEFAULT;
 }
 
+/**
+ * @brief uint16_t 位域映射的写时处理 线圈bit0
+ * @param value 库内传参，对于bit类型映射将传入(uint16_t *)类型, 值为0xFFFF(置位)或0x0000(清零)
+ * @return 标准返回，请依照 MBx_api.h 的 “API返回集” 部分编写
+*/
+static uint32_t coilWrite0(void *value)
+{
+    Men_COIL.bit0 = (*(uint16_t *)value) ? 1 : 0;
+    return MBX_API_RETURN_DEFAULT;
+}
+
+/**
+ * @brief uint16_t 位域映射的写时处理 线圈bit1
+ * @param value 库内传参，对于bit类型映射将传入(uint16_t *)类型, 值为0xFFFF(置位)或0x0000(清零)
+ * @return 标准返回，请依照 MBx_api.h 的 “API返回集” 部分编写
+*/
+static uint32_t coilWrite1(void *value)
+{
+    Men_COIL.bit1 = (*(uint16_t *)value) ? 1 : 0;
+    return MBX_API_RETURN_DEFAULT;
+}
+
+/**
+ * @brief uint16_t 位域映射的写时处理 线圈bit2
+ * @param value 库内传参，对于bit类型映射将传入(uint16_t *)类型, 值为0xFFFF(置位)或0x0000(清零)
+ * @return 标准返回，请依照 MBx_api.h 的 “API返回集” 部分编写
+*/
+static uint32_t coilWrite2(void *value)
+{
+    Men_COIL.bit2 = (*(uint16_t *)value) ? 1 : 0;
+    return MBX_API_RETURN_DEFAULT;
+}
+
+/**
+ * @brief uint16_t 位域映射的写时处理 线圈bit3
+ * @param value 库内传参，对于bit类型映射将传入(uint16_t *)类型, 值为0xFFFF(置位)或0x0000(清零)
+ * @return 标准返回，请依照 MBx_api.h 的 “API返回集” 部分编写
+*/
+static uint32_t coilWrite3(void *value)
+{
+    Men_COIL.bit3 = (*(uint16_t *)value) ? 1 : 0;
+    return MBX_API_RETURN_DEFAULT;
+}
+
 /******************测试数据弄一些值的操作******************/
 
 /**
@@ -315,6 +393,16 @@ static void TestMemInit(void)
         fMapMem[i]   = i * 10.0 + (float)i / 10.0;
         dMapMem[i]   = i * 10.0 + (float)i / 100.0;
     }
+
+    /* 初始化线圈与离散输入 */
+    Men_COIL.bit0       = 1;
+    Men_COIL.bit1       = 0;
+    Men_COIL.bit2       = 1;
+    Men_COIL.bit3       = 0;
+    Men_DISC_INPUT.bit0 = 0;
+    Men_DISC_INPUT.bit1 = 1;
+    Men_DISC_INPUT.bit2 = 0;
+    Men_DISC_INPUT.bit3 = 1;
 }
 
 /**
@@ -336,7 +424,17 @@ static void TestMemUpdate(uint32_t Cycle)
             fMapMem[i]   = fMapMem[i] + ((float)1ULL * 10.0 + (float)1ULL / 10.0);
             dMapMem[i]   = dMapMem[i] + ((float)1ULL * 10.0 + (float)1ULL / 100.0);
         }
-        i = 0;
+
+        /* 翻转线圈与离散输入bit, 便于观察读线圈/离散输入的数据变化 */
+        Men_COIL.bit0       = !Men_COIL.bit0;
+        Men_COIL.bit1       = !Men_COIL.bit1;
+        Men_COIL.bit2       = !Men_COIL.bit2;
+        Men_COIL.bit3       = !Men_COIL.bit3;
+        Men_DISC_INPUT.bit0 = !Men_DISC_INPUT.bit0;
+        Men_DISC_INPUT.bit1 = !Men_DISC_INPUT.bit1;
+        Men_DISC_INPUT.bit2 = !Men_DISC_INPUT.bit2;
+        Men_DISC_INPUT.bit3 = !Men_DISC_INPUT.bit3;
+        i                   = 0;
     }
 }
 
@@ -396,9 +494,15 @@ HANDLE SerialOpen(const char *com, int baud, int byteSize, int parity, int stopB
     BOOL         b = FALSE;
     COMMTIMEOUTS CommTimeouts;
     HANDLE       comHandle = INVALID_HANDLE_VALUE;
+    char         comPath[32]; // COM10及以上串口需要 \\.\COMxxx 格式
 
     //打开串口
-    comHandle = CreateFile(com,                          //串口名称
+    if(strncmp(com, "\\\\.\\", 4) == 0)
+        snprintf(comPath, sizeof(comPath), "%s", com);
+    else
+        snprintf(comPath, sizeof(comPath), "\\\\.\\%s", com);
+
+    comHandle = CreateFile(comPath,                      //串口名称
                            GENERIC_READ | GENERIC_WRITE, //可读、可写
                            0,                            // No Sharing
                            NULL,                         // No Security

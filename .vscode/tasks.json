@@ -22,7 +22,10 @@
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
             ],
             "options": {
-                "cwd": "${fileDirname}"
+                "cwd": "${fileDirname}",
+                "env": {
+                    "PATH": "C:\\111_APPS\\MSYS2\\mingw64\\bin;${env:PATH}"
+                }
             },
             "problemMatcher": [
                 "$gcc"
