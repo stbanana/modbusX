@@ -409,7 +409,7 @@ uint32_t MBx_utility_map_w_cooperate_review(void)
 #ifdef _MBX_16BIT_BYTE
                     MPxMapwriteCo.Puzzles[1] = (*(uint16_t *)(MPxMapwriteCo.Memory + 1));
 #else
-                    MPxMapwriteCo.Puzzles[1] = (*(uint16_t *)(MPxMapwriteCo.Memory + 2));
+                    MPxMapwriteCo.Puzzles[1] = (*(uint16_t *)((uint8_t *)MPxMapwriteCo.Memory + 2));
 #endif
                 }
             }
@@ -429,7 +429,7 @@ uint32_t MBx_utility_map_w_cooperate_review(void)
 #ifdef _MBX_16BIT_BYTE
                     MPxMapwriteCo.Puzzles[1] = (*(uint16_t *)(MPxMapwriteCo.Memory + 1));
 #else
-                    MPxMapwriteCo.Puzzles[1] = (*(uint16_t *)(MPxMapwriteCo.Memory + 2));
+                    MPxMapwriteCo.Puzzles[1] = (*(uint16_t *)((uint8_t *)MPxMapwriteCo.Memory + 2));
 #endif
                 }
                 if(MPxMapwriteCo.PuzzlesComplete.bit.PuzzleL2 == 0)
@@ -437,7 +437,7 @@ uint32_t MBx_utility_map_w_cooperate_review(void)
 #ifdef _MBX_16BIT_BYTE
                     MPxMapwriteCo.Puzzles[1] = (*(uint16_t *)(MPxMapwriteCo.Memory + 2));
 #else
-                    MPxMapwriteCo.Puzzles[2] = (*(uint16_t *)(MPxMapwriteCo.Memory + 4));
+                    MPxMapwriteCo.Puzzles[2] = (*(uint16_t *)((uint8_t *)MPxMapwriteCo.Memory + 4));
 #endif
                 }
                 if(MPxMapwriteCo.PuzzlesComplete.bit.PuzzleL3 == 0)
@@ -445,7 +445,7 @@ uint32_t MBx_utility_map_w_cooperate_review(void)
 #ifdef _MBX_16BIT_BYTE
                     MPxMapwriteCo.Puzzles[1] = (*(uint16_t *)(MPxMapwriteCo.Memory + 3));
 #else
-                    MPxMapwriteCo.Puzzles[3] = (*(uint16_t *)(MPxMapwriteCo.Memory + 6));
+                    MPxMapwriteCo.Puzzles[3] = (*(uint16_t *)((uint8_t *)MPxMapwriteCo.Memory + 6));
 #endif
                 }
             }
@@ -466,11 +466,11 @@ uint32_t MBx_utility_map_w_cooperate_review(void)
             {
                 if(MPxMapwriteCo.PuzzlesComplete.bit.PuzzleL0 == 0)
                 {
-                    MPxMapwriteCo.Puzzles[0] = (*(uint16_t *)MPxMapwriteCo.Memory + 2);
+                    MPxMapwriteCo.Puzzles[0] = (*(uint16_t *)((uint8_t *)MPxMapwriteCo.Memory + 2));
                 }
                 if(MPxMapwriteCo.PuzzlesComplete.bit.PuzzleL1 == 0)
                 {
-                    MPxMapwriteCo.Puzzles[1] = (*(uint16_t *)(MPxMapwriteCo.Memory));
+                    MPxMapwriteCo.Puzzles[1] = (*(uint16_t *)((uint8_t *)MPxMapwriteCo.Memory));
                 }
             }
             break;
@@ -482,15 +482,15 @@ uint32_t MBx_utility_map_w_cooperate_review(void)
             {
                 if(MPxMapwriteCo.PuzzlesComplete.bit.PuzzleL0 == 0)
                 {
-                    MPxMapwriteCo.Puzzles[0] = (*(uint16_t *)MPxMapwriteCo.Memory + 6);
+                    MPxMapwriteCo.Puzzles[0] = (*(uint16_t *)((uint8_t *)MPxMapwriteCo.Memory + 6));
                 }
                 if(MPxMapwriteCo.PuzzlesComplete.bit.PuzzleL1 == 0)
                 {
-                    MPxMapwriteCo.Puzzles[1] = (*(uint16_t *)(MPxMapwriteCo.Memory + 4));
+                    MPxMapwriteCo.Puzzles[1] = (*(uint16_t *)((uint8_t *)MPxMapwriteCo.Memory + 4));
                 }
                 if(MPxMapwriteCo.PuzzlesComplete.bit.PuzzleL2 == 0)
                 {
-                    MPxMapwriteCo.Puzzles[2] = (*(uint16_t *)(MPxMapwriteCo.Memory + 2));
+                    MPxMapwriteCo.Puzzles[2] = (*(uint16_t *)((uint8_t *)MPxMapwriteCo.Memory + 2));
                 }
                 if(MPxMapwriteCo.PuzzlesComplete.bit.PuzzleL3 == 0)
                 {
@@ -538,7 +538,7 @@ static uint16_t MBX_utility_map_entry_data_get(const _MBX_MAP_LIST_ENTRY *entry)
 #ifdef _MBX_16BIT_BYTE
         return (*(uint16_t *)(entry->Memory + 1));
 #else
-        return (*(uint16_t *)(entry->Memory + 2));
+        return (*(uint16_t *)((uint8_t *)entry->Memory + 2));
 #endif
     case MBX_REG_TYPE_U32_DC:
         return (((*(uint16_t *)(entry->Memory)) & 0xFF) << 8) | (((*(uint16_t *)(entry->Memory)) & 0xFF00) >> 8);
@@ -546,7 +546,7 @@ static uint16_t MBX_utility_map_entry_data_get(const _MBX_MAP_LIST_ENTRY *entry)
 #ifdef _MBX_16BIT_BYTE
         return (((*(uint16_t *)(entry->Memory + 1)) & 0xFF) << 8) | (((*(uint16_t *)(entry->Memory + 1)) & 0xFF00) >> 8);
 #else
-        return (((*(uint16_t *)(entry->Memory + 2)) & 0xFF) << 8) | (((*(uint16_t *)(entry->Memory + 2)) & 0xFF00) >> 8);
+        return (((*(uint16_t *)((uint8_t *)entry->Memory + 2)) & 0xFF) << 8) | (((*(uint16_t *)((uint8_t *)entry->Memory + 2)) & 0xFF00) >> 8);
 #endif
     case MBX_REG_TYPE_U64_0:
         return (*(uint64_t *)(entry->Memory));
@@ -554,19 +554,19 @@ static uint16_t MBX_utility_map_entry_data_get(const _MBX_MAP_LIST_ENTRY *entry)
 #ifdef _MBX_16BIT_BYTE
         return (*(uint64_t *)(entry->Memory + 1));
 #else
-        return (*(uint64_t *)(entry->Memory + 2));
+        return (*(uint64_t *)((uint8_t *)entry->Memory + 2));
 #endif
     case MBX_REG_TYPE_U64_2:
 #ifdef _MBX_16BIT_BYTE
         return (*(uint64_t *)(entry->Memory + 2));
 #else
-        return (*(uint64_t *)(entry->Memory + 4));
+        return (*(uint64_t *)((uint8_t *)entry->Memory + 4));
 #endif
     case MBX_REG_TYPE_U64_3:
 #ifdef _MBX_16BIT_BYTE
         return (*(uint64_t *)(entry->Memory + 3));
 #else
-        return (*(uint64_t *)(entry->Memory + 6));
+        return (*(uint64_t *)((uint8_t *)entry->Memory + 6));
 #endif
     case MBX_REG_TYPE_BIT_ONLY:
         return (((*(uint8_t *)entry->Memory)) & 0x1) ? 0x1 : 0x0;
@@ -600,15 +600,15 @@ static uint16_t MBX_utility_map_entry_data_get(const _MBX_MAP_LIST_ENTRY *entry)
     case MBX_REG_TYPE_U16:
         return (*(uint16_t *)(entry->Memory));
     case MBX_REG_TYPE_U32_L:
-        return (*(uint16_t *)(entry->Memory + 2));
+        return (*(uint16_t *)((uint8_t *)entry->Memory + 2));
     case MBX_REG_TYPE_U32_H:
         return (*(uint16_t *)(entry->Memory));
     case MBX_REG_TYPE_U64_0:
-        return (*(uint64_t *)(entry->Memory + 6));
+        return (*(uint64_t *)((uint8_t *)entry->Memory + 6));
     case MBX_REG_TYPE_U64_1:
-        return (*(uint64_t *)(entry->Memory + 4));
+        return (*(uint64_t *)((uint8_t *)entry->Memory + 4));
     case MBX_REG_TYPE_U64_2:
-        return (*(uint64_t *)(entry->Memory + 2));
+        return (*(uint64_t *)((uint8_t *)entry->Memory + 2));
     case MBX_REG_TYPE_U64_3:
         return (*(uint64_t *)(entry->Memory));
     case MBX_REG_TYPE_BIT_ONLY:
@@ -894,7 +894,7 @@ static uint32_t MBX_utility_map_entry_data_set_cast(const _MBX_MAP_LIST_ENTRY *e
 #ifdef _MBX_16BIT_BYTE
         *(uint16_t *)(entry->Memory + 1) = value;
 #else
-        *(uint16_t *)(entry->Memory + 2)            = value;
+        *(uint16_t *)((uint8_t *)entry->Memory + 2)            = value;
 #endif
         break;
     case MBX_REG_TYPE_U32_DC:
@@ -914,21 +914,21 @@ static uint32_t MBX_utility_map_entry_data_set_cast(const _MBX_MAP_LIST_ENTRY *e
 #ifdef _MBX_16BIT_BYTE
         *(uint16_t *)(entry->Memory + 1) = value;
 #else
-        *(uint16_t *)(entry->Memory + 2)            = value;
+        *(uint16_t *)((uint8_t *)entry->Memory + 2)            = value;
 #endif
         break;
     case MBX_REG_TYPE_U64_2:
 #ifdef _MBX_16BIT_BYTE
         *(uint16_t *)(entry->Memory + 2) = value;
 #else
-        *(uint16_t *)(entry->Memory + 4)            = value;
+        *(uint16_t *)((uint8_t *)entry->Memory + 4)            = value;
 #endif
         break;
     case MBX_REG_TYPE_U64_3:
 #ifdef _MBX_16BIT_BYTE
         *(uint16_t *)(entry->Memory + 3) = value;
 #else
-        *(uint16_t *)(entry->Memory + 6)            = value;
+        *(uint16_t *)((uint8_t *)entry->Memory + 6)            = value;
 #endif
         break;
     case MBX_REG_TYPE_BIT_ONLY:
